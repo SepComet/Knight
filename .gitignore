@@ -1,0 +1,93 @@
+# ============================================================
+# Knight —— Unity 客户端 + Go 服务端 + Protobuf
+# ============================================================
+
+# ===== 通用 =====
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.log
+
+# IDE（Rider / VS / VSCode 的本地缓存）
+.idea/
+*.iml
+.vs/
+.vscode/
+
+# ===== Unity 客户端 (Knight-Client) =====
+# Unity 自动生成的缓存、临时与构建目录
+Knight-Client/[Ll]ibrary/
+Knight-Client/[Tt]emp/
+Knight-Client/[Oo]bj/
+Knight-Client/[Bb]uild/
+Knight-Client/[Bb]uilds/
+Knight-Client/[Ll]ogs/
+Knight-Client/[Uu]ser[Ss]ettings/
+Knight-Client/MemoryCaptures/
+Knight-Client/[Rr]ecordings/
+Knight-Client/.gradle/
+
+# Asset Store 工具、JetBrains 自动生成的编辑器插件
+Knight-Client/Assets/AssetStoreTools*
+Knight-Client/Assets/Plugins/Editor/JetBrains*
+
+# .meta 原则上跟随资源一起提交；仅当对应资源被忽略时才忽略其 meta
+!Knight-Client/Assets/**/*.meta
+
+# Unity 崩溃报告
+Knight-Client/sysinfo.txt
+
+# Addressables / Android StreamingAssets 的打包临时产物
+Knight-Client/Assets/[Aa]ddressable[Aa]ssets[Dd]ata/*/*.bin*
+Knight-Client/Assets/StreamingAssets/aa.meta
+Knight-Client/Assets/StreamingAssets/aa/
+
+# Unity 导出的 IDE 工程文件（打开工程时自动生成，不入库）
+Knight-Client/*.csproj
+Knight-Client/*.sln
+Knight-Client/*.suo
+Knight-Client/*.tmp
+Knight-Client/*.user
+Knight-Client/*.userprefs
+Knight-Client/*.pidb
+Knight-Client/*.booproj
+Knight-Client/*.svd
+Knight-Client/*.pdb
+Knight-Client/*.mdb
+Knight-Client/*.opendb
+Knight-Client/*.VC.db
+
+# 构建产物
+Knight-Client/*.apk
+Knight-Client/*.aab
+Knight-Client/*.unitypackage
+Knight-Client/*.app
+
+# ===== Go 服务端 (Knight-Server) =====
+# 编译产物
+Knight-Server/bin/
+Knight-Server/*.exe
+Knight-Server/*.exe~
+
+# 测试二进制、覆盖率与性能分析产物
+Knight-Server/*.test
+Knight-Server/*.out
+Knight-Server/*.prof
+
+# Go workspace 文件（多模块开发时再按需提交）
+Knight-Server/go.work
+Knight-Server/go.work.sum
+
+# 本地运行日志
+Knight-Server/logs/
+
+# 依赖目录：如团队决定提交 vendor/，删除下面这行
+# Knight-Server/vendor/
+
+# ===== Protobuf 生成产物 =====
+# 产物由 Knight-Tools/gen-proto.ps1 全量重生成、可复现，默认两端都提交：
+#   Knight-Client/Assets/Scripts/Proto/Generated/Knight.cs
+#   Knight-Server/protogen/knight.pb.go
+# 如改为"不提交、各端自行生成"，取消下面两行注释：
+# Knight-Client/Assets/Scripts/Proto/Generated/
+# Knight-Server/protogen/

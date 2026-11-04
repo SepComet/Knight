@@ -1,0 +1,348 @@
+// ============================================================================
+// Knight 网络协议 — 唯一契约源
+//
+// 规则（修改本文件前必读，详见 Docs/protocol.md §11）：
+//   1. 本文件是客户端(C#)与服务端(Go)之间所有消息的唯一定义处；
+//      Docs/protocol.md 只描述流程与语义，不复制定义。
+//   2. 任何改动（含"仅新增"）都必须把 HandshakeReq 注释中的 PROTO_VERSION +1。
+//      MVP 不承诺向后兼容，两端版本不一致时服务端拒绝握手。
+//   3. MsgId 只增不改不删：新消息在所属域段末尾追加新号。
+//   4. 枚举只增不改号；proto3 首个枚举值固定为 0（默认值/占位语义）。
+//   5. 修改后运行 Knight-Tools/gen-proto.ps1 重新生成两端代码。
+//   6. 位置单位 = Unity world unit；角度单位 = 度；约定见 Docs/protocol.md §8。
+// ============================================================================
+syntax = "proto3";
+
+package knight;
+
+option csharp_namespace = "Knight.Proto";
+// TODO(待定项): 与 Knight-Server/go.mod 的 module 路径保持一致，服务端骨架落地时修正
+option go_package = "knight-server/protogen";
+
+// ----------------------------------------------------------------------------
+// 消息 ID 分配表（唯一分配处，只增不改）
+// 域段划分是未来通道拆分单位（96~127 优先移出可靠通道），当前全部走同一 KCP 通道
+// ----------------------------------------------------------------------------
+enum MsgId {
+  MSG_NONE = 0;  // proto3 首枚举占位，不使用
+
+  // —— 1~31 连接与会话 ——
+  MSG_HANDSHAKE_REQ = 1;  // C→S 握手
+  MSG_HANDSHAKE_ACK = 2;  // S→C 握手应答
+  MSG_HEARTBEAT = 3;      // C→S 心跳保活
+  MSG_ERROR = 4;          // S→C 错误/踢出
+
+  // —— 32~63 大厅与房间 ——
+  MSG_CREATE_ROOM_REQ = 32;  // C→S 创建房间
+  MSG_JOIN_ROOM_REQ = 33;    // C→S 加入房间
+  MSG_LEAVE_ROOM = 34;       // C→S 退出房间
+  MSG_SET_READY = 35;        // C→S 设置准备状态
+  MSG_START_GAME = 36;       // C→S 房主开局
+  MSG_ROOM_STATE_PUSH = 37;  // S→C 房间成员/状态全量广播
+  MSG_GAME_START = 38;       // S→C 开局通知
+
+  // —— 64~95 游戏内可靠事件 ——
+  MSG_ENTITY_SPAWN = 64;     // S→C 实体生成
+  MSG_ENTITY_DESPAWN = 65;   // S→C 实体销毁
+  MSG_DAMAGE_EVENT = 66;     // S→C 命中反馈
+  MSG_DOOR_STATE = 67;       // S→C 出口状态
+  MSG_ROOM_TRANSITION = 68;  // S→C 房间切换通知
+  MSG_ROOM_LOADED = 69;      // C→S 加载完成确认
+  MSG_ITEM_PICKED = 70;      // S→C 道具拾取结果
+  MSG_PLAYER_LEFT = 71;      // S→C 对局中玩家断线移除
+  MSG_GAME_RESULT = 72;      // S→C 结算
+
+  // —— 96~127 高频通道 ——
+  MSG_SNAPSHOT = 96;    // S→C 单播快照
+  MSG_INPUT_BATCH = 97; // C→S 批量输入
+}
+
+// ----------------------------------------------------------------------------
+// 1~31 连接与会话
+// ----------------------------------------------------------------------------
+
+// PROTO_VERSION = 1（任何改动 +1，见文件头规则 2）
+message HandshakeReq {
+  uint32 proto_version = 1;
+  string token = 2;  // HTTP /api/v1/login 返回的会话令牌
+}
+
+message HandshakeAck {
+  uint64 uid = 1;   // 账号 ID（持久）；验证通过后绑定到本 KCP 会话
+  string name = 2;
+}
+
+// 客户端空闲时每 3s 发送；服务端任意入包均重置 10s 超时计时器
+message Heartbeat {}
+
+message Error {
+  ErrorCode code = 1;
+  string message = 2;  // 人类可读调试信息，可空
+}
+
+enum ErrorCode {
+  ERR_OK = 0;                // 占位默认值，不作为错误使用
+  ERR_VERSION_MISMATCH = 1;  // proto_version 不一致（握手，关闭连接）
+  ERR_INVALID_TOKEN = 2;     // token 无效或过期（握手，关闭连接）
+  ERR_ALREADY_ONLINE = 3;    // 同账号已有活跃会话，拒绝新连接（握手，关闭连接）
+  ERR_ROOM_NOT_FOUND = 4;    // 加入房间：房间不存在
+  ERR_ROOM_FULL = 5;         // 加入房间：已满
+  ERR_GAME_ALREADY_STARTED = 6;  // 加入房间：已开局
+  ERR_NOT_ROOM_OWNER = 7;    // 非房主执行房主操作
+  ERR_INVALID_REQUEST = 8;   // 当前状态下不合法的请求（兜底）
+  ERR_SERVER_FULL = 9;       // 服务端会话数达上限（握手，关闭连接）
+  ERR_KICKED_TIMEOUT = 10;   // 心跳超时踢出（关闭连接）
+}
+
+// ----------------------------------------------------------------------------
+// 32~63 大厅与房间
+// ----------------------------------------------------------------------------
+
+message CreateRoomReq {}  // 房间号由服务端生成，经 RoomStatePush 私有下发
+
+message JoinRoomReq {
+  uint32 room_id = 1;
+}
+
+// 在房间内 = 退出房间；在大厅 = 忽略
+message LeaveRoom {}
+
+message SetReady {
+  bool ready = 1;
+}
+
+// 仅房主可发；服务端校验人数下限（min_players_to_start，默认 2，开发期可配 1）
+message StartGame {}
+
+// 房间成员/状态任何变化即全量广播（含变更者本人）
+message RoomStatePush {
+  uint32 room_id = 1;
+  RoomSessionState state = 2;
+  uint64 owner_uid = 3;
+  repeated RoomMember members = 4;
+}
+
+message RoomMember {
+  uint64 uid = 1;
+  string name = 2;
+  bool ready = 3;
+}
+
+// 对齐 SRS §6.1。MVP 服务端只使用 WAITING / RUNNING / CLOSED：
+// WAITING 覆盖 SRS 的 Waiting+Preparing；VICTORY/DEFEAT 经 GameResult 表达
+enum RoomSessionState {
+  ROOM_WAITING = 0;
+  ROOM_PREPARING = 1;
+  ROOM_RUNNING = 2;
+  ROOM_VICTORY = 3;
+  ROOM_DEFEAT = 4;
+  ROOM_CLOSED = 5;
+}
+
+// 开局通知：携带地牢房间序列（map_id 由客户端本地映射为内置地图资源）。
+// 随后服务端紧跟 RoomTransition(首房间)——开局加载与房间切换共用同一序列
+message GameStart {
+  repeated uint32 map_ids = 1;  // MVP 固定 [1, 2, 3]，3 = Boss 房
+}
+
+// ----------------------------------------------------------------------------
+// 64~95 游戏内可靠事件（RoomLoaded 为 C→S，其余均为 S→C）
+//
+// 生死权威以快照为准：事件是可靠前导通知，用于驱动特效/音效/流程；
+// 客户端在快照中发现未知实体时应兜底本地创建（见 protocol.md §7.3）
+// ----------------------------------------------------------------------------
+
+message EntitySpawn {
+  repeated EntityState entities = 1;
+}
+
+message EntityDespawn {
+  repeated uint32 entity_ids = 1;
+  DespawnReason reason = 2;
+}
+
+enum DespawnReason {
+  DESPAWN_KILLED = 0;        // 被击杀
+  DESPAWN_CONSUMED = 1;      // 道具被拾取
+  DESPAWN_LIFETIME_END = 2;  // 子弹到达生命周期
+  DESPAWN_ROOM_CLEANUP = 3;  // 房间切换清理
+}
+
+// 命中反馈（SRS §3.5 客户端特效数据源）；伤害权威结果以快照 hp 为准
+message DamageEvent {
+  uint32 attacker_id = 1;  // 实体 ID
+  uint32 target_id = 2;    // 实体 ID
+  float pos_x = 3;         // 命中点（特效定位）
+  float pos_y = 4;
+  int32 new_hp = 5;
+}
+
+// 出口状态（当前房间）
+message DoorState {
+  DoorStateValue state = 1;
+}
+
+enum DoorStateValue {
+  DOOR_LOCKED = 0;
+  DOOR_OPEN = 1;
+}
+
+// 房间切换（服务端控制，SRS §6.3）：暂停模拟 → 广播本消息
+// → 收齐所有在场玩家 RoomLoaded，或任一玩家 3s 未确认则超时强制开始 → 恢复模拟
+message RoomTransition {
+  uint32 map_id = 1;
+  repeated SpawnAssignment spawns = 2;  // 全体在场玩家的出生点分配
+}
+
+message SpawnAssignment {
+  uint64 uid = 1;
+  float pos_x = 2;
+  float pos_y = 3;
+}
+
+// C→S：客户端本地加载完成后确认
+message RoomLoaded {}
+
+message ItemPicked {
+  uint32 item_entity_id = 1;
+  uint64 uid = 2;       // 拾取者
+  int32 healed_hp = 3;  // 实际恢复量（可被最大生命值截断）
+}
+
+// 对局中玩家断线移除；该玩家后续规则判定视同被击败。
+// 大厅阶段的成员变化经 RoomStatePush 表达，不发本消息
+message PlayerLeft {
+  uint64 uid = 1;
+  LeftReason reason = 2;
+}
+
+enum LeftReason {
+  LEFT_DISCONNECT = 0;  // 心跳超时断线
+}
+
+message GameResult {
+  uint64 match_id = 1;  // 服务端持久化记录 ID，用于战绩查询
+  GameOutcome outcome = 2;
+  uint32 duration_sec = 3;
+  repeated PlayerResult results = 4;
+}
+
+message PlayerResult {
+  uint64 uid = 1;
+  uint32 kills = 2;
+  int32 damage_dealt = 3;
+  int32 damage_taken = 4;
+  bool alive = 5;
+}
+
+enum GameOutcome {
+  OUTCOME_NONE = 0;  // 占位默认值
+  OUTCOME_VICTORY = 1;
+  OUTCOME_DEFEAT = 2;
+}
+
+// ----------------------------------------------------------------------------
+// 96~127 高频通道（快照 / 输入）
+// ----------------------------------------------------------------------------
+
+enum EntityType {
+  ENTITY_NONE = 0;
+  ENTITY_PLAYER = 1;
+  ENTITY_ENEMY = 2;
+  ENTITY_BOSS = 3;
+  ENTITY_PROJECTILE = 4;
+  ENTITY_PICKUP = 5;
+}
+
+// 对齐 SRS §3.4 玩家状态；怪物/Boss 复用同一动画状态集
+enum EntityAnimState {
+  ANIM_NONE = 0;
+  ANIM_IDLE = 1;
+  ANIM_MOVING = 2;
+  ANIM_ATTACKING = 3;
+  ANIM_DAMAGED = 4;
+  ANIM_DEAD = 5;
+}
+
+// 全量快照中的单个实体状态（快照 = 当前房间全部存活实体）
+// MVP 无类型专属字段；未来需要时再引入 oneof 扩展位， EntityType 标注驱动客户端表现管线
+message EntityState {
+  uint32 entity_id = 1;  // 会话内运行时实体 ID，服务端单调分配不复用
+  EntityType type = 2;
+  float pos_x = 3;  // Unity world unit
+  float pos_y = 4;
+  float facing = 5;  // 度；0°=+X(右)，90°=+Y(上)，逆时针
+  EntityAnimState state = 6;
+  int32 hp = 7;
+}
+
+// 服务端 → 单个客户端的单播快照（各客户端 last_input_seq 不同）
+message Snapshot {
+  uint32 tick = 1;            // 服务端模拟 Tick（调试/统计；插值不依赖）
+  uint32 last_input_seq = 2;  // 本客户端已被服务端应用的最新输入 seq（校正锚点）
+  uint32 baseline_seq = 3;    // 预留：未来增量快照基线号，MVP 恒为 0
+  repeated EntityState entities = 4;
+}
+
+enum InputButtons {
+  BTN_NONE = 0;
+  BTN_ATTACK = 1;    // bit0：按住持续（服务端按冷却自动连发）
+  BTN_INTERACT = 2;  // bit1：单帧边沿（拾取请求，服务端取半径内最近合法道具）
+}
+
+message InputCmd {
+  uint32 seq = 1;        // 客户端自 1 起单调递增
+  float move_x = 2;      // 已归一化 [-1,1]，超出由服务端钳制
+  float move_y = 3;
+  float aim_angle = 4;   // 度；约定同 EntityState.facing
+  uint32 buttons = 5;    // InputButtons 位掩码
+}
+
+// C→S：每 33ms(30Hz) 发送一次，inputs 携带所有未被 last_input_seq 确认的输入。
+// 单可靠通道下输入不会丢失；全量重发语义为未来拆分不可靠通道预留自愈能力。
+// 上限 120 条/批，超限按协议违规处理（ERR_INVALID_REQUEST + 断开）
+message InputBatch {
+  uint32 first_seq = 1;  // = inputs[0].seq，冗余校验
+  repeated InputCmd inputs = 2;
+}
+
+// ----------------------------------------------------------------------------
+// 封包
+// ----------------------------------------------------------------------------
+
+// 每个 KCP 包 = 恰好一条 Envelope（KCP 消息模式，无长度前缀）。
+// msg_id 必须与 payload 分支一致，不一致按 ERR_INVALID_REQUEST 处理
+message Envelope {
+  MsgId msg_id = 1;
+  oneof payload {
+    // 1~31 连接与会话
+    HandshakeReq handshake_req = 10;
+    HandshakeAck handshake_ack = 11;
+    Heartbeat heartbeat = 12;
+    Error error = 13;
+
+    // 32~63 大厅与房间
+    CreateRoomReq create_room_req = 20;
+    JoinRoomReq join_room_req = 21;
+    LeaveRoom leave_room = 22;
+    SetReady set_ready = 23;
+    StartGame start_game = 24;
+    RoomStatePush room_state_push = 25;
+    GameStart game_start = 26;
+
+    // 64~95 游戏内可靠事件
+    EntitySpawn entity_spawn = 30;
+    EntityDespawn entity_despawn = 31;
+    DamageEvent damage_event = 32;
+    DoorState door_state = 33;
+    RoomTransition room_transition = 34;
+    RoomLoaded room_loaded = 35;
+    ItemPicked item_picked = 36;
+    PlayerLeft player_left = 37;
+    GameResult game_result = 38;
+
+    // 96~127 高频通道
+    Snapshot snapshot = 40;
+    InputBatch input_batch = 41;
+  }
+}
