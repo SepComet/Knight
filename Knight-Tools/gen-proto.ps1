@@ -2,8 +2,8 @@
 # 用法：在仓库根目录执行  ./Knight-Tools/gen-proto.ps1
 #
 # 前置依赖：
-#   - protoc 在 PATH 中（https://github.com/protocolbuffers/protobuf/releases）
-#   - protoc-gen-go 在 PATH 中（go install google.golang.org/protobuf/cmd/protoc-gen-go@latest）
+#   - protoc 33.0 在 PATH 中（https://github.com/protocolbuffers/protobuf/releases/tag/v33.0）
+#   - protoc-gen-go 1.36.10 在 PATH 中（go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.36.10）
 #
 # 运行时依赖（生成后两端编译需要）：
 #   - C#：Google.Protobuf 包（Unity 侧引入方式见 Docs/protocol.md §12）

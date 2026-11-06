@@ -61,7 +61,7 @@ enum MsgId {
 // 1~31 连接与会话
 // ----------------------------------------------------------------------------
 
-// PROTO_VERSION = 1（任何改动 +1，见文件头规则 2）
+// PROTO_VERSION = 2（任何改动 +1，见文件头规则 2）
 message HandshakeReq {
   uint32 proto_version = 1;
   string token = 2;  // HTTP /api/v1/login 返回的会话令牌
@@ -175,6 +175,7 @@ message DamageEvent {
   float pos_x = 3;         // 命中点（特效定位）
   float pos_y = 4;
   int32 new_hp = 5;
+  int32 damage = 6;  // 本次命中的实际扣血量（非负，含致死时按剩余 HP 截断），用于飘字
 }
 
 // 出口状态（当前房间）
@@ -200,8 +201,11 @@ message SpawnAssignment {
   float pos_y = 3;
 }
 
-// C→S：客户端本地加载完成后确认
-message RoomLoaded {}
+// C→S：客户端本地加载完成后确认，只接受当前待加载地图的确认。
+// MVP 地图序列 [1, 2, 3] 不重复；以后允许重复地图时需改用独立的切换序号。
+message RoomLoaded {
+  uint32 map_id = 1;  // 回显本次 RoomTransition.map_id，避免超时后的旧确认被用于下一房间
+}
 
 message ItemPicked {
   uint32 item_entity_id = 1;
@@ -265,7 +269,8 @@ enum EntityAnimState {
 }
 
 // 全量快照中的单个实体状态（快照 = 当前房间全部存活实体）
-// MVP 无类型专属字段；未来需要时再引入 oneof 扩展位， EntityType 标注驱动客户端表现管线
+// EntityType + config_id 驱动客户端资源选择；player_uid 关联账号与运行时玩家实体。
+// 维持统一状态结构，复杂的类型专属动态状态在确有需要时再引入 oneof 扩展位。
 message EntityState {
   uint32 entity_id = 1;  // 会话内运行时实体 ID，服务端单调分配不复用
   EntityType type = 2;
@@ -274,6 +279,8 @@ message EntityState {
   float facing = 5;  // 度；0°=+X(右)，90°=+Y(上)，逆时针
   EntityAnimState state = 6;
   int32 hp = 7;
+  uint64 player_uid = 8;  // ENTITY_PLAYER 时为账号 ID，其余类型为 0；用于识别本地玩家/队友
+  uint32 config_id = 9;   // 同 EntityType 内的内置配置/表现资源键（非 0），两端配置需一致
 }
 
 // 服务端 → 单个客户端的单播快照（各客户端 last_input_seq 不同）
