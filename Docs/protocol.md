@@ -1,6 +1,6 @@
 # Knight 网络协议规范
 
-**文档版本：** V0.1（草案，待评审）
+**文档版本：** V0.2（草案，待评审；`proto_version = 2`）
 **上游需求：** [SRS-需求规格说明书.md](./SRS-需求规格说明书.md) §3 / §4 / §6 / §7
 **契约源：** [Knight-Proto/knight.proto](../Knight-Proto/knight.proto) —— 唯一消息定义处，本文档不复制定义，只描述流程与语义
 **代码生成：** [Knight-Tools/gen-proto.ps1](../Knight-Tools/gen-proto.ps1)
@@ -26,10 +26,10 @@
 | 传输通道 | MVP 单 KCP 通道；ID 域段（96~127 高频段）预留未来拆分 | MVP 研究重点是同步算法而非传输层 |
 | 快照编码 | 全量快照；`baseline_seq` 字段预留未来增量 | 当前规模带宽不敏感，"丢一个快照无所谓"简化插值层 |
 | 时钟同步 | 不做显式时钟同步；插值以**本地接收时刻**为基准 | 免周期校准；MVP 验收（平滑显示）不依赖时钟映射 |
-| 快照实体 | 统一 `repeated EntityState`，`EntityType` 标注类型 | 一套生成/更新/销毁管线；MVP 无类型专属字段，oneof 扩展位待需要时引入 |
+| 快照实体 | 统一 `repeated EntityState`，`EntityType` + `config_id` 标注类型/资源，`player_uid` 关联玩家账号 | 一套生成/更新/销毁管线；复杂类型专属动态状态的 oneof 扩展位待需要时引入 |
 | 输入形态 | `InputBatch` 每次携带**全部未确认输入** | 预测/校正正确性的前提（SRS §7.3 回放依赖） |
-| 封包 | 每个 KCP 包 = 一条 `Envelope{msg_id, oneof payload}` | KCP 消息模式边界保真；oneof 让 id→类型映射编译期锁定 |
-| 身份绑定 | 握手携 token 验证，uid 绑定到 KCP 会话，此后不再传身份 | 防伪造、省字节 |
+| 封包 | 每个 KCP 包 = 一条 `Envelope{msg_id, oneof payload}` | KCP 消息模式边界保真；oneof 限定 payload 类型，接收端仍须校验 msg_id 与分支匹配 |
+| 身份绑定 | 握手携 token 验证，uid 绑定到 KCP 会话，客户端后续请求不再携带身份 | 防伪造、省字节；服务端实体状态仍携带玩家身份映射 |
 | 版本协商 | 握手强校验 `proto_version`，不一致拒绝 | 一条字段换掉两端协议漂移的排障成本 |
 | 断线（对局中） | 移除实体并广播，规则判定视同被击败；会话继续 | 与"无断线重连"（SRS §9.2）自洽，规则面侵入最小 |
 | 房间切换 | 等 `RoomLoaded` 确认，3s 超时强制开始 | 换取加载时序确定性 |
@@ -173,7 +173,7 @@ sequenceDiagram
 |---|---|---|
 | `EntitySpawn` | 子弹生成、道具生成、（兜底）房间实体补发 | 可批量 |
 | `EntityDespawn` | 死亡 / 被拾取 / 到寿 / 房间清理 | `DespawnReason` 区分 |
-| `DamageEvent` | 每次命中 | 驱动命中特效与飘字；权威 HP 以快照为准 |
+| `DamageEvent` | 每次命中 | `damage` 为本次实际扣血量（非负，致死时按剩余 HP 截断），驱动命中特效与飘字；权威 HP 以快照为准 |
 | `DoorState` | 房间内敌人清空时 `DOOR_OPEN` | SRS §5.5 |
 | `RoomTransition` | 服务端控制切换（§6.4） | 携带全员出生点 |
 | `ItemPicked` | `BTN_INTERACT` 校验通过后 | `healed_hp` 为截断后实际恢复量 |
@@ -234,11 +234,14 @@ sequenceDiagram
     Note over S: 所有存活且在场玩家进入出口区域
     S->>S: 暂停模拟
     S-->>C: RoomTransition{map_id, spawns}
-    C->>S: RoomLoaded（各自确认）
+    C->>S: RoomLoaded{map_id}（各自确认）
     Note over S: 收齐确认，或任一玩家 3s 未确认则超时强制开始
     S->>S: 清理旧房间实体 → 恢复模拟
     S-->>C: Snapshot（新房间全量状态，模拟恢复后的第一帧）
 ```
+
+- `RoomLoaded.map_id` 必须回显所确认的 `RoomTransition.map_id`。服务端只接受当前加载阶段、当前待加载地图、当前在场玩家的首次确认；重复或过期确认直接忽略，不得计入下一房间。
+- MVP 地图序列固定为不重复的 `[1, 2, 3]`，因此 `map_id` 足以关联确认。未来支持重复地图时，必须为切换通知和确认同时增加独立切换序号，不能继续只按 `map_id` 匹配。
 
 ### 6.3 结算与关闭
 
@@ -275,6 +278,8 @@ Boss 被击败 / 全员被击败
 - **事件是前导通知**：`EntitySpawn` / `EntityDespawn` 用于即时驱动特效、音效与流程（如 `DoorState` 解锁音），比快照提前最多一个快照周期。
 - **兜底规则**：快照中出现客户端未知的 `entity_id` → 本地立即创建；`EntityDespawn` 先于快照到达 → 立即播放销毁表现并标记，快照确认后删除。
 - 本地玩家开火时**立即**播放枪口特效（预测表现），但子弹实体不做本地预测，一律等 `EntitySpawn` + 快照。
+- `EntityState.player_uid` 在玩家实体上必须是非零账号 ID，其余实体为 0；客户端以它与 `HandshakeAck.uid` 匹配来识别本地玩家，并与房间成员关联。账号 ID 与运行时 `entity_id` 是不同空间，不得按数值相等、位置或列表顺序推断身份；完整快照本身必须包含这一映射。
+- `EntityState.config_id` 为非零、按 `EntityType` 分域的内置配置/表现资源键；`EntitySpawn` 与 `Snapshot` 对同一实体必须保持一致。客户端以 `(type, config_id)` 查本地资源，服务端以同一键查权威配置，不在网络上传输配置内容。MVP 的普通怪物配置键 `1` = 近战、`2` = 远程；玩家、Boss、子弹、生命恢复道具各自类型内使用键 `1`。同一键的资源与数值由两端配置保持一致；键 `0` 无效，不可用它代替缺失的实体配置。
 
 ---
 
@@ -310,7 +315,7 @@ Boss 被击败 / 全员被击败
 | `kcp_port` | 37777/UDP | 服务端 | 可配置 |
 | `http_port` | 37780/TCP | 服务端 | 可配置 |
 | KCP 参数 | nodelay=1, interval=10, resend=2, nc=1 | 服务端 | 待网络测试调优 |
-| `proto_version` | 1 | 双端 | 随 proto 改动递增 |
+| `proto_version` | 2 | 双端 | 随 proto 改动递增 |
 
 ---
 
@@ -348,6 +353,23 @@ Boss 被击败 / 全员被击败
 |---|---|---|
 | Unity 客户端 | `Knight-Client/Assets/Scripts/Proto/Generated/Knight.cs` | `Google.Protobuf`（引入方式见待定项） |
 | Go 服务端 | `Knight-Server/protogen/knight.pb.go` | `google.golang.org/protobuf` |
+
+### 11.3 生成与契约检查
+
+提交生成代码时使用固定版本：`protoc 33.0`、`protoc-gen-go v1.36.10`；C# 编译对应 `Google.Protobuf 3.33.0`，Go 编译对应 `google.golang.org/protobuf v1.36.10`。先将生成工具加入 `PATH`，再运行：
+
+```powershell
+pwsh -NoProfile -File Knight-Tools/gen-proto.ps1
+```
+
+契约回归检查（Python 3.9+，建议安装在独立虚拟环境中）：
+
+```sh
+python -m pip install protobuf==6.33.0
+python Knight-Tools/test-proto.py
+```
+
+检查会用 `protoc` 在临时目录编译描述符，验证消息 ID 与封包字段号、实体身份/配置字段、加载确认、伤害量、版本一致性及序列化往返，不改动生成产物。它不实现也不替代服务端运行时校验；`msg_id` 与 `payload` 是否匹配、输入合法性及状态机约束仍须由两端业务代码执行。
 
 ---
 
