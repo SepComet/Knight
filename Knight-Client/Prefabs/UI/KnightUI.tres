@@ -1,0 +1,263 @@
+[gd_resource type="Theme" format=3 uid="uid://pngc76s6u1a"]
+
+[ext_resource type="FontVariation" path="res://Textures/Ninja Adventure - Asset Pack/Ui/Font/UIFont.tres" id="ascii_font"]
+[ext_resource type="Texture2D" uid="uid://cj4lx401i85ss" path="res://Textures/Ninja Adventure - Asset Pack/Ui/Theme/Theme Wood/button_disabled.png" id="button_disabled_texture"]
+[ext_resource type="Texture2D" uid="uid://dedj6mo1t3u57" path="res://Textures/Ninja Adventure - Asset Pack/Ui/Theme/Theme Wood/nine_path_focus.png" id="button_focus_texture"]
+[ext_resource type="Texture2D" uid="uid://jn6jg0lw4cdk" path="res://Textures/Ninja Adventure - Asset Pack/Ui/Theme/Theme Wood/button_hover.png" id="button_hover_texture"]
+[ext_resource type="Texture2D" uid="uid://ci4w1tjl853ox" path="res://Textures/Ninja Adventure - Asset Pack/Ui/Theme/Theme Wood/button_normal.png" id="button_normal_texture"]
+[ext_resource type="Texture2D" uid="uid://65w1wdnav3bi" path="res://Textures/Ninja Adventure - Asset Pack/Ui/Theme/Theme Wood/button_pressed.png" id="button_pressed_texture"]
+[ext_resource type="Texture2D" uid="uid://hws8yyr65fhp" path="res://Textures/Ninja Adventure - Asset Pack/Ui/Receptacle/Receptacle Rectangle/ProgressWhite.png" id="fill"]
+
+[sub_resource type="StyleBoxTexture" id="disabled"]
+content_margin_left = 20.0
+content_margin_top = 12.0
+content_margin_right = 20.0
+content_margin_bottom = 12.0
+texture = ExtResource("button_disabled_texture")
+texture_margin_left = 3.0
+texture_margin_top = 3.0
+texture_margin_right = 3.0
+texture_margin_bottom = 3.0
+
+[sub_resource type="StyleBoxTexture" id="focus"]
+texture = ExtResource("button_focus_texture")
+texture_margin_left = 5.0
+texture_margin_top = 5.0
+texture_margin_right = 5.0
+texture_margin_bottom = 5.0
+
+[sub_resource type="StyleBoxTexture" id="hover"]
+content_margin_left = 20.0
+content_margin_top = 12.0
+content_margin_right = 20.0
+content_margin_bottom = 12.0
+texture = ExtResource("button_hover_texture")
+texture_margin_left = 3.0
+texture_margin_top = 3.0
+texture_margin_right = 3.0
+texture_margin_bottom = 3.0
+
+[sub_resource type="StyleBoxTexture" id="normal"]
+content_margin_left = 20.0
+content_margin_top = 12.0
+content_margin_right = 20.0
+content_margin_bottom = 12.0
+texture = ExtResource("button_normal_texture")
+texture_margin_left = 3.0
+texture_margin_top = 3.0
+texture_margin_right = 3.0
+texture_margin_bottom = 3.0
+
+[sub_resource type="StyleBoxTexture" id="pressed"]
+content_margin_left = 20.0
+content_margin_top = 12.0
+content_margin_right = 20.0
+content_margin_bottom = 12.0
+texture = ExtResource("button_pressed_texture")
+texture_margin_left = 3.0
+texture_margin_top = 3.0
+texture_margin_right = 3.0
+texture_margin_bottom = 3.0
+
+[sub_resource type="StyleBoxFlat" id="panel"]
+content_margin_left = 20.0
+content_margin_top = 12.0
+content_margin_right = 20.0
+content_margin_bottom = 12.0
+bg_color = Color(0.33, 0.38, 0.29, 1)
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id="track"]
+content_margin_left = 20.0
+content_margin_top = 12.0
+content_margin_right = 20.0
+content_margin_bottom = 12.0
+bg_color = Color(0.2, 0.19, 0.16, 1)
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id="background"]
+content_margin_left = 20.0
+content_margin_top = 12.0
+content_margin_right = 20.0
+content_margin_bottom = 12.0
+bg_color = Color(0.27, 0.25, 0.18, 1)
+anti_aliasing = false
+
+[sub_resource type="StyleBoxTexture" id="PrimaryButton_disabled"]
+content_margin_left = 20.0
+content_margin_top = 12.0
+content_margin_right = 20.0
+content_margin_bottom = 12.0
+texture = ExtResource("button_disabled_texture")
+texture_margin_left = 3.0
+texture_margin_top = 3.0
+texture_margin_right = 3.0
+texture_margin_bottom = 3.0
+
+[sub_resource type="StyleBoxTexture" id="PrimaryButton_hover"]
+content_margin_left = 20.0
+content_margin_top = 12.0
+content_margin_right = 20.0
+content_margin_bottom = 12.0
+texture = ExtResource("button_hover_texture")
+texture_margin_left = 3.0
+texture_margin_top = 3.0
+texture_margin_right = 3.0
+texture_margin_bottom = 3.0
+
+[sub_resource type="StyleBoxTexture" id="PrimaryButton_normal"]
+content_margin_left = 20.0
+content_margin_top = 12.0
+content_margin_right = 20.0
+content_margin_bottom = 12.0
+texture = ExtResource("button_normal_texture")
+texture_margin_left = 3.0
+texture_margin_top = 3.0
+texture_margin_right = 3.0
+texture_margin_bottom = 3.0
+
+[sub_resource type="StyleBoxTexture" id="PrimaryButton_pressed"]
+content_margin_left = 20.0
+content_margin_top = 12.0
+content_margin_right = 20.0
+content_margin_bottom = 12.0
+texture = ExtResource("button_pressed_texture")
+texture_margin_left = 3.0
+texture_margin_top = 3.0
+texture_margin_right = 3.0
+texture_margin_bottom = 3.0
+
+[sub_resource type="StyleBoxFlat" id="PrimaryButton_shadow"]
+bg_color = Color(0, 0, 0, 0)
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
+anti_aliasing = false
+
+[sub_resource type="StyleBoxTexture" id="fill"]
+content_margin_left = 20.0
+content_margin_top = 12.0
+content_margin_right = 20.0
+content_margin_bottom = 12.0
+texture = ExtResource("fill")
+texture_margin_left = 5.0
+texture_margin_top = 5.0
+texture_margin_right = 5.0
+texture_margin_bottom = 5.0
+
+[sub_resource type="StyleBoxTexture" id="SecondaryButton_disabled"]
+content_margin_left = 20.0
+content_margin_top = 12.0
+content_margin_right = 20.0
+content_margin_bottom = 12.0
+texture = ExtResource("button_disabled_texture")
+texture_margin_left = 3.0
+texture_margin_top = 3.0
+texture_margin_right = 3.0
+texture_margin_bottom = 3.0
+
+[sub_resource type="StyleBoxTexture" id="SecondaryButton_hover"]
+content_margin_left = 20.0
+content_margin_top = 12.0
+content_margin_right = 20.0
+content_margin_bottom = 12.0
+texture = ExtResource("button_hover_texture")
+texture_margin_left = 3.0
+texture_margin_top = 3.0
+texture_margin_right = 3.0
+texture_margin_bottom = 3.0
+
+[sub_resource type="StyleBoxTexture" id="SecondaryButton_normal"]
+content_margin_left = 20.0
+content_margin_top = 12.0
+content_margin_right = 20.0
+content_margin_bottom = 12.0
+texture = ExtResource("button_normal_texture")
+texture_margin_left = 3.0
+texture_margin_top = 3.0
+texture_margin_right = 3.0
+texture_margin_bottom = 3.0
+
+[sub_resource type="StyleBoxTexture" id="SecondaryButton_pressed"]
+content_margin_left = 20.0
+content_margin_top = 12.0
+content_margin_right = 20.0
+content_margin_bottom = 12.0
+texture = ExtResource("button_pressed_texture")
+texture_margin_left = 3.0
+texture_margin_top = 3.0
+texture_margin_right = 3.0
+texture_margin_bottom = 3.0
+
+[sub_resource type="StyleBoxFlat" id="SecondaryButton_shadow"]
+bg_color = Color(0, 0, 0, 0)
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 2
+shadow_offset = Vector2(0, 1)
+anti_aliasing = false
+
+[resource]
+default_font = ExtResource("ascii_font")
+default_font_size = 22
+BrandTitle/base_type = &"PrimaryTitle"
+BrandTitle/colors/font_color = Color(1, 0.7, 0.32, 1)
+BrandTitle/font_sizes/font_size = 64
+Button/colors/font_color = Color(1, 0.96, 0.84, 1)
+Button/colors/font_disabled_color = Color(0.55, 0.5, 0.4, 1)
+Button/colors/font_hover_color = Color(0.16, 0.12, 0.09, 1)
+Button/colors/font_pressed_color = Color(1, 0.88, 0.65, 1)
+Button/colors/font_shadow_color = Color(0.12, 0.1, 0.08, 1)
+Button/constants/shadow_offset_x = 1
+Button/constants/shadow_offset_y = 2
+Button/styles/disabled = SubResource("disabled")
+Button/styles/focus = SubResource("focus")
+Button/styles/hover = SubResource("hover")
+Button/styles/normal = SubResource("normal")
+Button/styles/pressed = SubResource("pressed")
+Label/colors/font_color = Color(1, 0.96, 0.84, 1)
+Label/colors/font_shadow_color = Color(0.12, 0.1, 0.08, 1)
+Label/constants/shadow_offset_x = 1
+Label/constants/shadow_offset_y = 2
+LineEdit/colors/font_color = Color(1, 0.96, 0.84, 1)
+LineEdit/colors/font_placeholder_color = Color(0.7, 0.7, 0.58, 1)
+LineEdit/colors/font_shadow_color = Color(0.12, 0.1, 0.08, 1)
+LineEdit/constants/shadow_offset_x = 1
+LineEdit/constants/shadow_offset_y = 2
+LineEdit/styles/focus = SubResource("panel")
+LineEdit/styles/normal = SubResource("track")
+Panel/styles/panel = SubResource("background")
+PanelContainer/styles/panel = SubResource("panel")
+PrimaryButton/base_type = &"Button"
+PrimaryButton/styles/disabled = SubResource("PrimaryButton_disabled")
+PrimaryButton/styles/focus = SubResource("focus")
+PrimaryButton/styles/hover = SubResource("PrimaryButton_hover")
+PrimaryButton/styles/normal = SubResource("PrimaryButton_normal")
+PrimaryButton/styles/pressed = SubResource("PrimaryButton_pressed")
+PrimaryButtonShadow/base_type = &"Panel"
+PrimaryButtonShadow/styles/panel = SubResource("PrimaryButton_shadow")
+PrimaryButtonVisual/base_type = &"Panel"
+PrimaryButtonVisual/styles/panel = SubResource("PrimaryButton_normal")
+PrimaryTitle/base_type = &"Label"
+PrimaryTitle/colors/font_shadow_color = Color(0, 0, 0, 0.5)
+PrimaryTitle/constants/shadow_offset_x = 0
+PrimaryTitle/constants/shadow_offset_y = 2
+PrimaryTitle/constants/shadow_outline_size = 4
+PrimaryTitle/font_sizes/font_size = 36
+ProgressBar/styles/background = SubResource("track")
+ProgressBar/styles/fill = SubResource("fill")
+SecondaryButton/base_type = &"Button"
+SecondaryButton/styles/disabled = SubResource("SecondaryButton_disabled")
+SecondaryButton/styles/focus = SubResource("focus")
+SecondaryButton/styles/hover = SubResource("SecondaryButton_hover")
+SecondaryButton/styles/normal = SubResource("SecondaryButton_normal")
+SecondaryButton/styles/pressed = SubResource("SecondaryButton_pressed")
+SecondaryButtonShadow/base_type = &"Panel"
+SecondaryButtonShadow/styles/panel = SubResource("SecondaryButton_shadow")
+SecondaryButtonVisual/base_type = &"Panel"
+SecondaryButtonVisual/styles/panel = SubResource("SecondaryButton_normal")
+SecondaryTitle/base_type = &"Label"
+SecondaryTitle/colors/font_shadow_color = Color(0, 0, 0, 0.5)
+SecondaryTitle/constants/shadow_offset_x = 0
+SecondaryTitle/constants/shadow_offset_y = 1
+SecondaryTitle/constants/shadow_outline_size = 2
+SecondaryTitle/font_sizes/font_size = 28

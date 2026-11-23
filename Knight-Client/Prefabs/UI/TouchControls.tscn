@@ -1,0 +1,372 @@
+[gd_scene load_steps=16 format=3]
+
+[ext_resource type="Theme" path="res://Prefabs/UI/KnightUI.tres" id="1_theme"]
+
+[ext_resource type="Texture2D" path="res://Textures/Ninja Adventure - Asset Pack/Ui/Receptacle/Receptacle Sphere/BackgroundIron.png" id="base_tex"]
+
+[ext_resource type="Texture2D" path="res://Textures/Ninja Adventure - Asset Pack/Ui/Receptacle/Receptacle Sphere/BackgroundWood.png" id="knob_tex"]
+
+[ext_resource type="Texture2D" path="res://Textures/Ninja Adventure - Asset Pack/Ui/Skill Icon/Items & Weapon/Kunai.png" id="AttackButton_icon"]
+
+[ext_resource type="Texture2D" path="res://Textures/Ninja Adventure - Asset Pack/Ui/Skill Icon/Items & Weapon/Shuriken.png" id="SwitchWeaponButton_icon"]
+
+[ext_resource type="Texture2D" path="res://Textures/Ninja Adventure - Asset Pack/Ui/Skill Icon/Spell/Fireball.png" id="SkillButton_icon"]
+
+[ext_resource type="Texture2D" path="res://Textures/Ninja Adventure - Asset Pack/Ui/Receptacle/Receptacle Sphere/BackgroundIron2.png" id="action_tex"]
+
+[ext_resource type="Script" path="res://Scripts/Runtime/UI/ButtonVisual.cs" id="button_visual"]
+
+[ext_resource type="Script" path="res://Scripts/UI/Battle/TouchControlsView.cs" id="battle_view"]
+
+[sub_resource type="StyleBoxTexture" id="Base"]
+texture = ExtResource("base_tex")
+texture_margin_left = 0.0
+texture_margin_right = 0.0
+texture_margin_top = 0.0
+texture_margin_bottom = 0.0
+
+[sub_resource type="StyleBoxTexture" id="Knob"]
+texture = ExtResource("knob_tex")
+texture_margin_left = 0.0
+texture_margin_right = 0.0
+texture_margin_top = 0.0
+texture_margin_bottom = 0.0
+
+[sub_resource type="StyleBoxTexture" id="ActionNormal"]
+texture = ExtResource("action_tex")
+modulate_color = Color(1, 1, 1, 1)
+content_margin_left = 20.0
+content_margin_top = 20.0
+content_margin_right = 20.0
+content_margin_bottom = 20.0
+
+[sub_resource type="StyleBoxTexture" id="ActionHover"]
+texture = ExtResource("action_tex")
+modulate_color = Color(1, 1, 0.8, 1)
+content_margin_left = 20.0
+content_margin_top = 20.0
+content_margin_right = 20.0
+content_margin_bottom = 20.0
+
+[sub_resource type="StyleBoxTexture" id="ActionPressed"]
+texture = ExtResource("action_tex")
+modulate_color = Color(0.65, 0.65, 0.65, 1)
+content_margin_left = 20.0
+content_margin_top = 20.0
+content_margin_right = 20.0
+content_margin_bottom = 20.0
+
+
+[sub_resource type="StyleBoxEmpty" id="button_empty"]
+
+[node name="TouchControls" type="Control"]
+script = ExtResource("battle_view")
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture_filter = 1
+theme = ExtResource("1_theme")
+
+[node name="MoveJoystick" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = -236.0
+offset_right = 236.0
+offset_bottom = -40.0
+mouse_filter = 2
+
+[node name="JoystickBase" type="PanelContainer" parent="MoveJoystick"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("Base")
+
+[node name="JoystickKnob" type="Button" parent="MoveJoystick"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 54.0
+offset_top = 54.0
+offset_right = 142.0
+offset_bottom = 142.0
+theme_override_styles/normal = SubResource("button_empty")
+theme_override_styles/hover = SubResource("button_empty")
+theme_override_styles/pressed = SubResource("button_empty")
+theme_override_styles/disabled = SubResource("button_empty")
+theme_override_styles/focus = SubResource("button_empty")
+
+[node name="Panel" type="Panel" parent="MoveJoystick/JoystickKnob"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("button_visual")
+StyleType = &"PrimaryButton"
+NormalStyle = SubResource("Knob")
+HoverStyle = SubResource("Knob")
+PressedStyle = SubResource("Knob")
+FocusStyle = SubResource("Knob")
+theme_override_styles/panel = SubResource("Knob")
+
+[node name="Label" type="Label" parent="MoveJoystick/JoystickKnob/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+text = ""
+horizontal_alignment = 1
+vertical_alignment = 1
+visible = false
+
+[node name="Focus" type="Panel" parent="MoveJoystick/JoystickKnob/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+visible = false
+
+[node name="CombatActions" type="Control" parent="."]
+layout_mode = 1
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -330.0
+offset_top = -260.0
+offset_right = -32.0
+offset_bottom = -32.0
+mouse_filter = 2
+
+[node name="AttackButton" type="Button" parent="CombatActions"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 154.0
+offset_top = 84.0
+offset_right = 290.0
+offset_bottom = 220.0
+theme_override_styles/normal = SubResource("button_empty")
+theme_override_styles/hover = SubResource("button_empty")
+theme_override_styles/pressed = SubResource("button_empty")
+theme_override_styles/disabled = SubResource("button_empty")
+theme_override_styles/focus = SubResource("button_empty")
+
+[node name="Panel" type="Panel" parent="CombatActions/AttackButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("button_visual")
+StyleType = &"PrimaryButton"
+NormalStyle = SubResource("ActionNormal")
+HoverStyle = SubResource("ActionHover")
+PressedStyle = SubResource("ActionPressed")
+FocusStyle = SubResource("ActionHover")
+DisabledStyle = SubResource("ActionPressed")
+theme_override_styles/panel = SubResource("ActionNormal")
+
+[node name="Label" type="Label" parent="CombatActions/AttackButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+text = ""
+horizontal_alignment = 1
+vertical_alignment = 1
+visible = false
+
+[node name="Icon" type="TextureRect" parent="CombatActions/AttackButton/Panel"]
+layout_mode = 1
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -32.0
+offset_top = -32.0
+offset_right = 32.0
+offset_bottom = 32.0
+mouse_filter = 2
+texture = ExtResource("AttackButton_icon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Focus" type="Panel" parent="CombatActions/AttackButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+visible = false
+
+[node name="SwitchWeaponButton" type="Button" parent="CombatActions"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 14.0
+offset_top = 132.0
+offset_right = 110.0
+offset_bottom = 228.0
+theme_override_styles/normal = SubResource("button_empty")
+theme_override_styles/hover = SubResource("button_empty")
+theme_override_styles/pressed = SubResource("button_empty")
+theme_override_styles/disabled = SubResource("button_empty")
+theme_override_styles/focus = SubResource("button_empty")
+
+[node name="Panel" type="Panel" parent="CombatActions/SwitchWeaponButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("button_visual")
+StyleType = &"PrimaryButton"
+NormalStyle = SubResource("ActionNormal")
+HoverStyle = SubResource("ActionHover")
+PressedStyle = SubResource("ActionPressed")
+FocusStyle = SubResource("ActionHover")
+DisabledStyle = SubResource("ActionPressed")
+theme_override_styles/panel = SubResource("ActionNormal")
+
+[node name="Label" type="Label" parent="CombatActions/SwitchWeaponButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+text = ""
+horizontal_alignment = 1
+vertical_alignment = 1
+visible = false
+
+[node name="Icon" type="TextureRect" parent="CombatActions/SwitchWeaponButton/Panel"]
+layout_mode = 1
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -22.0
+offset_top = -22.0
+offset_right = 22.0
+offset_bottom = 22.0
+mouse_filter = 2
+texture = ExtResource("SwitchWeaponButton_icon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Focus" type="Panel" parent="CombatActions/SwitchWeaponButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+visible = false
+
+[node name="InteractButton" type="Button" parent="CombatActions"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = -100.0
+offset_top = 0.0
+offset_right = 4.0
+offset_bottom = 80.0
+text = "交互"
+
+[node name="SkillButton" type="Button" parent="CombatActions"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 20.0
+offset_top = 0.0
+offset_right = 124.0
+offset_bottom = 104.0
+theme_override_styles/normal = SubResource("button_empty")
+theme_override_styles/hover = SubResource("button_empty")
+theme_override_styles/pressed = SubResource("button_empty")
+theme_override_styles/disabled = SubResource("button_empty")
+theme_override_styles/focus = SubResource("button_empty")
+
+[node name="Panel" type="Panel" parent="CombatActions/SkillButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("button_visual")
+StyleType = &"PrimaryButton"
+NormalStyle = SubResource("ActionNormal")
+HoverStyle = SubResource("ActionHover")
+PressedStyle = SubResource("ActionPressed")
+FocusStyle = SubResource("ActionHover")
+DisabledStyle = SubResource("ActionPressed")
+theme_override_styles/panel = SubResource("ActionNormal")
+
+[node name="Label" type="Label" parent="CombatActions/SkillButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+text = ""
+horizontal_alignment = 1
+vertical_alignment = 1
+visible = false
+
+[node name="Icon" type="TextureRect" parent="CombatActions/SkillButton/Panel"]
+layout_mode = 1
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -24.0
+offset_top = -24.0
+offset_right = 24.0
+offset_bottom = 24.0
+mouse_filter = 2
+texture = ExtResource("SkillButton_icon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Focus" type="Panel" parent="CombatActions/SkillButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+visible = false
+

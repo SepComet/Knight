@@ -1,0 +1,380 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Theme" path="res://Prefabs/UI/KnightUI.tres" id="1_theme"]
+[ext_resource type="Script" path="res://Scripts/Runtime/UI/ButtonVisual.cs" id="button_visual"]
+[ext_resource type="PackedScene" path="res://Prefabs/UI/RoomListItem.tscn" id="room_item"]
+[ext_resource type="PackedScene" path="res://Prefabs/UI/RoomPasswordDialog.tscn" id="password_dialog"]
+
+[ext_resource type="Script" path="res://Scripts/UI/Rooms/RoomSelectionView.cs" id="view_script"]
+
+[sub_resource type="StyleBoxEmpty" id="button_empty"]
+
+[node name="RoomSelection" type="Control"]
+script = ExtResource("view_script")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture_filter = 1
+theme = ExtResource("1_theme")
+mouse_filter = 2
+
+[node name="Background" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 48
+theme_override_constants/margin_right = 48
+theme_override_constants/margin_top = 32
+theme_override_constants/margin_bottom = 32
+
+[node name="Layout" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="Title" type="Label" parent="Margin/Layout"]
+layout_mode = 2
+theme_type_variation = &"PrimaryTitle"
+text = "房间"
+
+[node name="Body" type="HBoxContainer" parent="Margin/Layout"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 32
+
+[node name="Sidebar" type="VBoxContainer" parent="Margin/Layout/Body"]
+layout_mode = 2
+custom_minimum_size = Vector2(220, 0)
+theme_override_constants/separation = 16
+
+[node name="CreateRoomButton" type="Button" parent="Margin/Layout/Body/Sidebar"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(200, 56)
+theme_override_styles/normal = SubResource("button_empty")
+theme_override_styles/hover = SubResource("button_empty")
+theme_override_styles/pressed = SubResource("button_empty")
+theme_override_styles/disabled = SubResource("button_empty")
+theme_override_styles/focus = SubResource("button_empty")
+
+[node name="Panel" type="Panel" parent="Margin/Layout/Body/Sidebar/CreateRoomButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("button_visual")
+StyleType = &"PrimaryButton"
+theme_type_variation = &"PrimaryButtonVisual"
+
+
+[node name="Shadow" type="Panel" parent="Margin/Layout/Body/Sidebar/CreateRoomButton/Panel"]
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"PrimaryButtonShadow"
+
+[node name="Label" type="Label" parent="Margin/Layout/Body/Sidebar/CreateRoomButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+text = "创建房间"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Focus" type="Panel" parent="Margin/Layout/Body/Sidebar/CreateRoomButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+visible = false
+
+[node name="JoinRoomButton" type="Button" parent="Margin/Layout/Body/Sidebar"]
+disabled = true
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(200, 56)
+theme_override_styles/normal = SubResource("button_empty")
+theme_override_styles/hover = SubResource("button_empty")
+theme_override_styles/pressed = SubResource("button_empty")
+theme_override_styles/disabled = SubResource("button_empty")
+theme_override_styles/focus = SubResource("button_empty")
+
+[node name="Panel" type="Panel" parent="Margin/Layout/Body/Sidebar/JoinRoomButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("button_visual")
+StyleType = &"PrimaryButton"
+theme_type_variation = &"PrimaryButtonVisual"
+
+
+[node name="Shadow" type="Panel" parent="Margin/Layout/Body/Sidebar/JoinRoomButton/Panel"]
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"PrimaryButtonShadow"
+
+[node name="Label" type="Label" parent="Margin/Layout/Body/Sidebar/JoinRoomButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+text = "加入房间"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Focus" type="Panel" parent="Margin/Layout/Body/Sidebar/JoinRoomButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+visible = false
+
+[node name="Space" type="Control" parent="Margin/Layout/Body/Sidebar"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BackButton" type="Button" parent="Margin/Layout/Body/Sidebar"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(200, 56)
+theme_override_styles/normal = SubResource("button_empty")
+theme_override_styles/hover = SubResource("button_empty")
+theme_override_styles/pressed = SubResource("button_empty")
+theme_override_styles/disabled = SubResource("button_empty")
+theme_override_styles/focus = SubResource("button_empty")
+
+[node name="Panel" type="Panel" parent="Margin/Layout/Body/Sidebar/BackButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("button_visual")
+StyleType = &"SecondaryButton"
+theme_type_variation = &"SecondaryButtonVisual"
+
+
+[node name="Shadow" type="Panel" parent="Margin/Layout/Body/Sidebar/BackButton/Panel"]
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"SecondaryButtonShadow"
+
+[node name="Label" type="Label" parent="Margin/Layout/Body/Sidebar/BackButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+text = "返回主页面"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Focus" type="Panel" parent="Margin/Layout/Body/Sidebar/BackButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+visible = false
+
+[node name="RoomListPanel" type="PanelContainer" parent="Margin/Layout/Body"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Content" type="VBoxContainer" parent="Margin/Layout/Body/RoomListPanel"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Header" type="HBoxContainer" parent="Margin/Layout/Body/RoomListPanel/Content"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="RoomListTitle" type="Label" parent="Margin/Layout/Body/RoomListPanel/Content/Header"]
+size_flags_horizontal = 3
+layout_mode = 2
+theme_type_variation = &"SecondaryTitle"
+text = "房间列表"
+
+[node name="RefreshButton" type="Button" parent="Margin/Layout/Body/RoomListPanel/Content/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(200, 56)
+theme_override_styles/normal = SubResource("button_empty")
+theme_override_styles/hover = SubResource("button_empty")
+theme_override_styles/pressed = SubResource("button_empty")
+theme_override_styles/disabled = SubResource("button_empty")
+theme_override_styles/focus = SubResource("button_empty")
+
+[node name="Panel" type="Panel" parent="Margin/Layout/Body/RoomListPanel/Content/Header/RefreshButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("button_visual")
+StyleType = &"SecondaryButton"
+theme_type_variation = &"SecondaryButtonVisual"
+
+
+[node name="Shadow" type="Panel" parent="Margin/Layout/Body/RoomListPanel/Content/Header/RefreshButton/Panel"]
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"SecondaryButtonShadow"
+
+[node name="Label" type="Label" parent="Margin/Layout/Body/RoomListPanel/Content/Header/RefreshButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+text = "刷新"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Focus" type="Panel" parent="Margin/Layout/Body/RoomListPanel/Content/Header/RefreshButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+visible = false
+
+[node name="Columns" type="HBoxContainer" parent="Margin/Layout/Body/RoomListPanel/Content"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="RoomCodeHeading" type="Label" parent="Margin/Layout/Body/RoomListPanel/Content/Columns"]
+layout_mode = 2
+custom_minimum_size = Vector2(160, 0)
+size_flags_horizontal = 3
+text = "房间号"
+
+[node name="PlayerCountHeading" type="Label" parent="Margin/Layout/Body/RoomListPanel/Content/Columns"]
+layout_mode = 2
+custom_minimum_size = Vector2(80, 0)
+size_flags_horizontal = 3
+text = "人数"
+
+[node name="StatusHeading" type="Label" parent="Margin/Layout/Body/RoomListPanel/Content/Columns"]
+layout_mode = 2
+custom_minimum_size = Vector2(120, 0)
+size_flags_horizontal = 3
+text = "状态"
+
+[node name="PasswordHeading" type="Label" parent="Margin/Layout/Body/RoomListPanel/Content/Columns"]
+layout_mode = 2
+custom_minimum_size = Vector2(80, 0)
+size_flags_horizontal = 3
+text = "密码"
+
+[node name="Scroll" type="ScrollContainer" parent="Margin/Layout/Body/RoomListPanel/Content"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="RoomList" type="VBoxContainer" parent="Margin/Layout/Body/RoomListPanel/Content/Scroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="RoomItemTemplate" parent="Margin/Layout/Body/RoomListPanel/Content/Scroll/RoomList" instance=ExtResource("room_item")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[node name="ListMessageLabel" type="Label" parent="Margin/Layout/Body/RoomListPanel/Content"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+text = ""
+
+[node name="RoomPasswordDialog" parent="." instance=ExtResource("password_dialog")]
+unique_name_in_owner = true
+visible = false
+

@@ -1,0 +1,7 @@
+[gd_resource type="Resource" format=3]
+
+[resource]
+metadata/data = [
+{ "icon": "角色1", "id": 1001, "initiallyOwned": true, "maxHp": 120, "maxMp": 40, "name": "角色1", "skillActionId": 101, "speed": 12, "weaponItemId": 0 }
+]
+metadata/bin = "AYPpB+inkuiJsjEBeCgMZQAH6KeS6ImyMQ=="

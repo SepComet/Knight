@@ -1,0 +1,27 @@
+<module name="">
+    <bean name="vector2" valueType="1" sep=",">
+        <var name="x" type="float"/>
+        <var name="y" type="float"/>
+    </bean>
+    <bean name="vector3" valueType="1" sep=",">
+        <var name="x" type="float"/>
+        <var name="y" type="float"/>
+        <var name="z" type="float"/>
+    </bean>
+    <bean name="vector4" valueType="1" sep=",">
+        <var name="x" type="float"/>
+        <var name="y" type="float"/>
+        <var name="z" type="float"/>
+        <var name="w" type="float"/>
+    </bean>
+    <bean name="color32" valueType="1" sep=",">
+        <var name="r" type="byte"/>
+        <var name="g" type="byte"/>
+        <var name="b" type="byte"/>
+        <var name="a" type="byte"/>
+        <mapper target="all" codeTarget="cs-bin">
+            <option name="type" value="UnityEngine.Color32"/>
+            <option name="constructor" value="ExternalTypeUtil.NewColor32"/>
+        </mapper>
+    </bean>
+</module>

@@ -1,0 +1,8 @@
+[gd_resource type="Resource" format=3]
+
+[resource]
+metadata/data = [
+{ "assetName": "select", "id": 10000, "priority": 0, "volume": 1 },
+{ "assetName": "click", "id": 10001, "priority": 0, "volume": 1 }
+]
+metadata/bin = "AqcQBnNlbGVjdAAAAIA/pxEFY2xpY2sAAACAPw=="

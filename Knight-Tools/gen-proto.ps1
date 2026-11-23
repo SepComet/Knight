@@ -6,11 +6,12 @@
 #   - protoc-gen-go 1.36.10 在 PATH 中（go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.36.10）
 #
 # 运行时依赖（生成后两端编译需要）：
-#   - C#：Google.Protobuf 包（Unity 侧引入方式见 Docs/protocol.md §12）
+#   - C#：Google.Protobuf 包（Godot 客户端经 NuGet PackageReference 引入，见 Knight-Client.csproj 与 Docs/protocol.md §12）
 #   - Go：google.golang.org/protobuf
 #
 # 产物（全量重生成，先清理旧文件防漂移）：
-#   - Knight-Client/Assets/Scripts/Proto/Generated/Knight.cs
+#   - Knight-Client/Scripts/Base/Gen/Proto/Knight.cs
+#     （Gen 为生成代码总目录，按来源分子目录：Proto = 协议，DataTable = Luban 数据表定义）
 #   - Knight-Server/protogen/knight.pb.go
 
 #Requires -Version 5.1
@@ -19,7 +20,7 @@ $ErrorActionPreference = "Stop"
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $protoDir = Join-Path $repoRoot "Knight-Proto"
 $protoFile = Join-Path $protoDir "knight.proto"
-$csharpOut = Join-Path $repoRoot "Knight-Client\Assets\Scripts\Proto\Generated"
+$csharpOut = Join-Path $repoRoot "Knight-Client\Scripts\Base\Gen\Proto"
 $goOut = Join-Path $repoRoot "Knight-Server\protogen"
 
 if (-not (Test-Path $protoFile)) {
@@ -29,6 +30,7 @@ if (-not (Test-Path $protoFile)) {
 New-Item -ItemType Directory -Force -Path $csharpOut, $goOut | Out-Null
 
 # 全量重生成：先清理旧产物，防止消息改名后残留旧文件造成两端映射漂移
+# Gen/Proto 为 proto 专属子目录，可安全清理全部 *.cs（Gen/DataTable 的 Luban 产物不受影响）
 Remove-Item (Join-Path $csharpOut "*.cs") -ErrorAction SilentlyContinue
 Remove-Item (Join-Path $goOut "*.pb.go") -ErrorAction SilentlyContinue
 

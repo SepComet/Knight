@@ -1,0 +1,8 @@
+[gd_resource type="FontVariation" load_steps=3 format=3]
+
+[ext_resource type="FontFile" path="res://Textures/Ninja Adventure - Asset Pack/Ui/Font/NormalFont.ttf" id="ascii"]
+[ext_resource type="FontFile" path="res://Textures/Ninja Adventure - Asset Pack/Ui/Font/KnightCjk10-NoAscii.ttf" id="cjk"]
+
+[resource]
+base_font = ExtResource("ascii")
+fallbacks = Array[Font]([ExtResource("cjk")])

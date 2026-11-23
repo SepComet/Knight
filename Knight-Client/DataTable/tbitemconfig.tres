@@ -1,0 +1,10 @@
+[gd_resource type="Resource" format=3]
+
+[resource]
+metadata/data = [
+{ "atkBonus": 2, "icon": "生命小药", "id": 1001, "matBonus": 0, "name": "生命小药", "rarity": 1, "sellPrice": 12, "speedBonus": 0 },
+{ "atkBonus": 4, "icon": "生命大药", "id": 1002, "matBonus": 0, "name": "生命大药", "rarity": 5, "sellPrice": 20, "speedBonus": 0 },
+{ "atkBonus": 80, "icon": "魔力小药", "id": 2001, "matBonus": 0, "name": "魔力小药", "rarity": 2, "sellPrice": 8, "speedBonus": 0 },
+{ "atkBonus": 150, "icon": "魔力大药", "id": 2002, "matBonus": 0, "name": "魔力大药", "rarity": 3, "sellPrice": 15, "speedBonus": 0 }
+]
+metadata/bin = "BIPpDOeUn+WRveWwj+iNrwECAAAM55Sf5ZG95bCP6I2vDIPqDOeUn+WRveWkp+iNrwUEAAAM55Sf5ZG95aSn6I2vFIfRDOmtlOWKm+Wwj+iNrwJQAAAM6a2U5Yqb5bCP6I2vCIfSDOmtlOWKm+Wkp+iNrwOAlgAADOmtlOWKm+Wkp+iNrw8="

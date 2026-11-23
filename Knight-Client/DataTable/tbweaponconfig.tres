@@ -1,0 +1,12 @@
+[gd_resource type="Resource" format=3]
+
+[resource]
+metadata/data = [
+{ "atkBonus": 5, "icon": "短剑", "id": 1001, "manaCost": 0, "name": "短剑", "rarity": 1, "weaponAttackType": 1, "weaponType": 1 },
+{ "atkBonus": 7, "icon": "菜刀", "id": 1002, "manaCost": 0, "name": "菜刀", "rarity": 2, "weaponAttackType": 1, "weaponType": 1 },
+{ "atkBonus": 10, "icon": "阔剑", "id": 1003, "manaCost": 0, "name": "阔剑", "rarity": 3, "weaponAttackType": 1, "weaponType": 1 },
+{ "atkBonus": 0, "icon": "小法杖", "id": 1004, "manaCost": 1, "name": "小法杖", "rarity": 1, "weaponAttackType": 1, "weaponType": 2 },
+{ "atkBonus": 0, "icon": "中法杖", "id": 1005, "manaCost": 2, "name": "中法杖", "rarity": 2, "weaponAttackType": 1, "weaponType": 2 },
+{ "atkBonus": 0, "icon": "大法杖", "id": 1006, "manaCost": 3, "name": "大法杖", "rarity": 3, "weaponAttackType": 2, "weaponType": 2 }
+]
+metadata/bin = "BoPpBuefreWJkQEBAQUABuefreWJkYPqBuiPnOWIgAEBAgcABuiPnOWIgIPrBumYlOWJkQEBAwoABumYlOWJkYPsCeWwj+azleadlgIBAQABCeWwj+azleadloPtCeS4reazleadlgIBAgACCeS4reazleadloPuCeWkp+azleadlgICAwADCeWkp+azleadlg=="

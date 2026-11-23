@@ -1,0 +1,315 @@
+[gd_scene format=3 uid="uid://dfql33h0dv7fx"]
+
+[ext_resource type="Theme" uid="uid://pngc76s6u1a" path="res://Prefabs/UI/KnightUI.tres" id="1_theme"]
+[ext_resource type="Texture2D" uid="uid://ci4w1tjl853ox" path="res://Textures/Ninja Adventure - Asset Pack/Ui/Theme/Theme Wood/button_normal.png" id="2_gix03"]
+[ext_resource type="Texture2D" uid="uid://dedj6mo1t3u57" path="res://Textures/Ninja Adventure - Asset Pack/Ui/Theme/Theme Wood/nine_path_focus.png" id="4_wsi2j"]
+[ext_resource type="Script" uid="uid://r3kvdnkpsvja" path="res://Scripts/Runtime/UI/ButtonVisual.cs" id="button_visual"]
+[ext_resource type="Script" uid="uid://da0xv0am6lqov" path="res://Scripts/UI/Common/MainMenuView.cs" id="view_script"]
+
+[sub_resource type="StyleBoxEmpty" id="button_empty"]
+
+[sub_resource type="StyleBoxTexture" id="PrimaryButton_normal"]
+content_margin_left = 20.0
+content_margin_top = 12.0
+content_margin_right = 20.0
+content_margin_bottom = 12.0
+texture = ExtResource("2_gix03")
+texture_margin_left = 3.0
+texture_margin_top = 3.0
+texture_margin_right = 3.0
+texture_margin_bottom = 3.0
+
+[sub_resource type="StyleBoxTexture" id="focus"]
+texture = ExtResource("4_wsi2j")
+texture_margin_left = 5.0
+texture_margin_top = 5.0
+texture_margin_right = 5.0
+texture_margin_bottom = 5.0
+
+[node name="MainMenu" type="Control" unique_id=999956599]
+texture_filter = 1
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme = ExtResource("1_theme")
+script = ExtResource("view_script")
+
+[node name="Background" type="Panel" parent="." unique_id=1919203992]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Center" type="CenterContainer" parent="." unique_id=1408774286]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Menu" type="VBoxContainer" parent="Center" unique_id=1884486806]
+custom_minimum_size = Vector2(360, 0)
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="Title" type="Label" parent="Center/Menu" unique_id=2061093773]
+layout_mode = 2
+theme_type_variation = &"BrandTitle"
+text = "KNIGHT"
+
+[node name="StartButton" type="Button" parent="Center/Menu" unique_id=1264870828]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 80)
+layout_mode = 2
+theme_override_styles/normal = SubResource("button_empty")
+theme_override_styles/pressed = SubResource("button_empty")
+theme_override_styles/hover = SubResource("button_empty")
+theme_override_styles/disabled = SubResource("button_empty")
+theme_override_styles/focus = SubResource("button_empty")
+
+[node name="Panel" type="Panel" parent="Center/Menu/StartButton" unique_id=2004675252]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"PrimaryButtonVisual"
+theme_override_styles/panel = SubResource("PrimaryButton_normal")
+script = ExtResource("button_visual")
+
+[node name="Shadow" type="Panel" parent="Center/Menu/StartButton/Panel" unique_id=627226389]
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"PrimaryButtonShadow"
+
+[node name="Label" type="Label" parent="Center/Menu/StartButton/Panel" unique_id=604017839]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.96, 0.84, 1)
+theme_override_font_sizes/font_size = 40
+text = "开始游戏"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Focus" type="Panel" parent="Center/Menu/StartButton/Panel" unique_id=1076204192]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("focus")
+
+[node name="SettingsButton" type="Button" parent="Center/Menu" unique_id=723855101]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 80)
+layout_mode = 2
+theme_override_styles/normal = SubResource("button_empty")
+theme_override_styles/pressed = SubResource("button_empty")
+theme_override_styles/hover = SubResource("button_empty")
+theme_override_styles/disabled = SubResource("button_empty")
+theme_override_styles/focus = SubResource("button_empty")
+
+[node name="Panel" type="Panel" parent="Center/Menu/SettingsButton" unique_id=1851709610]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"PrimaryButtonVisual"
+theme_override_styles/panel = SubResource("PrimaryButton_normal")
+script = ExtResource("button_visual")
+
+[node name="Shadow" type="Panel" parent="Center/Menu/SettingsButton/Panel" unique_id=382814823]
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"PrimaryButtonShadow"
+
+[node name="Label" type="Label" parent="Center/Menu/SettingsButton/Panel" unique_id=1864334467]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.96, 0.84, 1)
+theme_override_font_sizes/font_size = 40
+text = "设置"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Focus" type="Panel" parent="Center/Menu/SettingsButton/Panel" unique_id=409999501]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("focus")
+
+[node name="QuitButton" type="Button" parent="Center/Menu" unique_id=1513142360]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 80)
+layout_mode = 2
+theme_override_styles/normal = SubResource("button_empty")
+theme_override_styles/pressed = SubResource("button_empty")
+theme_override_styles/hover = SubResource("button_empty")
+theme_override_styles/disabled = SubResource("button_empty")
+theme_override_styles/focus = SubResource("button_empty")
+
+[node name="Panel" type="Panel" parent="Center/Menu/QuitButton" unique_id=1685435194]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"PrimaryButtonVisual"
+theme_override_styles/panel = SubResource("PrimaryButton_normal")
+script = ExtResource("button_visual")
+
+[node name="Shadow" type="Panel" parent="Center/Menu/QuitButton/Panel" unique_id=1935434299]
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"PrimaryButtonShadow"
+
+[node name="Label" type="Label" parent="Center/Menu/QuitButton/Panel" unique_id=747219100]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.96, 0.84, 1)
+theme_override_font_sizes/font_size = 40
+text = "退出游戏"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Focus" type="Panel" parent="Center/Menu/QuitButton/Panel" unique_id=1982686274]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("focus")
+[node name="AccountButton" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 24.0
+offset_top = 24.0
+offset_right = 364.0
+offset_bottom = 80.0
+theme_override_styles/normal = SubResource("button_empty")
+theme_override_styles/hover = SubResource("button_empty")
+theme_override_styles/pressed = SubResource("button_empty")
+theme_override_styles/disabled = SubResource("button_empty")
+theme_override_styles/focus = SubResource("button_empty")
+
+[node name="Panel" type="Panel" parent="AccountButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"SecondaryButtonVisual"
+script = ExtResource("button_visual")
+StyleType = &"SecondaryButton"
+CaptionName = &"AccountLabel"
+
+[node name="Shadow" type="Panel" parent="AccountButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+show_behind_parent = true
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
+theme_type_variation = &"SecondaryButtonShadow"
+
+[node name="AccountLabel" type="Label" parent="AccountButton/Panel"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+offset_left = 16.0
+offset_right = -16.0
+text = "登录"
+horizontal_alignment = 1
+vertical_alignment = 1
+text_overrun_behavior = 3
+
+[node name="Focus" type="Panel" parent="AccountButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+visible = false

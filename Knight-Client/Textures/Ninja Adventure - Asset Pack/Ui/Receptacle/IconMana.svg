@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" shape-rendering="crispEdges">
+  <title>Mana</title>
+  <path fill="#000000" d="M5 0h4v1H5z M3 1h2v1H3z M9 1h2v1H9z M2 2h1v1H2z M11 2h1v1H11z M1 3h1v1H1z M12 3h1v1H12z M1 4h1v1H1z M12 4h1v1H12z M0 5h1v1H0z M13 5h1v1H13z M0 6h1v1H0z M13 6h1v1H13z M0 7h1v1H0z M13 7h1v1H13z M0 8h1v1H0z M13 8h1v1H13z M1 9h1v1H1z M12 9h1v1H12z M1 10h1v1H1z M12 10h1v1H12z M2 11h1v1H2z M11 11h1v1H11z M3 12h2v1H3z M9 12h2v1H9z M5 13h4v1H5z"/>
+  <path fill="#f2fcff" d="M5 2h2v1H5z M4 3h2v1H4z M4 4h1v1H4z"/>
+  <path fill="#a6e5ff" d="M5 1h4v1H5z M3 2h2v1H3z M7 2h4v1H7z M2 3h2v1H2z M6 3h5v1H6z M2 4h2v1H2z M5 4h5v1H5z M1 5h6v1H1z M1 6h1v1H1z"/>
+  <path fill="#4cb5f5" d="M11 3h1v1H11z M10 4h2v1H10z M7 5h6v1H7z M2 6h9v1H2z M1 7h8v1H1z M1 8h5v1H1z M2 9h1v1H2z"/>
+  <path fill="#2879ce" d="M11 6h2v1H11z M9 7h4v1H9z M6 8h7v1H6z M3 9h8v1H3z M2 10h6v1H2z M3 11h2v1H3z"/>
+  <path fill="#19488e" d="M11 9h1v1H11z M8 10h4v1H8z M5 11h6v1H5z M5 12h4v1H5z"/>
+</svg>

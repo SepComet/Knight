@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://cojixamrhnucj"
+path="res://.godot/imported/Explosion2.wav-338a50c93c0681859c82fb5bdf91d5db.sample"
+
+[deps]
+
+source_file="res://Textures/Ninja Adventure - Asset Pack/Audio/Sounds/Elemental/Explosion2.wav"
+dest_files=["res://.godot/imported/Explosion2.wav-338a50c93c0681859c82fb5bdf91d5db.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

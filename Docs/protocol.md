@@ -1,6 +1,6 @@
 # Knight 网络协议规范
 
-**文档版本：** V0.2（草案，待评审；`proto_version = 2`）
+**文档版本：** V0.2（草案，待评审；`proto_version = 4`）
 **上游需求：** [SRS-需求规格说明书.md](./SRS-需求规格说明书.md) §3 / §4 / §6 / §7
 **契约源：** [Knight-Proto/knight.proto](../Knight-Proto/knight.proto) —— 唯一消息定义处，本文档不复制定义，只描述流程与语义
 **代码生成：** [Knight-Tools/gen-proto.ps1](../Knight-Tools/gen-proto.ps1)
@@ -9,7 +9,7 @@
 
 ## 1. 范围与原则
 
-本文档定义 Unity 客户端与 Go 服务端之间的线上协议：传输方式、封包规则、握手与会话生命周期、消息语义与校验规则、核心时序、数值单位约定。
+本文档定义 Godot 客户端（C#）与 Go 服务端之间的线上协议：传输方式、封包规则、握手与会话生命周期、消息语义与校验规则、核心时序、数值单位约定。
 
 原则：
 
@@ -42,8 +42,34 @@
 ## 2. 传输层
 
 - **单 KCP 通道，承载 UDP**，默认端口 `37777`（可配置）。
-- KCP 工作在**消息模式**：应用层每调用一次 send = 一个完整 Envelope，协议层无长度前缀。
-- 初始 KCP 参数：`nodelay=1, interval=10, resend=2, nc=1`（社区常用激进配置，属 SRS §11 开发顺序第 1 步的验证范围，待 §8.3 网络测试调优）。
+- KCP 工作在**消息模式**：应用层每调用一次 send = 一个完整 Envelope。
+- 两端传输实现均为 **kcp2k**（V1.41）：客户端源码 vendor 于 `Knight-Client/Scripts/ThirdParty/kcp2k`；
+  服务端为逐函数移植的 Go 实现 `Knight-Server/internal/kcp2k`（待定项 #2 已解决）。
+
+### 2.1 线上帧格式（kcp2k 封装，两端逐字节一致）
+
+```
+UDP 数据报 = [1B channel][4B cookie 小端][载荷]
+  channel: 1 = Reliable（载荷为 KCP 段流，MTU=1200-5）
+           2 = Unreliable（载荷 = [1B 消息头][内容]，单包直发，不经 KCP）
+可靠消息（KCP 重组后）= [1B 消息头][内容]
+  Hello=1（空，bare 握手）  Ping=2（4B 发送方时间戳）  Data=3（= Envelope 字节）  Pong=4（4B 回显时间戳）
+不可靠消息 = [1B 消息头][内容]
+  Data=4  Disconnect=5（主动断开 = 5 连发）
+```
+
+- **cookie**：服务端每连接 `crypto/rand` 生成，之后每个下行包都携带；客户端从收到的首个非零 cookie 采纳并回带。
+  服务端仅在 bare 握手完成后校验（不匹配即丢弃该包）——客户端 Hello 重传（cookie=0）属正常现象。
+- **bare 握手**：客户端连接后立即发 Hello；服务端回 Hello（带 cookie）后连接才进入可通信状态。
+  客户端在收到服务端 Hello 前收到 Data 会按协议违规断开，因此服务端认证前禁止发送任何 Data。
+- **保活**：kcp2k 层每 1s 互发 Ping/Pong（可靠通道，Pong 限频 1s 一次）；10s 无任何入包 → 断开；
+  死链（单段重传 20 次无 ACK）→ 断开；收发队列总量 ≥ 10000 → 拥塞断开。
+- **消息上限**：可靠 `(MTU−24−5)×(接收窗口−1)−1 ≈ 147KB`；不可靠 `MTU−6 = 1194B`。
+  应用层心跳（§4.2 的 3s Heartbeat）与 kcp2k 层 Ping 相互独立，前者不计入传输层活性。
+
+### 2.2 初始 KCP 参数
+
+- `nodelay=1, interval=10, resend=2, nc=1`（turbo 模式，关闭拥塞窗口；待 §8.3 网络测试调优）。
 - 未来拆分原则（MVP 不实现）：`96~127` 高频段优先移出可靠通道；`Envelope` 结构与消息 ID 不变，仅路由层变化，对业务代码透明。
 
 ---
@@ -56,12 +82,14 @@
 |---|---|---|---|---|
 | `POST /api/v1/register` | 注册账号 | `{name, password}` | `200 {uid}` | `409` 名称已存在 |
 | `POST /api/v1/login` | 登录换取 token | `{name, password}` | `200 {uid, name, token}` | `401` 凭证错误 |
-| `GET /api/v1/users/{uid}` | 用户基本信息 | — | `200 {uid, name, created_at}` | `404` |
-| `GET /api/v1/users/{uid}/matches` | 历史战绩列表 | — | `200 [{match_id, outcome, duration_sec, kills, damage_dealt, damage_taken, alive, finished_at}]` | `404` |
+| `GET /api/v1/users/{uid}` | 用户基本信息 | — | `200 {uid, name, coins, created_at}` | `404` |
+| `GET /api/v1/users/{uid}/matches` | 历史战绩列表 | — | `200 [{match_id, outcome, duration_sec, character_id, weapon_id, kills, damage_dealt, damage_taken, alive, finished_at}]` | `404` |
 
 - 查询接口需带 `Authorization: Bearer <token>`。
 - token：服务端生成的随机 128 位串，**内存态**，有效期 24h，进程重启失效（MVP 接受，见 §12 待定项）。
 - 密码加盐哈希存储，不落明文。
+- uid 与 match_id 为服务端雪花 ID（64 位，超 JS 安全整数 2^53）：**JSON 中一律序列化为字符串**；KCP 侧 proto `uint64` 不受影响。
+- `coins` = 蓝币；`character_id` / `weapon_id` 为对局时角色/武器 config_id 快照（对齐 Luban 配置，与 `EntityState.config_id` 同约定，非数据库外键）。
 
 ---
 
@@ -119,8 +147,8 @@ sequenceDiagram
 | 域段 | 消息 | 方向 | 用途 |
 |---|---|---|---|
 | 1~31 连接/会话 | `HandshakeReq` / `HandshakeAck` / `Heartbeat` / `Error` | 见表 | 握手、保活、错误 |
-| 32~63 大厅/房间 | `CreateRoomReq` `JoinRoomReq` `LeaveRoom` `SetReady` `StartGame` | C→S | 房间操作 |
-| | `RoomStatePush` `GameStart` | S→C | 房间状态广播、开局 |
+| 32~63 大厅/房间 | `CreateRoomReq` `JoinRoomReq` `LeaveRoom` `SetReady` `StartGame` `GetRoomListReq` | C→S | 房间操作 |
+| | `RoomStatePush` `GameStart` `GetRoomListResp` | S→C | 房间状态广播、开局、房间列表 |
 | 64~95 游戏事件 | `EntitySpawn` `EntityDespawn` `DamageEvent` `DoorState` `RoomTransition` `ItemPicked` `PlayerLeft` `GameResult` | S→C | 可靠事件 |
 | | `RoomLoaded` | C→S | 加载确认 |
 | 96~127 高频 | `Snapshot` | S→C 单播 | 全量快照 |
@@ -130,13 +158,15 @@ sequenceDiagram
 
 | 消息 | 服务端校验 | 失败处理 |
 |---|---|---|
-| `CreateRoomReq` | 会话数上限 | `ERR_SERVER_FULL` |
-| `JoinRoomReq` | 房间存在 / 未满 / 未开局 | `ERR_ROOM_NOT_FOUND` / `ERR_ROOM_FULL` / `ERR_GAME_ALREADY_STARTED` |
+| `CreateRoomReq` | 会话数上限 / 密码长度（≤32 字符） | `ERR_SERVER_FULL` / `ERR_INVALID_REQUEST` |
+| `JoinRoomReq` | 房间存在 / 密码匹配 / 未开局 / 未满 | `ERR_ROOM_NOT_FOUND` / `ERR_ROOM_PASSWORD_MISMATCH` / `ERR_GAME_ALREADY_STARTED` / `ERR_ROOM_FULL` |
 | `SetReady` | 会话处于 `ROOM_WAITING` | `ERR_INVALID_REQUEST` |
 | `StartGame` | 发送者是房主 / 在场人数 ≥ `min_players_to_start` | `ERR_NOT_ROOM_OWNER` / `ERR_INVALID_REQUEST` |
 | `LeaveRoom` | 任意时刻可发 | 房主离开：剩余成员中最早加入者继任；无人则销毁房间（SRS §3.2） |
 
-- 房间号由服务端生成（MVP 无房间列表浏览，SRS §3.2 按房间号加入）。
+- `GetRoomListReq`（任意会话、任意时刻可发）返回全部非 `CLOSED` 房间的摘要 `RoomSummary{room_id, has_password, player_count, state}`，按房间号升序；仅暴露是否加密，不泄露密码本身。客户端据此生成房间列表并择房加入。
+- 房间号由服务端生成。
+- 房间密码**可选**：`CreateRoomReq.password` 为空即公开房间（凭房间号直接加入）；非空为加密房间，`JoinRoomReq.password` 必须匹配。密码只存服务端，不进 `RoomStatePush` 广播。
 - `RoomStatePush` 为**全量快照式广播**（非增量），成员任何变化（加入/离开/准备/房主变更）都重发完整成员表，含变更者本人。
 - MVP 的 `RoomSessionState` 只使用 `WAITING / RUNNING / CLOSED`；`PREPARING` 枚举保留以对齐 SRS §6.1（见 §12 待定项）。
 
@@ -287,7 +317,7 @@ Boss 被击败 / 全员被击败
 
 | 项 | 约定 |
 |---|---|
-| 位置 | `float32`，单位 = Unity world unit（1 单位 = 1 地面 tile） |
+| 位置 | `float32`，单位 = 世界单位（1 单位 = 1 地面 tile；Godot 客户端按 tile 尺寸换算到 Godot 坐标） |
 | 角度（`facing` / `aim_angle`） | `float32`，单位 = 度；0° = +X（右），90° = +Y（上），逆时针 |
 | 移动输入 | 已归一化 `float32`，模长 ≤ 1 |
 | 生命值 / 伤害 / 恢复量 | `int32` |
@@ -315,7 +345,7 @@ Boss 被击败 / 全员被击败
 | `kcp_port` | 37777/UDP | 服务端 | 可配置 |
 | `http_port` | 37780/TCP | 服务端 | 可配置 |
 | KCP 参数 | nodelay=1, interval=10, resend=2, nc=1 | 服务端 | 待网络测试调优 |
-| `proto_version` | 2 | 双端 | 随 proto 改动递增 |
+| `proto_version` | 4 | 双端 | 随 proto 改动递增 |
 
 ---
 
@@ -330,6 +360,7 @@ Boss 被击败 / 全员被击败
 | `ERR_ROOM_NOT_FOUND` | 加入不存在的房间 | 保持 |
 | `ERR_ROOM_FULL` | 加入已满房间 | 保持 |
 | `ERR_GAME_ALREADY_STARTED` | 加入已开局房间 | 保持 |
+| `ERR_ROOM_PASSWORD_MISMATCH` | 加入加密房间密码缺失或不匹配 | 保持 |
 | `ERR_NOT_ROOM_OWNER` | 非房主开局 | 保持 |
 | `ERR_INVALID_REQUEST` | 状态机不合法的请求 / 封包违规 | 业务兜底保持；封包违规关闭 |
 | `ERR_KICKED_TIMEOUT` | 心跳超时 | 关闭 |
@@ -351,7 +382,7 @@ Boss 被击败 / 全员被击败
 
 | 端 | 产物 | 运行时依赖 |
 |---|---|---|
-| Unity 客户端 | `Knight-Client/Assets/Scripts/Proto/Generated/Knight.cs` | `Google.Protobuf`（引入方式见待定项） |
+| Godot 客户端 | `Knight-Client/Scripts/Base/Gen/Proto/Knight.cs`（命名空间 `SepCore.Definition`，与 Luban 数据定义一致；Gen 下 Proto/DataTable 子目录按来源分离） | `Google.Protobuf`（NuGet PackageReference，见 `Knight-Client/Knight-Client.csproj`）；KCP 传输层为 kcp2k 源码 vendor（`Knight-Client/Scripts/ThirdParty/kcp2k`，见其 README） |
 | Go 服务端 | `Knight-Server/protogen/knight.pb.go` | `google.golang.org/protobuf` |
 
 ### 11.3 生成与契约检查
@@ -377,9 +408,9 @@ python Knight-Tools/test-proto.py
 
 | # | 事项 | 解决时机 |
 |---|---|---|
-| 1 | `go_package = "knight-server/protogen"` 需与 `Knight-Server/go.mod` 的 module 路径对齐 | 服务端骨架落地 |
-| 2 | KCP 库选型：服务端拟 `xtaci/kcp-go`，客户端拟社区 kcp-csharp 维护分支 | SRS §11 开发顺序第 1 步 PoC |
-| 3 | Unity 侧 `Google.Protobuf` 运行时引入方式（NuGet 导出 dll / UPM） | 客户端工程建立 |
+| 1 | ~~`go_package = "knight-server/protogen"` 需与 `Knight-Server/go.mod` 的 module 路径对齐~~ **已解决**：go.mod module 名为 `knight-server`，与 go_package 一致，proto 无需改动 | 已解决（服务端骨架落地） |
+| 2 | ~~服务端 KCP 选型~~ **已解决**：弃用 `xtaci/kcp-go` 的 UDPSession（其按 KCP 头 conv 号分会话，而 kcp2k 客户端 conv 恒 0、按远端地址分 peer，无法对接）；改为从 kcp2k 源码逐函数移植 Go 实现（`Knight-Server/internal/kcp2k`），含 channel/cookie 封帧与 Hello/Ping 生命周期（§2.1） | 已解决（服务端传输层落地） |
+| 3 | 客户端运行时依赖已落地：`Google.Protobuf` NuGet PackageReference + kcp2k 源码 vendor（无额外 NuGet 依赖） | 已解决（客户端工程建立） |
 | 4 | token 为服务端内存态，进程重启全员重新登录 | MVP 接受；持久化待后续 |
 | 5 | `pickup_radius`、`reconcile_snap_threshold` 等数值 | P1 数值配置表 |
 | 6 | `RoomSessionState.PREPARING` 与 `WAITING` 在 MVP 服务端等价处理（枚举保留对齐 SRS §6.1） | 如后续需要区分再启用 |

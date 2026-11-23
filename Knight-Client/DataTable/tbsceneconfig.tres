@@ -1,0 +1,8 @@
+[gd_resource type="Resource" format=3]
+
+[resource]
+metadata/data = [
+{ "assetName": "Menu", "backgroundMusicId": 1, "id": 1 },
+{ "assetName": "Main", "backgroundMusicId": 2, "id": 2 }
+]
+metadata/bin = "AgEETWVudQECBE1haW4C"

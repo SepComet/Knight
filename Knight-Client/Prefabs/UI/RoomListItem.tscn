@@ -1,0 +1,109 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Theme" path="res://Prefabs/UI/KnightUI.tres" id="1_theme"]
+[ext_resource type="Script" path="res://Scripts/Runtime/UI/ButtonVisual.cs" id="button_visual"]
+
+[ext_resource type="Script" path="res://Scripts/UI/Rooms/RoomListItemView.cs" id="mvc_view"]
+
+[sub_resource type="StyleBoxEmpty" id="button_empty"]
+
+[node name="RoomListItem" type="Button"]
+script = ExtResource("mvc_view")
+custom_minimum_size = Vector2(0, 72)
+toggle_mode = true
+texture_filter = 1
+theme = ExtResource("1_theme")
+theme_override_styles/normal = SubResource("button_empty")
+theme_override_styles/hover = SubResource("button_empty")
+theme_override_styles/pressed = SubResource("button_empty")
+theme_override_styles/disabled = SubResource("button_empty")
+theme_override_styles/focus = SubResource("button_empty")
+
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"SecondaryButtonVisual"
+script = ExtResource("button_visual")
+StyleType = &"SecondaryButton"
+
+[node name="Label" type="Label" parent="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+visible = false
+text = ""
+
+[node name="Focus" type="Panel" parent="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+visible = false
+
+[node name="Margin" type="MarginContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="Fields" type="HBoxContainer" parent="Panel/Margin"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 16
+
+[node name="RoomCodeLabel" type="Label" parent="Panel/Margin/Fields"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+custom_minimum_size = Vector2(128, 0)
+size_flags_horizontal = 3
+text = "—"
+vertical_alignment = 1
+
+[node name="PlayerCountLabel" type="Label" parent="Panel/Margin/Fields"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+custom_minimum_size = Vector2(80, 0)
+size_flags_horizontal = 3
+text = "—"
+vertical_alignment = 1
+
+[node name="StatusLabel" type="Label" parent="Panel/Margin/Fields"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+custom_minimum_size = Vector2(120, 0)
+size_flags_horizontal = 3
+text = "—"
+vertical_alignment = 1
+
+[node name="PasswordLabel" type="Label" parent="Panel/Margin/Fields"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+custom_minimum_size = Vector2(80, 0)
+size_flags_horizontal = 3
+text = "—"
+vertical_alignment = 1
+

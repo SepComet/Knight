@@ -1,0 +1,7 @@
+[gd_resource type="Resource" format=3]
+
+[resource]
+metadata/data = [
+{ "dragHoldThresholdMs": 250, "initialCoins": 1000, "maxPlayerPartySize": 4, "minPlayerPartySize": 1, "newGameCharacterId": 1001, "worldFloatTextEntity": "WorldFloatText" }
+]
+metadata/bin = "AQ5Xb3JsZEZsb2F0VGV4dAEEgPqD6YPo"

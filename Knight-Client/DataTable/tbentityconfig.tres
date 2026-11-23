@@ -1,0 +1,20 @@
+[gd_resource type="Resource" format=3]
+
+[resource]
+metadata/data = [
+{ "assetName": "ItemEntity", "tscnPath": "ItemEntity.tscn" },
+{ "assetName": "WorldFloatText", "tscnPath": "WorldFloatText.tscn" },
+{ "assetName": "ResourcePoint1", "tscnPath": "ResourcePoint/ResourcePoint1.tscn" },
+{ "assetName": "ResourcePoint2", "tscnPath": "ResourcePoint/ResourcePoint2.tscn" },
+{ "assetName": "ResourcePoint3", "tscnPath": "ResourcePoint/ResourcePoint3.tscn" },
+{ "assetName": "ResourcePoint4", "tscnPath": "ResourcePoint/ResourcePoint4.tscn" },
+{ "assetName": "ResourcePoint5", "tscnPath": "ResourcePoint/ResourcePoint5.tscn" },
+{ "assetName": "EnemyPartyLowThreat", "tscnPath": "EnemyUnit/EnemyPartyLowThreat.tscn" },
+{ "assetName": "EnemyPartyMiddleThreat", "tscnPath": "EnemyUnit/EnemyPartyMiddleThreat.tscn" },
+{ "assetName": "EnemyPartyHighThreat", "tscnPath": "EnemyUnit/EnemyPartyHighThreat.tscn" },
+{ "assetName": "CharacterLeader", "tscnPath": "Character/CharacterLeader.tscn" },
+{ "assetName": "CharacterRetinue", "tscnPath": "Character/CharacterRetinue.tscn" },
+{ "assetName": "EvacuatePoint", "tscnPath": "Map/EvacuatePoint.tscn" },
+{ "assetName": "MainCamera", "tscnPath": "Map/MainCamera.tscn" }
+]
+metadata/bin = "DgpJdGVtRW50aXR5D0l0ZW1FbnRpdHkudHNjbg5Xb3JsZEZsb2F0VGV4dBNXb3JsZEZsb2F0VGV4dC50c2NuDlJlc291cmNlUG9pbnQxIVJlc291cmNlUG9pbnQvUmVzb3VyY2VQb2ludDEudHNjbg5SZXNvdXJjZVBvaW50MiFSZXNvdXJjZVBvaW50L1Jlc291cmNlUG9pbnQyLnRzY24OUmVzb3VyY2VQb2ludDMhUmVzb3VyY2VQb2ludC9SZXNvdXJjZVBvaW50My50c2NuDlJlc291cmNlUG9pbnQ0IVJlc291cmNlUG9pbnQvUmVzb3VyY2VQb2ludDQudHNjbg5SZXNvdXJjZVBvaW50NSFSZXNvdXJjZVBvaW50L1Jlc291cmNlUG9pbnQ1LnRzY24TRW5lbXlQYXJ0eUxvd1RocmVhdCJFbmVteVVuaXQvRW5lbXlQYXJ0eUxvd1RocmVhdC50c2NuFkVuZW15UGFydHlNaWRkbGVUaHJlYXQlRW5lbXlVbml0L0VuZW15UGFydHlNaWRkbGVUaHJlYXQudHNjbhRFbmVteVBhcnR5SGlnaFRocmVhdCNFbmVteVVuaXQvRW5lbXlQYXJ0eUhpZ2hUaHJlYXQudHNjbg9DaGFyYWN0ZXJMZWFkZXIeQ2hhcmFjdGVyL0NoYXJhY3RlckxlYWRlci50c2NuEENoYXJhY3RlclJldGludWUfQ2hhcmFjdGVyL0NoYXJhY3RlclJldGludWUudHNjbg1FdmFjdWF0ZVBvaW50Fk1hcC9FdmFjdWF0ZVBvaW50LnRzY24KTWFpbkNhbWVyYRNNYXAvTWFpbkNhbWVyYS50c2Nu"

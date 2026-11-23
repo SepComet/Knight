@@ -1,0 +1,323 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Theme" path="res://Prefabs/UI/KnightUI.tres" id="1_theme"]
+
+[ext_resource type="PackedScene" path="res://Prefabs/UI/WaitingPlayerItem.tscn" id="2_item"]
+
+
+[ext_resource type="Script" path="res://Scripts/Runtime/UI/ButtonVisual.cs" id="button_visual"]
+
+[ext_resource type="Script" path="res://Scripts/UI/Rooms/WaitingRoomView.cs" id="mvc_view"]
+
+[sub_resource type="StyleBoxEmpty" id="button_empty"]
+
+[node name="WaitingRoom" type="Control"]
+script = ExtResource("mvc_view")
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture_filter = 1
+theme = ExtResource("1_theme")
+
+[node name="Background" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 48
+theme_override_constants/margin_right = 48
+theme_override_constants/margin_top = 32
+theme_override_constants/margin_bottom = 32
+
+[node name="Layout" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+
+[node name="Title" type="Label" parent="Margin/Layout"]
+theme_type_variation = &"PrimaryTitle"
+layout_mode = 2
+text = "等待房间"
+
+[node name="RoomCodeLabel" type="Label" parent="Margin/Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "房间号：------"
+
+[node name="Players" type="HBoxContainer" parent="Margin/Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 16
+size_flags_vertical = 3
+
+[node name="PlayerTemplate" parent="Margin/Layout/Players" instance=ExtResource("2_item")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[node name="Actions" type="HBoxContainer" parent="Margin/Layout"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+
+[node name="LeaveRoomButton" type="Button" parent="Margin/Layout/Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(200, 56)
+theme_override_styles/normal = SubResource("button_empty")
+theme_override_styles/hover = SubResource("button_empty")
+theme_override_styles/pressed = SubResource("button_empty")
+theme_override_styles/disabled = SubResource("button_empty")
+theme_override_styles/focus = SubResource("button_empty")
+
+[node name="Panel" type="Panel" parent="Margin/Layout/Actions/LeaveRoomButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("button_visual")
+StyleType = &"SecondaryButton"
+theme_type_variation = &"SecondaryButtonVisual"
+
+
+[node name="Shadow" type="Panel" parent="Margin/Layout/Actions/LeaveRoomButton/Panel"]
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"SecondaryButtonShadow"
+
+[node name="Label" type="Label" parent="Margin/Layout/Actions/LeaveRoomButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+text = "离开房间"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Focus" type="Panel" parent="Margin/Layout/Actions/LeaveRoomButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+visible = false
+
+[node name="Space" type="Control" parent="Margin/Layout/Actions"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ReadyButton" type="Button" parent="Margin/Layout/Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(200, 56)
+theme_override_styles/normal = SubResource("button_empty")
+theme_override_styles/hover = SubResource("button_empty")
+theme_override_styles/pressed = SubResource("button_empty")
+theme_override_styles/disabled = SubResource("button_empty")
+theme_override_styles/focus = SubResource("button_empty")
+
+[node name="Panel" type="Panel" parent="Margin/Layout/Actions/ReadyButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("button_visual")
+StyleType = &"SecondaryButton"
+theme_type_variation = &"SecondaryButtonVisual"
+
+
+[node name="Shadow" type="Panel" parent="Margin/Layout/Actions/ReadyButton/Panel"]
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"SecondaryButtonShadow"
+
+[node name="Label" type="Label" parent="Margin/Layout/Actions/ReadyButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+text = "准备"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Focus" type="Panel" parent="Margin/Layout/Actions/ReadyButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+visible = false
+
+[node name="CancelReadyButton" type="Button" parent="Margin/Layout/Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(200, 56)
+visible = false
+theme_override_styles/normal = SubResource("button_empty")
+theme_override_styles/hover = SubResource("button_empty")
+theme_override_styles/pressed = SubResource("button_empty")
+theme_override_styles/disabled = SubResource("button_empty")
+theme_override_styles/focus = SubResource("button_empty")
+
+[node name="Panel" type="Panel" parent="Margin/Layout/Actions/CancelReadyButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("button_visual")
+StyleType = &"SecondaryButton"
+theme_type_variation = &"SecondaryButtonVisual"
+
+
+[node name="Shadow" type="Panel" parent="Margin/Layout/Actions/CancelReadyButton/Panel"]
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"SecondaryButtonShadow"
+
+[node name="Label" type="Label" parent="Margin/Layout/Actions/CancelReadyButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+text = "取消准备"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Focus" type="Panel" parent="Margin/Layout/Actions/CancelReadyButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+visible = false
+
+[node name="StartGameButton" type="Button" parent="Margin/Layout/Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(200, 56)
+theme_override_styles/normal = SubResource("button_empty")
+theme_override_styles/hover = SubResource("button_empty")
+theme_override_styles/pressed = SubResource("button_empty")
+theme_override_styles/disabled = SubResource("button_empty")
+theme_override_styles/focus = SubResource("button_empty")
+
+[node name="Panel" type="Panel" parent="Margin/Layout/Actions/StartGameButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("button_visual")
+StyleType = &"SecondaryButton"
+theme_type_variation = &"SecondaryButtonVisual"
+
+
+[node name="Shadow" type="Panel" parent="Margin/Layout/Actions/StartGameButton/Panel"]
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"SecondaryButtonShadow"
+
+[node name="Label" type="Label" parent="Margin/Layout/Actions/StartGameButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+text = "开始游戏"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Focus" type="Panel" parent="Margin/Layout/Actions/StartGameButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+visible = false
+

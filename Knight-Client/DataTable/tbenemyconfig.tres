@@ -1,0 +1,7 @@
+[gd_resource type="Resource" format=3]
+
+[resource]
+metadata/data = [
+{ "actionIds": [201], "atk": 8, "icon": "敌人1", "id": 3001, "maxHp": 50, "name": "敌人1", "speed": 8 }
+]
+metadata/bin = "AYu5B+aVjOS6ujEyCAgBgMkH5pWM5Lq6MQ=="

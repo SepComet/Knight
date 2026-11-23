@@ -1,0 +1,11 @@
+[gd_resource type="Resource" format=3]
+
+[resource]
+metadata/data = [
+{ "assetName": "weapon_player", "id": 10000, "loop": false, "maxDistance": 100, "priority": 0, "spatialBlend": 0, "volume": 1 },
+{ "assetName": "weapon_enemy", "id": 10001, "loop": false, "maxDistance": 100, "priority": 0, "spatialBlend": 0, "volume": 1 },
+{ "assetName": "explosion_player", "id": 20000, "loop": false, "maxDistance": 100, "priority": 0, "spatialBlend": 0, "volume": 1 },
+{ "assetName": "explosion_enemy", "id": 20001, "loop": false, "maxDistance": 100, "priority": 0, "spatialBlend": 0, "volume": 1 },
+{ "assetName": "explosion_asteroid", "id": 20002, "loop": false, "maxDistance": 100, "priority": 0, "spatialBlend": 0, "volume": 1 }
+]
+metadata/bin = "BacQDXdlYXBvbl9wbGF5ZXIAAAAAgD8AAAAAAADIQqcRDHdlYXBvbl9lbmVteQAAAACAPwAAAAAAAMhCwE4gEGV4cGxvc2lvbl9wbGF5ZXIAAAAAgD8AAAAAAADIQsBOIQ9leHBsb3Npb25fZW5lbXkAAAAAgD8AAAAAAADIQsBOIhJleHBsb3Npb25fYXN0ZXJvaWQAAAAAgD8AAAAAAADIQg=="

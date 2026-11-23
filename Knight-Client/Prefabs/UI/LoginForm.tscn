@@ -1,0 +1,423 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Theme" path="res://Prefabs/UI/KnightUI.tres" id="1_theme"]
+[ext_resource type="Script" path="res://Scripts/Runtime/UI/ButtonVisual.cs" id="button_visual"]
+
+[ext_resource type="Script" path="res://Scripts/UI/Auth/LoginView.cs" id="view_script"]
+
+[sub_resource type="StyleBoxEmpty" id="button_empty"]
+
+[node name="LoginForm" type="Control"]
+script = ExtResource("view_script")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture_filter = 1
+theme = ExtResource("1_theme")
+
+[node name="Dimmer" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.6)
+mouse_filter = 0
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Dialog" type="PanelContainer" parent="Center"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(560, 0)
+
+[node name="Content" type="VBoxContainer" parent="Center/Dialog"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Header" type="HBoxContainer" parent="Center/Dialog/Content"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="TitleLabel" type="Label" parent="Center/Dialog/Content/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"PrimaryTitle"
+text = "登录"
+
+[node name="CloseButton" type="Button" parent="Center/Dialog/Content/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(56, 56)
+theme_override_styles/normal = SubResource("button_empty")
+theme_override_styles/hover = SubResource("button_empty")
+theme_override_styles/pressed = SubResource("button_empty")
+theme_override_styles/disabled = SubResource("button_empty")
+theme_override_styles/focus = SubResource("button_empty")
+
+
+[node name="Panel" type="Panel" parent="Center/Dialog/Content/Header/CloseButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"SecondaryButtonVisual"
+script = ExtResource("button_visual")
+StyleType = &"SecondaryButton"
+
+[node name="Shadow" type="Panel" parent="Center/Dialog/Content/Header/CloseButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+show_behind_parent = true
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
+theme_type_variation = &"SecondaryButtonShadow"
+
+[node name="Label" type="Label" parent="Center/Dialog/Content/Header/CloseButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+text = "×"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Focus" type="Panel" parent="Center/Dialog/Content/Header/CloseButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+visible = false
+
+[node name="LoginFields" type="VBoxContainer" parent="Center/Dialog/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="LoginAccountInput" type="LineEdit" parent="Center/Dialog/Content/LoginFields"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 56)
+placeholder_text = "账号"
+
+
+[node name="LoginPasswordInput" type="LineEdit" parent="Center/Dialog/Content/LoginFields"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 56)
+placeholder_text = "密码"
+secret = true
+
+
+[node name="LoginActions" type="HBoxContainer" parent="Center/Dialog/Content/LoginFields"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="LoginButton" type="Button" parent="Center/Dialog/Content/LoginFields/LoginActions"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(252, 56)
+theme_override_styles/normal = SubResource("button_empty")
+theme_override_styles/hover = SubResource("button_empty")
+theme_override_styles/pressed = SubResource("button_empty")
+theme_override_styles/disabled = SubResource("button_empty")
+theme_override_styles/focus = SubResource("button_empty")
+
+
+[node name="Panel" type="Panel" parent="Center/Dialog/Content/LoginFields/LoginActions/LoginButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"PrimaryButtonVisual"
+script = ExtResource("button_visual")
+StyleType = &"PrimaryButton"
+
+[node name="Shadow" type="Panel" parent="Center/Dialog/Content/LoginFields/LoginActions/LoginButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+show_behind_parent = true
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
+theme_type_variation = &"PrimaryButtonShadow"
+
+[node name="Label" type="Label" parent="Center/Dialog/Content/LoginFields/LoginActions/LoginButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+text = "登录"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Focus" type="Panel" parent="Center/Dialog/Content/LoginFields/LoginActions/LoginButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+visible = false
+
+[node name="SwitchToRegisterButton" type="Button" parent="Center/Dialog/Content/LoginFields/LoginActions"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(252, 56)
+theme_override_styles/normal = SubResource("button_empty")
+theme_override_styles/hover = SubResource("button_empty")
+theme_override_styles/pressed = SubResource("button_empty")
+theme_override_styles/disabled = SubResource("button_empty")
+theme_override_styles/focus = SubResource("button_empty")
+
+
+[node name="Panel" type="Panel" parent="Center/Dialog/Content/LoginFields/LoginActions/SwitchToRegisterButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"SecondaryButtonVisual"
+script = ExtResource("button_visual")
+StyleType = &"SecondaryButton"
+
+[node name="Shadow" type="Panel" parent="Center/Dialog/Content/LoginFields/LoginActions/SwitchToRegisterButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+show_behind_parent = true
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
+theme_type_variation = &"SecondaryButtonShadow"
+
+[node name="Label" type="Label" parent="Center/Dialog/Content/LoginFields/LoginActions/SwitchToRegisterButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+text = "注册账号"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Focus" type="Panel" parent="Center/Dialog/Content/LoginFields/LoginActions/SwitchToRegisterButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+visible = false
+
+[node name="RegisterFields" type="VBoxContainer" parent="Center/Dialog/Content"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="RegisterAccountInput" type="LineEdit" parent="Center/Dialog/Content/RegisterFields"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 56)
+placeholder_text = "账号"
+
+
+[node name="RegisterPasswordInput" type="LineEdit" parent="Center/Dialog/Content/RegisterFields"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 56)
+placeholder_text = "密码"
+secret = true
+
+
+[node name="ConfirmPasswordInput" type="LineEdit" parent="Center/Dialog/Content/RegisterFields"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 56)
+placeholder_text = "确认密码"
+secret = true
+
+
+[node name="RegisterActions" type="HBoxContainer" parent="Center/Dialog/Content/RegisterFields"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="RegisterButton" type="Button" parent="Center/Dialog/Content/RegisterFields/RegisterActions"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(252, 56)
+theme_override_styles/normal = SubResource("button_empty")
+theme_override_styles/hover = SubResource("button_empty")
+theme_override_styles/pressed = SubResource("button_empty")
+theme_override_styles/disabled = SubResource("button_empty")
+theme_override_styles/focus = SubResource("button_empty")
+
+
+[node name="Panel" type="Panel" parent="Center/Dialog/Content/RegisterFields/RegisterActions/RegisterButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"PrimaryButtonVisual"
+script = ExtResource("button_visual")
+StyleType = &"PrimaryButton"
+
+[node name="Shadow" type="Panel" parent="Center/Dialog/Content/RegisterFields/RegisterActions/RegisterButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+show_behind_parent = true
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
+theme_type_variation = &"PrimaryButtonShadow"
+
+[node name="Label" type="Label" parent="Center/Dialog/Content/RegisterFields/RegisterActions/RegisterButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+text = "注册"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Focus" type="Panel" parent="Center/Dialog/Content/RegisterFields/RegisterActions/RegisterButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+visible = false
+
+[node name="SwitchToLoginButton" type="Button" parent="Center/Dialog/Content/RegisterFields/RegisterActions"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(252, 56)
+theme_override_styles/normal = SubResource("button_empty")
+theme_override_styles/hover = SubResource("button_empty")
+theme_override_styles/pressed = SubResource("button_empty")
+theme_override_styles/disabled = SubResource("button_empty")
+theme_override_styles/focus = SubResource("button_empty")
+
+
+[node name="Panel" type="Panel" parent="Center/Dialog/Content/RegisterFields/RegisterActions/SwitchToLoginButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"SecondaryButtonVisual"
+script = ExtResource("button_visual")
+StyleType = &"SecondaryButton"
+
+[node name="Shadow" type="Panel" parent="Center/Dialog/Content/RegisterFields/RegisterActions/SwitchToLoginButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+show_behind_parent = true
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
+theme_type_variation = &"SecondaryButtonShadow"
+
+[node name="Label" type="Label" parent="Center/Dialog/Content/RegisterFields/RegisterActions/SwitchToLoginButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+text = "返回登录"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Focus" type="Panel" parent="Center/Dialog/Content/RegisterFields/RegisterActions/SwitchToLoginButton/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+visible = false
+
+[node name="MessageLabel" type="Label" parent="Center/Dialog/Content"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+autowrap_mode = 3
+text = ""
+

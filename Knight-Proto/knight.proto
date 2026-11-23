@@ -9,13 +9,14 @@
 //   3. MsgId 只增不改不删：新消息在所属域段末尾追加新号。
 //   4. 枚举只增不改号；proto3 首个枚举值固定为 0（默认值/占位语义）。
 //   5. 修改后运行 Knight-Tools/gen-proto.ps1 重新生成两端代码。
-//   6. 位置单位 = Unity world unit；角度单位 = 度；约定见 Docs/protocol.md §8。
+//   6. 位置单位 = 世界单位（1 单位 = 1 地面 tile，客户端按 tile 尺寸换算到 Godot 坐标）；
+//      角度单位 = 度；约定见 Docs/protocol.md §8。
 // ============================================================================
 syntax = "proto3";
 
 package knight;
 
-option csharp_namespace = "Knight.Proto";
+option csharp_namespace = "SepCore.Definition";
 // TODO(待定项): 与 Knight-Server/go.mod 的 module 路径保持一致，服务端骨架落地时修正
 option go_package = "knight-server/protogen";
 
@@ -40,6 +41,8 @@ enum MsgId {
   MSG_START_GAME = 36;       // C→S 房主开局
   MSG_ROOM_STATE_PUSH = 37;  // S→C 房间成员/状态全量广播
   MSG_GAME_START = 38;       // S→C 开局通知
+  MSG_GET_ROOM_LIST_REQ = 39;  // C→S 拉取房间列表
+  MSG_GET_ROOM_LIST_RESP = 40; // S→C 房间列表应答
 
   // —— 64~95 游戏内可靠事件 ——
   MSG_ENTITY_SPAWN = 64;     // S→C 实体生成
@@ -61,7 +64,7 @@ enum MsgId {
 // 1~31 连接与会话
 // ----------------------------------------------------------------------------
 
-// PROTO_VERSION = 2（任何改动 +1，见文件头规则 2）
+// PROTO_VERSION = 5（任何改动 +1，见文件头规则 2）
 message HandshakeReq {
   uint32 proto_version = 1;
   string token = 2;  // HTTP /api/v1/login 返回的会话令牌
@@ -92,16 +95,22 @@ enum ErrorCode {
   ERR_INVALID_REQUEST = 8;   // 当前状态下不合法的请求（兜底）
   ERR_SERVER_FULL = 9;       // 服务端会话数达上限（握手，关闭连接）
   ERR_KICKED_TIMEOUT = 10;   // 心跳超时踢出（关闭连接）
+  ERR_ROOM_PASSWORD_MISMATCH = 11;  // 加入房间：密码缺失或不匹配
 }
 
 // ----------------------------------------------------------------------------
 // 32~63 大厅与房间
 // ----------------------------------------------------------------------------
 
-message CreateRoomReq {}  // 房间号由服务端生成，经 RoomStatePush 私有下发
+// 房间号由服务端生成，经 RoomStatePush 私有下发。
+// password 可选：空 = 公开房间（凭房间号即可加入）；非空 = 加密房间，仅房间内广播可见
+message CreateRoomReq {
+  string password = 1;  // 可选房间密码，最长 32 字符，超限按 ERR_INVALID_REQUEST 处理
+}
 
 message JoinRoomReq {
   uint32 room_id = 1;
+  string password = 2;  // 目标房间设了密码时必须匹配（ERR_ROOM_PASSWORD_MISMATCH）；无密码房间忽略本字段
 }
 
 // 在房间内 = 退出房间；在大厅 = 忽略
@@ -113,6 +122,22 @@ message SetReady {
 
 // 仅房主可发；服务端校验人数下限（min_players_to_start，默认 2，开发期可配 1）
 message StartGame {}
+
+// 拉取当前房间列表（大厅阶段任意时刻可发）：返回全部非 CLOSED 房间的摘要，
+// 供客户端展示房间列表并择房加入；不泄露密码本身，仅是否加密
+message GetRoomListReq {}
+
+// 房间摘要：列表浏览用最小字段集
+message RoomSummary {
+  uint32 room_id = 1;         // 房间号
+  bool has_password = 2;      // 是否有密码（不泄露密码本身）
+  uint32 player_count = 3;    // 当前人数
+  RoomSessionState state = 4; // 房间状态；CLOSED 房间不进列表
+}
+
+message GetRoomListResp {
+  repeated RoomSummary rooms = 1;  // 按房间号升序
+}
 
 // 房间成员/状态任何变化即全量广播（含变更者本人）
 message RoomStatePush {
@@ -274,7 +299,7 @@ enum EntityAnimState {
 message EntityState {
   uint32 entity_id = 1;  // 会话内运行时实体 ID，服务端单调分配不复用
   EntityType type = 2;
-  float pos_x = 3;  // Unity world unit
+  float pos_x = 3;  // 世界单位，1 单位 = 1 地面 tile（见 Docs/protocol.md §8）
   float pos_y = 4;
   float facing = 5;  // 度；0°=+X(右)，90°=+Y(上)，逆时针
   EntityAnimState state = 6;
@@ -336,6 +361,8 @@ message Envelope {
     StartGame start_game = 24;
     RoomStatePush room_state_push = 25;
     GameStart game_start = 26;
+    GetRoomListReq get_room_list_req = 27;
+    GetRoomListResp get_room_list_resp = 28;
 
     // 64~95 游戏内可靠事件
     EntitySpawn entity_spawn = 30;

@@ -1,0 +1,26 @@
+[gd_resource type="Resource" format=3]
+
+[resource]
+metadata/data = [
+{ "UIGroupName": "Default", "allowMultiInstance": true, "assetName": "DialogForm", "id": 1, "pauseCoveredUIForm": true },
+{ "UIGroupName": "Default", "allowMultiInstance": false, "assetName": "MainMenu", "id": 100, "pauseCoveredUIForm": true },
+{ "UIGroupName": "Default", "allowMultiInstance": false, "assetName": "SettingForm", "id": 101, "pauseCoveredUIForm": true },
+{ "UIGroupName": "Default", "allowMultiInstance": false, "assetName": "AboutForm", "id": 102, "pauseCoveredUIForm": true },
+{ "UIGroupName": "Battle", "allowMultiInstance": false, "assetName": "BattleForm", "id": 103, "pauseCoveredUIForm": true },
+{ "UIGroupName": "Input", "allowMultiInstance": false, "assetName": "TouchControls", "id": 104, "pauseCoveredUIForm": false },
+{ "UIGroupName": "Battle", "allowMultiInstance": false, "assetName": "GameHUD", "id": 105, "pauseCoveredUIForm": false },
+{ "UIGroupName": "Backpack", "allowMultiInstance": false, "assetName": "RoundBackpackForm", "id": 106, "pauseCoveredUIForm": false },
+{ "UIGroupName": "Overlay", "allowMultiInstance": false, "assetName": "GameResult", "id": 107, "pauseCoveredUIForm": true },
+{ "UIGroupName": "Backpack", "allowMultiInstance": false, "assetName": "DeploymentBriefingForm", "id": 108, "pauseCoveredUIForm": false },
+{ "UIGroupName": "Backpack", "allowMultiInstance": false, "assetName": "FadeForm", "id": 109, "pauseCoveredUIForm": false },
+{ "UIGroupName": "Overlay", "allowMultiInstance": false, "assetName": "ItemDragOverlayForm", "id": 110, "pauseCoveredUIForm": false },
+{ "UIGroupName": "Default", "allowMultiInstance": false, "assetName": "HomeForm", "id": 111, "pauseCoveredUIForm": true },
+{ "UIGroupName": "Default", "allowMultiInstance": false, "assetName": "LoadoutForm", "id": 112, "pauseCoveredUIForm": true },
+{ "UIGroupName": "Default", "allowMultiInstance": false, "assetName": "WarehouseForm", "id": 113, "pauseCoveredUIForm": true },
+{ "UIGroupName": "Default", "allowMultiInstance": false, "assetName": "ShopForm", "id": 114, "pauseCoveredUIForm": true },
+{ "UIGroupName": "NetworkStatus", "allowMultiInstance": false, "assetName": "NetworkStatusForm", "id": 115, "pauseCoveredUIForm": false },
+{ "UIGroupName": "Default", "allowMultiInstance": false, "assetName": "LoginForm", "id": 116, "pauseCoveredUIForm": true },
+{ "UIGroupName": "Default", "allowMultiInstance": false, "assetName": "RoomSelection", "id": 117, "pauseCoveredUIForm": true },
+{ "UIGroupName": "Default", "allowMultiInstance": false, "assetName": "WaitingRoom", "id": 118, "pauseCoveredUIForm": true }
+]
+metadata/bin = "FAEKRGlhbG9nRm9ybQdEZWZhdWx0AQFkCE1haW5NZW51B0RlZmF1bHQAAWULU2V0dGluZ0Zvcm0HRGVmYXVsdAABZglBYm91dEZvcm0HRGVmYXVsdAABZwpCYXR0bGVGb3JtBkJhdHRsZQABaA1Ub3VjaENvbnRyb2xzBUlucHV0AABpB0dhbWVIVUQGQmF0dGxlAABqEVJvdW5kQmFja3BhY2tGb3JtCEJhY2twYWNrAABrCkdhbWVSZXN1bHQHT3ZlcmxheQABbBZEZXBsb3ltZW50QnJpZWZpbmdGb3JtCEJhY2twYWNrAABtCEZhZGVGb3JtCEJhY2twYWNrAABuE0l0ZW1EcmFnT3ZlcmxheUZvcm0HT3ZlcmxheQAAbwhIb21lRm9ybQdEZWZhdWx0AAFwC0xvYWRvdXRGb3JtB0RlZmF1bHQAAXENV2FyZWhvdXNlRm9ybQdEZWZhdWx0AAFyCFNob3BGb3JtB0RlZmF1bHQAAXMRTmV0d29ya1N0YXR1c0Zvcm0NTmV0d29ya1N0YXR1cwAAdAlMb2dpbkZvcm0HRGVmYXVsdAABdQ1Sb29tU2VsZWN0aW9uB0RlZmF1bHQAAXYLV2FpdGluZ1Jvb20HRGVmYXVsdAAB"

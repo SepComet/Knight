@@ -1,0 +1,18 @@
+[gd_resource type="Resource" format=3]
+
+[resource]
+metadata/data = [
+{ "atlasPath": "Characters.png", "key": "角色1", "spriteIndex": 0 },
+{ "atlasPath": "Monsters.png", "key": "敌人1", "spriteIndex": 0 },
+{ "atlasPath": "Items.png", "key": "短剑", "spriteIndex": 1440 },
+{ "atlasPath": "Items.png", "key": "菜刀", "spriteIndex": 1441 },
+{ "atlasPath": "Items.png", "key": "阔剑", "spriteIndex": 1448 },
+{ "atlasPath": "Items.png", "key": "小法杖", "spriteIndex": 1488 },
+{ "atlasPath": "Items.png", "key": "中法杖", "spriteIndex": 1489 },
+{ "atlasPath": "Items.png", "key": "大法杖", "spriteIndex": 1490 },
+{ "atlasPath": "Items.png", "key": "生命小药", "spriteIndex": 272 },
+{ "atlasPath": "Items.png", "key": "生命大药", "spriteIndex": 273 },
+{ "atlasPath": "Items.png", "key": "魔力小药", "spriteIndex": 275 },
+{ "atlasPath": "Items.png", "key": "魔力大药", "spriteIndex": 276 }
+]
+metadata/bin = "DAfop5LoibIxDkNoYXJhY3RlcnMucG5nAAfmlYzkuroxDE1vbnN0ZXJzLnBuZwAG55+t5YmRCUl0ZW1zLnBuZ4WgBuiPnOWIgAlJdGVtcy5wbmeFoQbpmJTliZEJSXRlbXMucG5nhagJ5bCP5rOV5p2WCUl0ZW1zLnBuZ4XQCeS4reazleadlglJdGVtcy5wbmeF0QnlpKfms5XmnZYJSXRlbXMucG5nhdIM55Sf5ZG95bCP6I2vCUl0ZW1zLnBuZ4EQDOeUn+WRveWkp+iNrwlJdGVtcy5wbmeBEQzprZTlipvlsI/oja8JSXRlbXMucG5ngRMM6a2U5Yqb5aSn6I2vCUl0ZW1zLnBuZ4EU"

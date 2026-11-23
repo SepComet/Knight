@@ -1,0 +1,40 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Gameplay/Player/PlayerMotor.cs" id="motor"]
+[ext_resource type="Script" path="res://Scripts/Gameplay/Player/PlayerPresentation.cs" id="view"]
+[ext_resource type="Texture2D" path="res://Textures/Ninja Adventure - Asset Pack/Actor/Character/Knight/SeparateAnim/Idle.png" id="idle"]
+[ext_resource type="Texture2D" path="res://Textures/Ninja Adventure - Asset Pack/Actor/Character/Knight/SeparateAnim/Walk.png" id="walk"]
+[ext_resource type="Texture2D" path="res://Textures/Ninja Adventure - Asset Pack/Actor/Character/Knight/SeparateAnim/Dead.png" id="dead"]
+[ext_resource type="Script" path="res://Scripts/Gameplay/Player/LocalPlayerInput.cs" id="input"]
+
+[sub_resource type="CircleShape2D" id="shape"]
+radius = 5.0
+
+[node name="Player" type="CharacterBody2D"]
+texture_filter = 1
+script = ExtResource("motor")
+motion_mode = 1
+collision_layer = 2
+collision_mask = 1
+physics_interpolation_mode = 1
+
+[node name="Collision" type="CollisionShape2D" parent="."]
+shape = SubResource("shape")
+
+[node name="Presentation" type="Node2D" parent="." node_paths=PackedStringArray("Motor")]
+script = ExtResource("view")
+Motor = NodePath("..")
+IdleTexture = ExtResource("idle")
+WalkTexture = ExtResource("walk")
+DeadTexture = ExtResource("dead")
+
+[node name="BodySprite" type="Sprite2D" parent="Presentation"]
+unique_name_in_owner = true
+position = Vector2(0, -5)
+texture = ExtResource("idle")
+hframes = 4
+
+[node name="LocalInput" type="Node" parent="." node_paths=PackedStringArray("Motor")]
+unique_name_in_owner = true
+script = ExtResource("input")
+Motor = NodePath("..")

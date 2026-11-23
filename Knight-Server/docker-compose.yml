@@ -1,0 +1,49 @@
+# Knight 服务端：app + MySQL
+# 用法：docker compose up --build
+services:
+  mysql:
+    image: mysql:8.4
+    # 与 server 一致的自愈策略：Docker/宿主机重启后 mysql 不再缺位，
+    # 否则 server 会陷入 "lookup mysql no such host" 的崩溃重启循环（HTTP 不监听，客户端报无法连接）
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: knight-root
+      MYSQL_DATABASE: knight
+      MYSQL_USER: knight
+      MYSQL_PASSWORD: knight
+    ports:
+      - "3306:3306" # 开发期暴露宿主机，便于客户端调试；生产可去掉
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uknight", "-pknight"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  server:
+    build: .
+    environment:
+      KNIGHT_HTTP_PORT: "37780"
+      KNIGHT_KCP_PORT: "37777"
+      KNIGHT_MYSQL_HOST: mysql
+      KNIGHT_MYSQL_PORT: "3306"
+      KNIGHT_MYSQL_USER: knight
+      KNIGHT_MYSQL_PASSWORD: knight
+      KNIGHT_MYSQL_DB: knight
+      # 雪花 ID worker（0~1023）；多实例部署时各实例必须不同
+      KNIGHT_SNOWFLAKE_WORKER_ID: "0"
+      # 固定步长模拟频率（1~120，默认 30；Docs/server-tick-loop.md）
+      KNIGHT_TICK_RATE: "30"
+      # 仅当登录链路不可用时临时打开（接受任意非空 token）；正常流程用真实 token
+      # KNIGHT_DEV_TOKEN_BYPASS: "1"
+    ports:
+      - "37780:37780"
+      - "37777:37777/udp"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  mysql-data:
