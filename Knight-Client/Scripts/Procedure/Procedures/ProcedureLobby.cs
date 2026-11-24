@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using SepCore.Definition;
 using SepCore.Runtime.Fsm;
 using SepCore.Runtime.UI;
 using SepCore.UI;
@@ -13,26 +14,55 @@ namespace SepCore.Procedure;
 /// </summary>
 public sealed class ProcedureLobby : ProcedureBase
 {
+    private Fsm<ProcedureComponent>? _fsm;
+
     public override void OnEnter(Fsm<ProcedureComponent> fsm)
     {
+        _fsm = fsm;
         var ui = UIComponent.Instance
             ?? throw new InvalidOperationException("UIComponent 未就绪,无法进入大厅流程");
         var app = UiApplication.Ensure(ui);
         app.QuitRequested += OnQuitRequested;
+        app.GameStarted += OnGameStarted;
         app.EnterLobby();
         Godot.GD.Print("[Procedure] 进入大厅流程");
     }
 
     public override void OnExit(Fsm<ProcedureComponent> fsm)
     {
+        _fsm = null;
         var ui = UIComponent.Instance;
         var app = ui?.GetNodeOrNull<UiApplication>("UiApplication");
         if (app != null)
         {
             app.QuitRequested -= OnQuitRequested;
+            app.GameStarted -= OnGameStarted;
             app.LeaveLobby();
         }
         ui?.CloseAll();
+    }
+
+    private void OnGameStarted(GameStart gameStart)
+    {
+        if (_fsm == null)
+            return;
+
+        var ctx = _fsm.Owner.Context;
+        ctx.PendingRoomClosed = false;
+        ctx.PendingTransitionDisconnectReason = null;
+        ctx.PendingGameStart = gameStart.Clone();
+        ctx.RoomMemberNames.Clear();
+
+        var app = UIComponent.Instance?.GetNodeOrNull<UiApplication>("UiApplication");
+        if (app != null)
+        {
+            foreach (var kv in app.GetRoomMemberNames())
+                ctx.RoomMemberNames[kv.Key] = kv.Value;
+        }
+
+        ctx.NextScene = SceneType.Main;
+        ctx.NextProcedure = typeof(ProcedureBattle);
+        _fsm.ChangeState<ProcedureChangeScene>();
     }
 
     private static void OnQuitRequested()

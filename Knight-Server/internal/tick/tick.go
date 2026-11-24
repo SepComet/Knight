@@ -51,9 +51,12 @@ type Runner struct {
 	closeOnce sync.Once
 
 	mu      sync.Mutex
-	stopped bool // 置位后提交为空操作；由 Stop 与 Run 退出路径幂等置位
+	stopped bool          // 置位后提交为空操作；由 Stop 与 Run 退出路径幂等置位
+	runDone chan struct{} // Run 运行期间非 nil，Run 完全退出后关闭；供 Stop 同步等待
 
-	units []Tickable // 仅在模拟 goroutine 上读写（ops 操作与 tickOnce）
+	units           []Tickable // 仅在模拟 goroutine 上读写（ops 操作与 tickOnce）
+	inStep          bool       // 仅在模拟 goroutine 上读写：stepUnits 遍历期间置位
+	pendingRemovals []Tickable // 仅在模拟 goroutine 上读写：stepUnits 期间的延迟移除队列
 }
 
 // NewRunner 构造并校验配置。
@@ -76,7 +79,20 @@ func (r *Runner) Dt() time.Duration { return r.dt }
 // Run 真实时钟模式：按 1/rate 周期步进，ctx 取消或 Stop 后返回。
 // 固定 dt 不追帧：处理超时时 time.Ticker 自行丢拍，模拟时间落后于墙钟。
 func (r *Runner) Run(ctx context.Context) {
-	defer r.markStopped()
+	r.mu.Lock()
+	if r.stopped {
+		r.mu.Unlock()
+		return
+	}
+	done := make(chan struct{})
+	r.runDone = done
+	r.mu.Unlock()
+
+	defer func() {
+		r.markStopped()
+		close(done)
+	}()
+
 	ticker := time.NewTicker(r.dt)
 	defer ticker.Stop()
 	for {
@@ -104,8 +120,18 @@ func (r *Runner) Step(steps int) {
 	}
 }
 
-// Stop 请求退出 Run（幂等；未在 Run 时调用则此后提交均为空操作）。
-func (r *Runner) Stop() { r.markStopped() }
+// Stop 请求退出 Run 并等待正在执行的 tickOnce 与 Run 完全退出（幂等；
+// 未在 Run 时调用则立即返回，此后提交均为空操作）。
+func (r *Runner) Stop() {
+	r.mu.Lock()
+	r.stopped = true
+	done := r.runDone
+	r.mu.Unlock()
+	r.closeOnce.Do(func() { close(r.stopCh) })
+	if done != nil {
+		<-done
+	}
+}
 
 // markStopped 幂等置停：置位提交闸门并关闭 stopCh（唤醒可能阻塞的提交方）。
 func (r *Runner) markStopped() {
@@ -121,15 +147,32 @@ func (r *Runner) markStopped() {
 func (r *Runner) Add(t Tickable) { r.submit(func() { r.units = append(r.units, t) }) }
 
 // Remove 注销模拟单元：同一 tick 内不再调用；不存在时为幂等空操作。
+// 跨 goroutine 调用安全；若已在模拟 goroutine（Post 回调或 Tick 方法）内，请改用 RemoveNow 避免向自身 ops 通道投递死锁。
 func (r *Runner) Remove(t Tickable) {
 	r.submit(func() {
-		for i, u := range r.units {
-			if u == t {
-				r.units = append(r.units[:i], r.units[i+1:]...)
-				return
-			}
-		}
+		r.removeUnit(t)
 	})
+}
+
+// RemoveNow 在模拟 goroutine 内部（Post 回调或 Tick 方法内）同步注销模拟单元，
+// 不经 ops 通道，从根本上避免消费者自投递满队列死锁。禁止从模拟 goroutine 以外调用。
+func (r *Runner) RemoveNow(t Tickable) {
+	if r.inStep {
+		r.pendingRemovals = append(r.pendingRemovals, t)
+		return
+	}
+	r.removeUnit(t)
+}
+
+func (r *Runner) removeUnit(t Tickable) {
+	for i, u := range r.units {
+		if u == t {
+			copy(r.units[i:], r.units[i+1:])
+			r.units[len(r.units)-1] = nil
+			r.units = r.units[:len(r.units)-1]
+			return
+		}
+	}
 }
 
 // Post 提交一次性任务（输入投递等），在下一个 tick 边界、单元 Tick 之前执行。
@@ -172,9 +215,30 @@ func (r *Runner) tickOnce() {
 // stepUnits 按注册顺序派发，逐单元 recover：单个对局的缺陷不拖垮时间轴，
 // 进程级 fail-fast 边界不变（循环骨架本身无 recover）。
 func (r *Runner) stepUnits() {
+	r.inStep = true
 	for _, u := range r.units {
+		if r.isPendingRemoval(u) {
+			continue
+		}
 		r.callUnit(u)
 	}
+	r.inStep = false
+	if len(r.pendingRemovals) > 0 {
+		for _, t := range r.pendingRemovals {
+			r.removeUnit(t)
+		}
+		clear(r.pendingRemovals)
+		r.pendingRemovals = r.pendingRemovals[:0]
+	}
+}
+
+func (r *Runner) isPendingRemoval(t Tickable) bool {
+	for _, p := range r.pendingRemovals {
+		if p == t {
+			return true
+		}
+	}
+	return false
 }
 
 func (r *Runner) callUnit(u Tickable) {

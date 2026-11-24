@@ -92,3 +92,23 @@ type GameStartedArgs struct {
 	MapIDs     []uint32
 	PlayerUIDs []uint64
 }
+
+// ---- 游戏域（world.Manager 发布）----
+
+var (
+	// GameEnded 对局结束或战斗房间关闭（空房/结算），供大厅清理房间与成员索引。
+	GameEnded = Declare[GameEndedArgs]("world.game_ended")
+)
+
+// GameEnded 的 Reason 取值。
+const (
+	GameEndEmpty   = "empty"   // 全部玩家离开，战斗房间空置关闭
+	GameEndVictory = "victory" // Boss 被击败
+	GameEndDefeat  = "defeat"  // 全员被击败
+)
+
+// GameEndedArgs 是 GameEnded 的 payload。
+type GameEndedArgs struct {
+	RoomID uint32
+	Reason string // GameEnd* 常量之一
+}

@@ -48,12 +48,13 @@ const (
 )
 
 type sess struct {
-	connID     string
-	uid        uint64
-	name       string
-	state      sessState
-	endReason  string // SessionEnd 的 Reason；创建时为 disconnect，拒绝/超时路径覆写
-	lastPacket time.Time
+	connID          string
+	uid             uint64
+	name            string
+	state           sessState
+	endReason       string // SessionEnd 的 Reason；创建时为 disconnect，拒绝/超时路径覆写
+	lastPacket      time.Time
+	disconnectTimer *time.Timer
 }
 
 // Manager 会话管理器。生命周期事件在 gate goroutine 上发布；
@@ -65,6 +66,7 @@ type Manager struct {
 	bus    *event.Bus
 
 	mu     sync.Mutex
+	closed bool
 	router Router
 
 	sessions map[string]*sess  // connID → 会话
@@ -110,6 +112,10 @@ func (m *Manager) OnKcpDisconnect(connID string) {
 	m.mu.Lock()
 	s, ok := m.sessions[connID]
 	if ok {
+		if s.disconnectTimer != nil {
+			s.disconnectTimer.Stop()
+			s.disconnectTimer = nil
+		}
 		delete(m.sessions, connID)
 		if s.uid != 0 && m.byUID[s.uid] == connID {
 			delete(m.byUID, s.uid)
@@ -239,6 +245,11 @@ func (m *Manager) SendToUID(uid uint64, data []byte, channel kcp2k.Channel) bool
 	return true
 }
 
+// Reject 业务层发现协议违规（如 InputBatch 超限）时调用：下发错误并延迟关闭连接。
+func (m *Manager) Reject(connID string, code knight.ErrorCode, message string) {
+	m.reject(connID, code, message, event.SessionEndRejected)
+}
+
 // reject 应答 Error 消息。endReason 为空 = 业务可恢复错误，不断开；
 // 非空 = 结束性拒绝：记录会话结束原因并延迟断开连接。
 func (m *Manager) reject(connID string, code knight.ErrorCode, message, endReason string) {
@@ -257,11 +268,34 @@ func (m *Manager) reject(connID string, code knight.ErrorCode, message, endReaso
 		if delay == 0 {
 			delay = 500 * time.Millisecond
 		}
-		// 延迟断开：给可靠错误消息留出送达时间（客户端收到 Error 会自行断开）
-		time.AfterFunc(delay, func() {
-			m.gate.Disconnect(connID)
-		})
+		// 延迟断开：给可靠错误消息留出送达时间（客户端收到 Error 会自行断开）。
+		// 挂载到会话上以便 OnKcpDisconnect / Close 提前取消，避免停机后残留定时器。
+		m.mu.Lock()
+		if !m.closed {
+			if s, ok := m.sessions[connID]; ok {
+				if s.disconnectTimer != nil {
+					s.disconnectTimer.Stop()
+				}
+				s.disconnectTimer = time.AfterFunc(delay, func() {
+					m.gate.Disconnect(connID)
+				})
+			}
+		}
+		m.mu.Unlock()
 	}
+}
+
+// Close 停止所有挂起的延迟断开定时器，供优雅停机时调用（幂等）。
+func (m *Manager) Close() {
+	m.mu.Lock()
+	m.closed = true
+	for _, s := range m.sessions {
+		if s.disconnectTimer != nil {
+			s.disconnectTimer.Stop()
+			s.disconnectTimer = nil
+		}
+	}
+	m.mu.Unlock()
 }
 
 // ---------------------------------------------------------------- 超时

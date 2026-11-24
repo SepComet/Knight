@@ -4,10 +4,18 @@ import (
 	"encoding/xml"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
 )
+
+func pingArgs(count string) []string {
+	if runtime.GOOS == "windows" {
+		return []string{"-n", count, "127.0.0.1"}
+	}
+	return []string{"-c", count, "127.0.0.1"}
+}
 
 // runProcessCapture 的「结果即收工」路径：
 // doneFile 出现后宽限窗口内进程自然退出 → 不算提前收工；
@@ -24,7 +32,7 @@ func TestRunProcessCaptureEarlyReap(t *testing.T) {
 		_ = os.WriteFile(doneFile, []byte("<dummy/>"), 0o644)
 	}()
 	start := time.Now()
-	_, exitCode, runErr, earlyReap := runProcessCapture("ping", []string{"-n", "60", "127.0.0.1"}, 60, doneFile, 1)
+	_, exitCode, runErr, earlyReap := runProcessCapture("ping", pingArgs("60"), 60, doneFile, 1)
 	elapsed := time.Since(start)
 	if runErr != nil {
 		t.Fatalf("case1 runErr = %v", runErr)
@@ -39,7 +47,7 @@ func TestRunProcessCaptureEarlyReap(t *testing.T) {
 
 	// 用例 2：doneFile 出现前进程已自然退出 → earlyReap=false，正常返回。
 	_ = os.Remove(doneFile)
-	_, _, runErr2, earlyReap2 := runProcessCapture("ping", []string{"-n", "1", "127.0.0.1"}, 60, doneFile, 1)
+	_, _, runErr2, earlyReap2 := runProcessCapture("ping", pingArgs("1"), 60, doneFile, 1)
 	if runErr2 != nil {
 		t.Fatalf("case2 runErr = %v", runErr2)
 	}

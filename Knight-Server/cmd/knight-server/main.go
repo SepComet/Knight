@@ -25,6 +25,7 @@ import (
 	"knight-server/internal/snowflake"
 	"knight-server/internal/store"
 	"knight-server/internal/tick"
+	"knight-server/internal/world"
 )
 
 func main() {
@@ -105,9 +106,15 @@ func main() {
 		MaxRooms:   cfg.MaxRooms,
 	}, gate, mgr, bus)
 
-	// ---- 域级 Router（域段见 knight.proto MsgId 分配表；64~127 游戏域随落地追加）----
+	// ---- 战斗世界（游戏域 64~127）----
+	worldMgr := world.NewManager(world.Config{
+		TickRate: cfg.TickRate,
+	}, runner, mgr, mgr, bus)
+
+	// ---- 域级 Router（域段见 knight.proto MsgId 分配表）----
 	mgr.SetRouter(session.NewDomainRouter(gate,
 		session.DomainRoute{Min: 32, Max: 63, Router: lobbyMgr},
+		session.DomainRoute{Min: 64, Max: 127, Router: worldMgr},
 	))
 
 	// 心跳超时巡检
@@ -154,6 +161,7 @@ func main() {
 		}
 		// 先停模拟循环再关传输：对局可能还在经 gate 发包，传输层最后关
 		runner.Stop()
+		mgr.Close()
 		gate.Stop()
 	}
 }

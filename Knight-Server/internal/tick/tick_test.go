@@ -270,3 +270,121 @@ func (h *captureHandler) Handle(_ context.Context, rec slog.Record) error {
 func (h *captureHandler) WithAttrs([]slog.Attr) slog.Handler { return h }
 
 func (h *captureHandler) WithGroup(string) slog.Handler { return h }
+
+// TestRemoveNowInsidePostWithFullOpsNoDeadlock 验证在 ops 满载时从 Post 回调内调用 RemoveNow 不会自投递死锁（P1-2）。
+func TestRemoveNowInsidePostWithFullOpsNoDeadlock(t *testing.T) {
+	r := newRunner(t, 30)
+	u := &recUnit{name: "target"}
+	r.Add(u)
+	r.Step(1)
+	if len(u.dts) != 1 {
+		t.Fatalf("u ticks = %d, want 1", len(u.dts))
+	}
+
+	// 第 1 条 Post 调用 RemoveNow，随后把 ops 通道（容量 1024）完全填满
+	r.Post(func() {
+		r.RemoveNow(u)
+	})
+	for i := 0; i < 1023; i++ {
+		r.Post(func() {})
+	}
+
+	done := make(chan struct{})
+	go func() {
+		r.Step(1)
+		close(done)
+	}()
+
+	select {
+	case <-done:
+	case <-time.After(2 * time.Second):
+		t.Fatal("RemoveNow inside Post deadlocked when ops channel was full")
+	}
+
+	if len(u.dts) != 1 {
+		t.Fatalf("removed unit should not tick again: ticks = %d, want 1", len(u.dts))
+	}
+}
+
+type removeNowUnit struct {
+	runner  *tick.Runner
+	targets []tick.Tickable
+	ticks   int
+}
+
+func (u *removeNowUnit) Tick(time.Duration) {
+	u.ticks++
+	for _, target := range u.targets {
+		u.runner.RemoveNow(target)
+	}
+}
+
+// TestRemoveNowInsideTickDoesNotSkipNextUnit 验证在 Tick 执行期间调用 RemoveNow 不会破坏遍历顺序。
+func TestRemoveNowInsideTickDoesNotSkipNextUnit(t *testing.T) {
+	r := newRunner(t, 30)
+	u2 := &recUnit{name: "u2"}
+	u3 := &recUnit{name: "u3"}
+	u1 := &removeNowUnit{runner: r}
+	u1.targets = []tick.Tickable{u1, u2}
+
+	r.Add(u1)
+	r.Add(u2)
+	r.Add(u3)
+
+	r.Step(1)
+	if u1.ticks != 1 || len(u2.dts) != 0 || len(u3.dts) != 1 {
+		t.Fatalf("after step 1: u1=%d u2=%d u3=%d, want 1/0/1", u1.ticks, len(u2.dts), len(u3.dts))
+	}
+
+	r.Step(1)
+	if u1.ticks != 1 || len(u2.dts) != 0 || len(u3.dts) != 2 {
+		t.Fatalf("after step 2: u1=%d u2=%d u3=%d, want 1/0/2", u1.ticks, len(u2.dts), len(u3.dts))
+	}
+}
+
+type blockingUnit struct {
+	started  chan struct{}
+	finished chan struct{}
+	sleep    time.Duration
+}
+
+func (u *blockingUnit) Tick(time.Duration) {
+	select {
+	case <-u.started:
+	default:
+		close(u.started)
+	}
+	time.Sleep(u.sleep)
+	select {
+	case <-u.finished:
+	default:
+		close(u.finished)
+	}
+}
+
+// TestStopWaitsForInFlightTick 验证 Runner.Stop 会等待正在执行的 tickOnce 完全结束后再返回（P1-3）。
+func TestStopWaitsForInFlightTick(t *testing.T) {
+	r := newRunner(t, 100) // dt = 10ms
+	u := &blockingUnit{
+		started:  make(chan struct{}),
+		finished: make(chan struct{}),
+		sleep:    40 * time.Millisecond,
+	}
+	r.Add(u)
+
+	go r.Run(context.Background())
+
+	select {
+	case <-u.started:
+	case <-time.After(2 * time.Second):
+		t.Fatal("unit did not start ticking")
+	}
+
+	r.Stop()
+
+	select {
+	case <-u.finished:
+	default:
+		t.Fatal("Runner.Stop returned before in-flight Tick finished")
+	}
+}

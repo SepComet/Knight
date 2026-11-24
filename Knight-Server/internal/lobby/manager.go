@@ -6,7 +6,8 @@
 //   - 单房最多 MaxPlayers 人；开局后禁止加入
 //   - 房主才有开始权限，人数 ≥ MinPlayers 才能开局
 //   - 房主退出 → 最早加入者继任；房间空 → 销毁
-//   - 对局中（RUNNING）成员离开：本阶段按退房广播处理，PlayerLeft 语义随游戏轮次落地
+//   - 对局中（RUNNING）成员离开：不再广播 RoomStatePush（游戏内由 world 广播 PlayerLeft）；
+//     对局结束/关闭时经 event.GameEnded 统一清理房间与成员索引并下发 ROOM_CLOSED
 package lobby
 
 import (
@@ -128,6 +129,9 @@ func NewManager(cfg Config, gate Sender, uidSender UIDSender, bus *event.Bus) *M
 	event.Subscribe(bus, event.SessionEnd, func(args event.SessionEndArgs) {
 		m.onSessionEnd(args.UID)
 	})
+	event.Subscribe(bus, event.GameEnded, func(args event.GameEndedArgs) {
+		m.onGameEnded(args.RoomID)
+	})
 	return m
 }
 
@@ -177,6 +181,31 @@ func (m *Manager) onSessionEnd(uid uint64) {
 	for _, p := range pending {
 		p()
 	}
+}
+
+// onGameEnded 响应游戏域对局结束/房间关闭：清理 rooms 与 roomOf 索引，
+// 若仍有在场成员则下发 RoomStatePush{ROOM_CLOSED}（protocol.md §6.3），避免玩家被锁死在旧房间。
+func (m *Manager) onGameEnded(roomID uint32) {
+	m.mu.Lock()
+	room, ok := m.rooms[roomID]
+	if !ok {
+		m.mu.Unlock()
+		return
+	}
+	delete(m.rooms, roomID)
+	for _, mem := range room.members {
+		if m.roomOf[mem.UID] == roomID {
+			delete(m.roomOf, mem.UID)
+		}
+	}
+	room.State = knight.RoomSessionState_ROOM_CLOSED
+	m.mu.Unlock()
+
+	if len(room.members) > 0 {
+		m.broadcast(room)
+	}
+	log.Printf("[lobby] room %d closed (game ended)", roomID)
+	event.Publish(m.bus, event.RoomDestroyed, event.RoomDestroyedArgs{RoomID: roomID})
 }
 
 // ---------------------------------------------------------------- 房间操作
@@ -283,7 +312,11 @@ func (m *Manager) leave(uid uint64, reason string) []func() {
 			event.Publish(m.bus, event.OwnerChanged, event.OwnerChangedArgs{RoomID: roomID, FromUID: uid, ToUID: toUID})
 		})
 	}
-	m.broadcast(room)
+	// 仅在 ROOM_WAITING 阶段广播成员变化 RoomStatePush；
+	// ROOM_RUNNING 期间由 world 广播 PlayerLeft，大厅不再发 RoomStatePush（protocol.md §5.6）。
+	if room.State == knight.RoomSessionState_ROOM_WAITING {
+		m.broadcast(room)
+	}
 	return pending
 }
 

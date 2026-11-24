@@ -13,7 +13,7 @@ namespace SepCore.UI.Rooms;
 public sealed class RoomSessionClient : IDisposable
 {
     private readonly INetworkMessageClient _network;
-    private readonly IDisposable _stateSubscription, _errorSubscription, _listSubscription;
+    private readonly IDisposable _stateSubscription, _errorSubscription, _listSubscription, _gameStartSubscription;
     private RoomPasswordMode? _pending;
     private uint _target;
     private float _elapsed;
@@ -23,6 +23,7 @@ public sealed class RoomSessionClient : IDisposable
     public event Action? StateChanged;
     public event Action<RoomStatePush>? RoomChanged;
     public event Action? RoomLeft;
+    public event Action<GameStart>? GameStarted;
     public event Action<string>? Failed;
     public event Action<IReadOnlyList<RoomSummary>>? RoomsListed;
 
@@ -32,6 +33,7 @@ public sealed class RoomSessionClient : IDisposable
         _stateSubscription = network.Subscribe<RoomStatePush>(OnRoom);
         _errorSubscription = network.Subscribe<ProtocolError>(OnError);
         _listSubscription = network.Subscribe<GetRoomListResp>(OnList);
+        _gameStartSubscription = network.Subscribe<GameStart>(OnGameStart);
         network.Disconnected += OnDisconnected;
     }
 
@@ -113,6 +115,25 @@ public sealed class RoomSessionClient : IDisposable
         RoomLeft?.Invoke();
     }
 
+    public void SetReady(bool ready)
+    {
+        if (IsBusy || Room == null || _network.State != NetworkState.Connected) return;
+        try { _network.Send(new SetReady { Ready = ready }); }
+        catch (InvalidOperationException) { Failed?.Invoke("连接状态已变化，请重试"); }
+    }
+
+    public void StartGame()
+    {
+        if (IsBusy || Room == null || Room.OwnerUid != _network.Uid || _network.State != NetworkState.Connected) return;
+        try { _network.Send(new StartGame()); }
+        catch (InvalidOperationException) { Failed?.Invoke("连接状态已变化，请重试"); }
+    }
+
+    private void OnGameStart(GameStart gameStart)
+    {
+        GameStarted?.Invoke(gameStart.Clone());
+    }
+
     private void OnRoom(RoomStatePush push)
     {
         var containsLocal = push.Members.Any(member => member.Uid == _network.Uid);
@@ -172,6 +193,7 @@ public sealed class RoomSessionClient : IDisposable
         _stateSubscription.Dispose();
         _errorSubscription.Dispose();
         _listSubscription.Dispose();
+        _gameStartSubscription.Dispose();
         _network.Disconnected -= OnDisconnected;
     }
 }

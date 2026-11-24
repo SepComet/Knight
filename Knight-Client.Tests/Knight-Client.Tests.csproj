@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
+    <RollForward>Major</RollForward>
     <RootNamespace>SepCore.Tests</RootNamespace>
     <IsPackable>false</IsPackable>
   </PropertyGroup>

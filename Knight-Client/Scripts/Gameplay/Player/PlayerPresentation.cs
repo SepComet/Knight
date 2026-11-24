@@ -26,7 +26,7 @@ public partial class PlayerPresentation : Node2D
             _walkTime = 0;
             return;
         }
-        var walking = !Motor.LastMovement.IsZeroApprox();
+        var walking = Motor.IsMoving;
         _walkTime = walking ? _walkTime + delta : 0;
         var facing = Vector2.FromAngle(Motor.FacingRadians);
         var direction = Mathf.Abs(facing.X) > Mathf.Abs(facing.Y)

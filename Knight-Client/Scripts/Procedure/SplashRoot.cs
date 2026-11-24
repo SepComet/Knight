@@ -21,7 +21,12 @@ public partial class SplashRoot : Control
             ?? throw new InvalidOperationException("ProcedureComponent 未注册为 autoload,无法启动流程");
 
         flow.ProcedureChanged += OnProcedureChanged;
-        flow.Run(new ProcedureLaunch(), new ProcedureLoading(), new ProcedureChangeScene(), new ProcedureLobby());
+        flow.Run(
+            new ProcedureLaunch(),
+            new ProcedureLoading(),
+            new ProcedureChangeScene(),
+            new ProcedureLobby(),
+            new ProcedureBattle());
     }
 
     public override void _ExitTree()

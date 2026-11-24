@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Battle/BattleWorld.cs" id="1"]
+[ext_resource type="Script" path="res://Scripts/Gameplay/Player/PlayerCamera.cs" id="2"]
+
+[node name="BattleWorld" type="Node2D"]
+script = ExtResource("1")
+
+[node name="WallsRoot" type="Node2D" parent="."]
+unique_name_in_owner = true
+
+[node name="EntitiesRoot" type="Node2D" parent="."]
+unique_name_in_owner = true
+
+[node name="PlayerCamera" type="Camera2D" parent="."]
+unique_name_in_owner = true
+zoom = Vector2(1.5, 1.5)
+script = ExtResource("2")

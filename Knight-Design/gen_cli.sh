@@ -78,13 +78,18 @@ dotnet "$LUBAN_DLL" \
     -x "cleanUpOutputDir=false"
 
 # Convert exported json tables to Godot .tres resources (json is removed afterwards).
-KNIGHT_MCP_EXE="$PROJECT_ROOT/Knight-Tools/knight-dev-mcp/bin/knight-dev-mcp.exe"
-if [[ -x "$KNIGHT_MCP_EXE" ]]; then
+KNIGHT_MCP_EXE=""
+if [[ -x "$PROJECT_ROOT/Knight-Tools/knight-dev-mcp/bin/knight-dev-mcp" ]]; then
+    KNIGHT_MCP_EXE="$PROJECT_ROOT/Knight-Tools/knight-dev-mcp/bin/knight-dev-mcp"
+elif [[ -x "$PROJECT_ROOT/Knight-Tools/knight-dev-mcp/bin/knight-dev-mcp.exe" ]]; then
+    KNIGHT_MCP_EXE="$PROJECT_ROOT/Knight-Tools/knight-dev-mcp/bin/knight-dev-mcp.exe"
+fi
+if [[ -n "$KNIGHT_MCP_EXE" ]]; then
     "$KNIGHT_MCP_EXE" json2tres "$PATH_DATA_ROOT"
     # Consistency pre-check: Luban table consistency / generated file headers / entity scene .tscn existence.
     "$KNIGHT_MCP_EXE" check
 else
-    echo "[WARN] knight-dev-mcp.exe not found; keep json output. Build: cd Knight-Tools/knight-dev-mcp && go build -o bin/knight-dev-mcp.exe ." >&2
+    echo "[WARN] knight-dev-mcp not found; keep json output. Build: cd Knight-Tools/knight-dev-mcp && go build -o bin/knight-dev-mcp ." >&2
 fi
 
 echo "[INFO] Luban export completed."

@@ -3,6 +3,8 @@ package kcp2k
 import (
 	"log"
 	"net"
+	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -54,7 +56,13 @@ type Server struct {
 	packets  chan udpPacket
 	ops      chan func(now uint32)
 	start    time.Time
-	closed   bool
+
+	stopCh    chan struct{}
+	stopOnce  sync.Once
+	readDone  chan struct{}
+	mu        sync.Mutex
+	runDone   chan struct{}
+	connCount atomic.Int32
 }
 
 // Listen 绑定 UDP 地址并启动读 goroutine（不开始主循环；调用 Run 或手动 Step）。
@@ -68,15 +76,20 @@ func Listen(address string, cfg Config, cb ServerCallbacks) (*Server, error) {
 		return nil, err
 	}
 	s := &Server{
-		conn:    conn,
-		cfg:     cfg,
-		cb:      cb,
-		conns:   make(map[string]*serverConn),
-		packets: make(chan udpPacket, 1024),
-		ops:     make(chan func(now uint32), 1024),
-		start:   time.Now(),
+		conn:     conn,
+		cfg:      cfg,
+		cb:       cb,
+		conns:    make(map[string]*serverConn),
+		packets:  make(chan udpPacket, 1024),
+		ops:      make(chan func(now uint32), 1024),
+		start:    time.Now(),
+		stopCh:   make(chan struct{}),
+		readDone: make(chan struct{}),
 	}
-	go s.readLoop()
+	go func() {
+		defer close(s.readDone)
+		s.readLoop()
+	}()
 	return s, nil
 }
 
@@ -102,16 +115,46 @@ func (s *Server) LocalAddr() net.Addr { return s.conn.LocalAddr() }
 
 // Run 阻塞式主循环：每步 = ops + 收包 + 全体 peer 进出各 tick 一次，节奏 = KCP interval。
 func (s *Server) Run() {
+	s.mu.Lock()
+	select {
+	case <-s.stopCh:
+		s.mu.Unlock()
+		return
+	default:
+	}
+	done := make(chan struct{})
+	s.runDone = done
+	s.mu.Unlock()
+
+	defer func() {
+		s.conns = make(map[string]*serverConn)
+		s.connCount.Store(0)
+		close(done)
+	}()
+
 	tickInterval := time.Duration(s.cfg.Interval) * time.Millisecond
 	if tickInterval < 10*time.Millisecond {
 		tickInterval = 10 * time.Millisecond
 	}
-	for !s.closed {
+	ticker := time.NewTicker(tickInterval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-s.stopCh:
+			return
+		default:
+		}
 		now := s.now()
 		s.runOps(now)
 		s.drainPackets(now)
 		s.tickAll(now)
-		time.Sleep(tickInterval)
+
+		select {
+		case <-s.stopCh:
+			return
+		case <-ticker.C:
+		}
 	}
 }
 
@@ -122,11 +165,24 @@ func (s *Server) Step(now uint32) {
 	s.tickAll(now)
 }
 
-// Stop 停止并关闭套接字（读 goroutine 随之退出）。
+// Stop 停止并关闭套接字，并等待 Run（若已启动）与读 goroutine 完全退出（幂等）。
 func (s *Server) Stop() {
-	s.closed = true
-	s.conns = make(map[string]*serverConn)
-	_ = s.conn.Close()
+	s.stopOnce.Do(func() {
+		close(s.stopCh)
+		_ = s.conn.Close()
+	})
+	s.Wait()
+}
+
+// Wait 等待 Run（若已启动）与读 goroutine 退出。
+func (s *Server) Wait() {
+	s.mu.Lock()
+	done := s.runDone
+	s.mu.Unlock()
+	if done != nil {
+		<-done
+	}
+	<-s.readDone
 }
 
 // now 单调毫秒（自 Server 创建起，uint32 约 49 天回绕，timeDiff 保证回绕安全）。
@@ -136,9 +192,15 @@ func (s *Server) now() uint32 {
 
 // Send 向指定连接发送应用层消息（跨 goroutine 安全，经 ops 串行化）。
 // 未完成握手的连接会被静默丢弃——对端认证前收到 Data 会按协议断开。
+// 服务已停止或 ops 队列满载时不阻塞调用方（避免拖垮 tick.Runner 或泄漏停机后的 goroutine）。
 func (s *Server) Send(connID string, data []byte, channel Channel) {
+	select {
+	case <-s.stopCh:
+		return
+	default:
+	}
 	buf := append([]byte(nil), data...)
-	s.ops <- func(_ uint32) {
+	op := func(_ uint32) {
 		c, ok := s.conns[connID]
 		if !ok {
 			return
@@ -149,20 +211,38 @@ func (s *Server) Send(connID string, data []byte, channel Channel) {
 		}
 		c.peer.SendData(buf, channel)
 	}
+	select {
+	case s.ops <- op:
+	case <-s.stopCh:
+	default:
+		log.Printf("[kcp2k] ops queue overflow, dropping send to %s", connID)
+	}
 }
 
 // Disconnect 断开指定连接（跨 goroutine 安全，经 ops 串行化）。
 // 先刷出已排队的可靠消息再断开，保证"错误应答后关闭"场景的错误可达。
+// 服务已停止或 ops 队列满载时不阻塞调用方。
 func (s *Server) Disconnect(connID string) {
-	s.ops <- func(now uint32) {
+	select {
+	case <-s.stopCh:
+		return
+	default:
+	}
+	op := func(now uint32) {
 		if c, ok := s.conns[connID]; ok {
 			c.peer.FlushThenDisconnect(c.local(now))
 		}
 	}
+	select {
+	case s.ops <- op:
+	case <-s.stopCh:
+	default:
+		log.Printf("[kcp2k] ops queue overflow, dropping disconnect for %s", connID)
+	}
 }
 
-// ConnCount 当前连接数（诊断用，无锁读仅供观测）。
-func (s *Server) ConnCount() int { return len(s.conns) }
+// ConnCount 当前连接数（诊断用，并发安全）。
+func (s *Server) ConnCount() int { return int(s.connCount.Load()) }
 
 // drainPackets 非阻塞收取已到达的数据报并逐包处理。
 func (s *Server) drainPackets(now uint32) {
@@ -192,10 +272,13 @@ func (s *Server) tickAll(now uint32) {
 	for _, c := range s.conns {
 		c.peer.TickIncoming(c.local(now))
 	}
-	for _, id := range s.toRemove {
-		delete(s.conns, id)
+	if len(s.toRemove) > 0 {
+		for _, id := range s.toRemove {
+			delete(s.conns, id)
+		}
+		s.toRemove = s.toRemove[:0]
+		s.connCount.Store(int32(len(s.conns)))
 	}
-	s.toRemove = s.toRemove[:0]
 	for _, c := range s.conns {
 		c.peer.TickOutgoing(c.local(now))
 	}
@@ -225,6 +308,7 @@ func (s *Server) newServerConn(id string, remote *net.UDPAddr, now uint32) *serv
 			// 收到客户端 Hello：立即回 Hello（客户端由此获知 cookie），然后入表
 			c.peer.SendHello()
 			s.conns[c.id] = c
+			s.connCount.Store(int32(len(s.conns)))
 			if s.cb.OnConnect != nil {
 				s.cb.OnConnect(c.id)
 			}
@@ -247,7 +331,11 @@ func (s *Server) newServerConn(id string, remote *net.UDPAddr, now uint32) *serv
 		},
 		RawSend: func(data []byte) {
 			if _, err := s.conn.WriteToUDP(data, c.remote); err != nil {
-				log.Printf("[kcp2k] sendto %s failed: %v", c.id, err)
+				select {
+				case <-s.stopCh:
+				default:
+					log.Printf("[kcp2k] sendto %s failed: %v", c.id, err)
+				}
 			}
 		},
 	})

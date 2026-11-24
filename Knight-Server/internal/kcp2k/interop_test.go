@@ -3,8 +3,8 @@ package kcp2k
 import (
 	"bytes"
 	"fmt"
-
 	"testing"
+	"time"
 )
 
 // fixture 真实 UDP 套接字上的 client↔server 测试环境，虚拟时钟手动泵驱动。
@@ -225,8 +225,17 @@ func TestInteropPingPongRTT(t *testing.T) {
 	f := newFixture(t)
 	f.pumpUntil(func() bool { return f.cliConnected }, "handshake")
 
-	// kcp2k 每秒互发 Ping/Pong；首个 Pong 可能被对端限频挡回，泵到测得 RTT 为止
-	f.pumpUntil(func() bool { return f.cli.RTT() > 0 }, "client RTT measurement")
+	// kcp2k 每秒互发 Ping/Pong；首个 Pong 可能被对端限频挡回，泵到测得 RTT 为止。
+	// 虚拟时钟每步推进 10ms，而真实 UDP 环回由独立 readLoop goroutine 异步收包；
+	// 若无短暂让出，高速 CPU（如 macOS）会在内核投递单次 Ping/Pong 期间空转上百步，
+	// 使虚拟时间虚增数秒。每步短暂休眠以确保 UDP 环回收发跟上虚拟时钟。
+	for i := 0; i < 2000 && f.cli.RTT() == 0; i++ {
+		f.pump(1)
+		time.Sleep(time.Millisecond)
+	}
+	if f.cli.RTT() == 0 {
+		t.Fatal("timeout waiting for client RTT measurement")
+	}
 
 	// 环回 + 虚拟时钟下 RTT 通常为几十 ms；KCP 重传会刷新段 ts 导致偶发偏大，
 	// 只断言量级合理（远小于 10s 超时）

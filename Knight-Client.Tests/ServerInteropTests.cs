@@ -120,7 +120,11 @@ public class ServerInteropTests
         var json = await login.Content.ReadAsStringAsync();
         using var doc = System.Text.Json.JsonDocument.Parse(json);
         var root = doc.RootElement;
-        return (root.GetProperty("uid").GetUInt64(),
+        var uidElement = root.GetProperty("uid");
+        var uid = uidElement.ValueKind == System.Text.Json.JsonValueKind.String
+            ? ulong.Parse(uidElement.GetString()!, System.Globalization.CultureInfo.InvariantCulture)
+            : uidElement.GetUInt64();
+        return (uid,
                 root.GetProperty("name").GetString()!,
                 root.GetProperty("token").GetString()!);
     }

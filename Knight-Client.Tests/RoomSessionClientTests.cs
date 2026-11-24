@@ -146,4 +146,29 @@ public class RoomSessionClientTests
         client.Dispose(); connection.State = NetworkState.Connected;
         connection.Push(Room()); Assert.Null(client.Room);
     }
+
+    [Fact]
+    public void SetReadyStartGameAndGameStartNotificationWorkInWaitingRoom()
+    {
+        var connection = new Connection();
+        using var client = new RoomSessionClient(connection);
+        GameStart? started = null;
+        client.GameStarted += g => started = g;
+
+        // Join as host (uid 42)
+        client.Request(new RoomIntent(RoomPasswordMode.Create, null, ""));
+        connection.Push(Room(10));
+        connection.Sent.Clear();
+
+        client.SetReady(true);
+        var ready = Assert.IsType<SetReady>(Assert.Single(connection.Sent));
+        Assert.True(ready.Ready);
+
+        client.StartGame();
+        Assert.IsType<StartGame>(connection.Sent[1]);
+
+        connection.Push(new GameStart { MapIds = { 1u, 2u, 3u } });
+        Assert.NotNull(started);
+        Assert.Equal(new[] { 1u, 2u, 3u }, started!.MapIds);
+    }
 }
