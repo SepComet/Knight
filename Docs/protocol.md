@@ -1,6 +1,6 @@
 # Knight 网络协议规范
 
-**文档版本：** V0.2（草案，待评审；`proto_version = 4`）
+**文档版本：** V0.2（草案，待评审；`proto_version = 5`）
 **上游需求：** [SRS-需求规格说明书.md](./SRS-需求规格说明书.md) §3 / §4 / §6 / §7
 **契约源：** [Knight-Proto/knight.proto](../Knight-Proto/knight.proto) —— 唯一消息定义处，本文档不复制定义，只描述流程与语义
 **代码生成：** [Knight-Tools/gen-proto.ps1](../Knight-Tools/gen-proto.ps1)
@@ -345,7 +345,7 @@ Boss 被击败 / 全员被击败
 | `kcp_port` | 37777/UDP | 服务端 | 可配置 |
 | `http_port` | 37780/TCP | 服务端 | 可配置 |
 | KCP 参数 | nodelay=1, interval=10, resend=2, nc=1 | 服务端 | 待网络测试调优 |
-| `proto_version` | 4 | 双端 | 随 proto 改动递增 |
+| `proto_version` | 5 | 双端 | 随 proto 改动递增 |
 
 ---
 
