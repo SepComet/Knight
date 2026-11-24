@@ -15,14 +15,26 @@ public partial class LocalPlayerInput : Node
     public event Action? SkillRequested;
     public bool InteractionAvailable { get; set; }
     public bool IsInteractionMode => _primary.IsInteractionMode(InteractionAvailable);
+    public bool HasSyntheticInput => _synthetic.IsActive;
     private readonly PrimaryActionState _primary = new();
     private readonly PlayerInputBuffer _input = new();
+    private readonly SyntheticInputOverride _synthetic = new();
     private TouchControlsView? _touch;
     private bool _focused = true;
     private bool _enabled = true;
     private bool _wasAlive = true;
 
     public override void _Ready() => Motor.InputSource = Sample;
+
+    public void SetSyntheticInput(
+        Vector2 movement,
+        float? aimRadians = null,
+        bool attackHeld = false,
+        bool interact = false,
+        double? durationSeconds = null)
+        => _synthetic.Set(movement, aimRadians, attackHeld, interact, durationSeconds);
+
+    public void ClearSyntheticInput() => _synthetic.Clear();
 
     public void BindTouch(TouchControlsView view)
     {
@@ -39,6 +51,7 @@ public partial class LocalPlayerInput : Node
         _enabled = enabled;
         _input.Reset();
         _primary.Reset();
+        if (!enabled) _synthetic.Clear();
         _touch?.ResetInput();
     }
 
@@ -53,10 +66,12 @@ public partial class LocalPlayerInput : Node
 
     public override void _Process(double delta)
     {
+        _synthetic.Advance(delta);
         if (_wasAlive && !Motor.Alive)
         {
             _input.Reset();
             _primary.Reset();
+            _synthetic.Clear();
             _touch?.ResetInput();
         }
         _wasAlive = Motor.Alive;
@@ -65,7 +80,18 @@ public partial class LocalPlayerInput : Node
 
     private PlayerCommand Sample()
     {
-        if (!_enabled || !_focused || !Motor.Alive) { _input.Reset(); return new(Vector2.Zero, Motor.FacingRadians, false, false); }
+        if (!_enabled || !Motor.Alive)
+        {
+            _input.Reset();
+            _synthetic.Clear();
+            return new(Vector2.Zero, Motor.FacingRadians, false, false);
+        }
+        if (_synthetic.TrySample(Motor.FacingRadians, out var syntheticCommand))
+        {
+            CommandSampled?.Invoke(syntheticCommand);
+            return syntheticCommand;
+        }
+        if (!_focused) { _input.Reset(); return new(Vector2.Zero, Motor.FacingRadians, false, false); }
         var aim = Motor.FacingRadians;
         var canAttack = true;
         if (TouchMode)

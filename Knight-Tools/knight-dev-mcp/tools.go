@@ -162,6 +162,157 @@ func allTools() []tool {
 			},
 			fn: toolSmoke,
 		},
+		{
+			name: "clients_launch",
+			description: "启动多实例 Godot (.NET/mono) 客户端用于联机自动化测试与调试。自动检测本机 Godot mono 可执行文件" +
+				"（优先级：godot_path → KNIGHT_GODOT_PATH → macOS/Windows 常见 mono 路径与 PATH 中的 godot-mono，绝不误选非 mono 版），" +
+				"按宫格排列窗口位置并传入 --instance-id=<id> --dev-agent-port=<port>，将输出重定向至 .tmp/dev-clients/<id>.log，" +
+				"持久化实例注册表至 .tmp/dev-clients/registry.json，并轮询各实例 GET /health 直至全部就绪（超时附各实例日志尾部）。",
+			schema: map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"count": map[string]any{
+						"type":        "integer",
+						"description": "启动实例数量（1..4），默认 2；若提供 ids 且未提供 count 则以 ids 长度为准",
+					},
+					"ids": map[string]any{
+						"type":        "array",
+						"items":       map[string]any{"type": "string"},
+						"description": "可选，自定义实例 ID 列表（默认 [\"p1\",\"p2\",...]）",
+					},
+					"godot_path": map[string]any{
+						"type":        "string",
+						"description": "可选，显式指定 Godot .NET/mono 可执行文件路径",
+					},
+					"base_port": map[string]any{
+						"type":        "integer",
+						"description": "可选，DevAgent HTTP 起始端口，默认 19100（各实例依次 +1）",
+					},
+					"wait_ready_sec": map[string]any{
+						"type":        "number",
+						"description": "可选，等待全部实例 /health 就绪的超时秒数，默认 20",
+					},
+				},
+			},
+			fn: toolClientsLaunch,
+		},
+		{
+			name:        "clients_list",
+			description: "列出所有受管理的 Godot 客户端实例，并实时探测各实例 GET /health 返回状态（running / unhealthy / exited）、id、pid、port、log_path。",
+			schema:      map[string]any{"type": "object", "properties": map[string]any{}, "additionalProperties": false},
+			fn:          toolClientsList,
+		},
+		{
+			name:        "client_state",
+			description: "查询指定客户端实例（或 id=\"all\" 并行查询全部实例）的实时状态（调用 GET /state 返回 scene、procedure、network、room、battle、ui 等结构化 JSON）。",
+			schema: map[string]any{
+				"type":     "object",
+				"required": []string{"id"},
+				"properties": map[string]any{
+					"id": map[string]any{
+						"type":        "string",
+						"description": "目标实例 ID（如 \"p1\"），或 \"all\" 并行查询全部受管实例",
+					},
+				},
+			},
+			fn: toolClientState,
+		},
+		{
+			name: "client_act",
+			description: "向指定 Godot 客户端实例发送操作指令（POST /action）。支持单动作模式（直接传 type 及动作字段）或批量模式（传 actions 数组顺序执行）；" +
+				"type=\"wait\" 搭配 duration_ms 在 MCP 侧本地休眠等待，便于串联点击、输入、移动、等待等复合流程。",
+			schema: map[string]any{
+				"type":     "object",
+				"required": []string{"id"},
+				"properties": map[string]any{
+					"id": map[string]any{
+						"type":        "string",
+						"description": "目标实例 ID（如 \"p1\"）",
+					},
+					"type": map[string]any{
+						"type":        "string",
+						"description": "单动作类型：click_button | set_text | set_input | clear_input | quit | wait",
+					},
+					"text": map[string]any{
+						"type":        "string",
+						"description": "按钮文本或要写入的文本内容",
+					},
+					"name": map[string]any{
+						"type":        "string",
+						"description": "目标控件节点名",
+					},
+					"placeholder": map[string]any{
+						"type":        "string",
+						"description": "输入框占位符匹配文本",
+					},
+					"move_x": map[string]any{
+						"type":        "number",
+						"description": "移动输入 X 分量（-1..1）",
+					},
+					"move_y": map[string]any{
+						"type":        "number",
+						"description": "移动输入 Y 分量（-1..1）",
+					},
+					"aim_deg": map[string]any{
+						"type":        "number",
+						"description": "瞄准角度（度）",
+					},
+					"attack": map[string]any{
+						"type":        "boolean",
+						"description": "是否按下攻击输入",
+					},
+					"interact": map[string]any{
+						"type":        "boolean",
+						"description": "是否触发交互输入",
+					},
+					"duration_ms": map[string]any{
+						"type":        "integer",
+						"description": "持续或等待时长（毫秒）",
+					},
+					"actions": map[string]any{
+						"type": "array",
+						"items": map[string]any{
+							"type": "object",
+						},
+						"description": "批量动作数组，顺序执行；元素中 type=\"wait\" 且带 duration_ms 时在 MCP 侧等待",
+					},
+				},
+			},
+			fn: toolClientAct,
+		},
+		{
+			name:        "client_screenshot",
+			description: "截取指定 Godot 客户端实例的当前画面（调用 POST /screenshot）。未传 path 时默认保存至 .tmp/dev-clients/screenshots/<id>_<timestamp>.png。",
+			schema: map[string]any{
+				"type":     "object",
+				"required": []string{"id"},
+				"properties": map[string]any{
+					"id": map[string]any{
+						"type":        "string",
+						"description": "目标实例 ID（如 \"p1\"）",
+					},
+					"path": map[string]any{
+						"type":        "string",
+						"description": "可选，截图输出路径（自动转绝对路径并创建父目录）",
+					},
+				},
+			},
+			fn: toolClientScreenshot,
+		},
+		{
+			name:        "clients_stop",
+			description: "停止指定或全部受管理的 Godot 客户端实例：先发送 POST /action {\"type\":\"quit\"}，等待最多 2 秒后对未退出进程执行强杀，并更新 registry.json。",
+			schema: map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"id": map[string]any{
+						"type":        "string",
+						"description": "可选，目标实例 ID；省略或传 \"all\" 时停止全部受管实例",
+					},
+				},
+			},
+			fn: toolClientsStop,
+		},
 	}
 }
 

@@ -21,6 +21,7 @@ LubanComponent="*res://Scripts/Runtime/Luban/LubanComponent.cs"
 EventComponent="*res://Scripts/Runtime/Event/EventComponent.cs"
 NetworkComponent="*res://Scripts/Runtime/Network/NetworkComponent.cs"
 UIComponent="*res://Scripts/Runtime/UI/UIComponent.cs"
+DevAgentComponent="*res://Scripts/DevAgent/DevAgentComponent.cs"
 _fennara_game_capture="*res://addons/fennara/runtime/game_capture_helper.gd"
 
 [dotnet]

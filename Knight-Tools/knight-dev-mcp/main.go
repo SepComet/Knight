@@ -105,7 +105,8 @@ func handleLine(line []byte, enc *json.Encoder) {
 		"instructions": "Knight 仓库开发工具：服务端改动用 server_test 跑测试；客户端代码改完用 godot_verify 验证" +
 				"（mode=check 秒回环境状态；mode=compile 只查编译；mode=tests 编译+xUnit 测试一条命令完成）；" +
 				"luban_export 与 consistency_check 服务于 Luban 配置流水线；" +
-				"deploy 与 smoke 服务于服务端容器栈（HTTP 冒烟默认 127.0.0.1:37780）",
+				"deploy 与 smoke 服务于服务端容器栈（HTTP 冒烟默认 127.0.0.1:37780）；" +
+				"clients_launch / clients_list / client_state / client_act / client_screenshot / clients_stop 服务于多实例 Godot 客户端联机自动化调试",
 		})
 	case "ping":
 		writeResult(enc, req.ID, map[string]any{})

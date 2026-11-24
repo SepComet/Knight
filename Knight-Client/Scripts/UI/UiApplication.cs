@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using HttpClient = System.Net.Http.HttpClient;
 using Godot;
@@ -38,8 +39,10 @@ public partial class UiApplication : Node
     public TouchControlsController Controls { get; } = new();
     public GameResultController Results { get; } = new();
     public AccountSessionManager Accounts { get; private set; } = null!;
+    public RoomStatePush? CurrentRoom => _roomSession?.Room;
 
     public event Action? SettingsRequested, QuitRequested;
+    public event Action<GameStart>? GameStarted;
     private UIComponent _ui = null!;
     private RoomSessionClient _roomSession = null!;
     private bool _lobbyActive;
@@ -82,7 +85,10 @@ public partial class UiApplication : Node
         _roomSession.Failed += message => { if (_lobbyActive) Rooms.ShowMessage(message); };
         _roomSession.RoomChanged += OnRoomChanged;
         _roomSession.RoomLeft += OnRoomLeft;
+        _roomSession.GameStarted += OnGameStarted;
         Waiting.LeaveRequested += _roomSession.Leave;
+        Waiting.ReadyChanged += _roomSession.SetReady;
+        Waiting.StartRequested += _roomSession.StartGame;
         Results.ReturnRoomRequested += ShowWaitingRoom;
         Results.ReturnMenuRequested += ShowMainMenu;
         _ui.FormOpened += OnFormOpened;
@@ -123,6 +129,23 @@ public partial class UiApplication : Node
     {
         Waiting.SetPlayers("", "", false, Array.Empty<WaitingPlayer>());
         if (_lobbyActive && _ui.FindView(UIFormType.WaitingRoom) != null) ShowRooms();
+    }
+
+    private void OnGameStarted(GameStart gameStart)
+    {
+        if (!_lobbyActive) return;
+        GameStarted?.Invoke(gameStart);
+    }
+
+    public IReadOnlyDictionary<ulong, string> GetRoomMemberNames()
+    {
+        var names = new Dictionary<ulong, string>();
+        if (_roomSession.Room is { } room)
+        {
+            foreach (var member in room.Members)
+                names[member.Uid] = member.Name;
+        }
+        return names;
     }
 
     public void ShowMainMenu() => Navigate(UIFormType.LobbyForm);

@@ -64,3 +64,4 @@ Knight-Server/logs/
 # Knight-Server/protogen/
 /.zcode
 /.scratch
+/.tmp/
