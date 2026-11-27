@@ -63,6 +63,7 @@ type Server struct {
 	mu        sync.Mutex
 	runDone   chan struct{}
 	connCount atomic.Int32
+	netem     *NetEm
 }
 
 // Listen 绑定 UDP 地址并启动读 goroutine（不开始主循环；调用 Run 或手动 Step）。
@@ -85,6 +86,7 @@ func Listen(address string, cfg Config, cb ServerCallbacks) (*Server, error) {
 		start:    time.Now(),
 		stopCh:   make(chan struct{}),
 		readDone: make(chan struct{}),
+		netem:    NewNetEm(),
 	}
 	go func() {
 		defer close(s.readDone)
@@ -92,6 +94,9 @@ func Listen(address string, cfg Config, cb ServerCallbacks) (*Server, error) {
 	}()
 	return s, nil
 }
+
+// NetEm 返回服务端内置的运行时弱网注入器（默认全 0 透传）。
+func (s *Server) NetEm() *NetEm { return s.netem }
 
 // readLoop 阻塞读 UDP 并投递副本到 packets channel（conn 关闭后退出）。
 func (s *Server) readLoop() {
@@ -102,11 +107,14 @@ func (s *Server) readLoop() {
 			return // 套接字已关闭
 		}
 		pkt := udpPacket{data: append([]byte(nil), buf[:n]...), addr: addr}
-		select {
-		case s.packets <- pkt:
-		default:
-			log.Printf("[kcp2k] packet queue overflow, dropping from %s", addr)
-		}
+		s.netem.HandleInbound(func() {
+			select {
+			case s.packets <- pkt:
+			case <-s.stopCh:
+			default:
+				log.Printf("[kcp2k] packet queue overflow, dropping from %s", addr)
+			}
+		})
 	}
 }
 
@@ -165,13 +173,14 @@ func (s *Server) Step(now uint32) {
 	s.tickAll(now)
 }
 
-// Stop 停止并关闭套接字，并等待 Run（若已启动）与读 goroutine 完全退出（幂等）。
+// Stop 停止并关闭套接字，并等待 Run（若已启动）、读 goroutine 与弱网调度器完全退出（幂等）。
 func (s *Server) Stop() {
 	s.stopOnce.Do(func() {
 		close(s.stopCh)
 		_ = s.conn.Close()
 	})
 	s.Wait()
+	s.netem.Close()
 }
 
 // Wait 等待 Run（若已启动）与读 goroutine 退出。
@@ -330,13 +339,20 @@ func (s *Server) newServerConn(id string, remote *net.UDPAddr, now uint32) *serv
 			}
 		},
 		RawSend: func(data []byte) {
-			if _, err := s.conn.WriteToUDP(data, c.remote); err != nil {
+			s.netem.HandleOutbound(data, func(payload []byte) {
 				select {
 				case <-s.stopCh:
+					return
 				default:
-					log.Printf("[kcp2k] sendto %s failed: %v", c.id, err)
 				}
-			}
+				if _, err := s.conn.WriteToUDP(payload, c.remote); err != nil {
+					select {
+					case <-s.stopCh:
+					default:
+						log.Printf("[kcp2k] sendto %s failed: %v", c.id, err)
+					}
+				}
+			})
 		},
 	})
 	return c

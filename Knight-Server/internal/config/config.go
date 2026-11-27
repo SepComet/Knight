@@ -34,6 +34,13 @@ type Config struct {
 	// 模拟循环（Docs/server-tick-loop.md）
 	TickRate int // 固定步长模拟频率（KNIGHT_TICK_RATE），1~120；越界由 tick.NewRunner 拒绝启动
 
+	// 弱网模拟初始配置（默认全 0 关闭，可通过 HTTP /api/v1/debug/netem 热修改）
+	DebugAPIEnabled  bool    // KNIGHT_DEBUG_API_ENABLED，默认 false；仅开发/演示环境开启调试接口
+	NetEmDelayMs     int     // KNIGHT_NETEM_DELAY_MS，0~2000
+	NetEmJitterMs    int     // KNIGHT_NETEM_JITTER_MS，0~1000
+	NetEmLossPercent float64 // KNIGHT_NETEM_LOSS_PERCENT，0~50
+	NetEmDirection   string  // KNIGHT_NETEM_DIRECTION，both/outbound/inbound
+
 	// MySQL 连接参数；DSN 非空时优先使用完整 DSN，否则由分项拼接
 	MySQLDSN      string
 	MySQLHost     string
@@ -58,6 +65,11 @@ func Defaults() Config {
 		MinPlayers:       2,
 		MaxRooms:         64,
 		TickRate:         30,
+		DebugAPIEnabled:  false,
+		NetEmDelayMs:     0,
+		NetEmJitterMs:    0,
+		NetEmLossPercent: 0,
+		NetEmDirection:   "both",
 		MySQLHost:        "127.0.0.1",
 		MySQLPort:        3306,
 		MySQLUser:        "knight",
@@ -81,6 +93,11 @@ func FromEnv() Config {
 	c.MinPlayers = envInt("KNIGHT_MIN_PLAYERS_TO_START", c.MinPlayers)
 	c.MaxRooms = envInt("KNIGHT_MAX_ROOMS", c.MaxRooms)
 	c.TickRate = envInt("KNIGHT_TICK_RATE", c.TickRate)
+	c.DebugAPIEnabled = envBool("KNIGHT_DEBUG_API_ENABLED", c.DebugAPIEnabled)
+	c.NetEmDelayMs = envInt("KNIGHT_NETEM_DELAY_MS", c.NetEmDelayMs)
+	c.NetEmJitterMs = envInt("KNIGHT_NETEM_JITTER_MS", c.NetEmJitterMs)
+	c.NetEmLossPercent = envFloat("KNIGHT_NETEM_LOSS_PERCENT", c.NetEmLossPercent)
+	c.NetEmDirection = envStr("KNIGHT_NETEM_DIRECTION", c.NetEmDirection)
 	c.MySQLDSN = os.Getenv("KNIGHT_MYSQL_DSN")
 	c.MySQLHost = envStr("KNIGHT_MYSQL_HOST", c.MySQLHost)
 	c.MySQLPort = envInt("KNIGHT_MYSQL_PORT", c.MySQLPort)
@@ -116,10 +133,28 @@ func envInt(key string, def int) int {
 	return def
 }
 
+func envFloat(key string, def float64) float64 {
+	if v := os.Getenv(key); v != "" {
+		if f, err := strconv.ParseFloat(v, 64); err == nil {
+			return f
+		}
+	}
+	return def
+}
+
 func envDur(key string, def time.Duration) time.Duration {
 	if v := os.Getenv(key); v != "" {
 		if d, err := time.ParseDuration(v); err == nil {
 			return d
+		}
+	}
+	return def
+}
+
+func envBool(key string, def bool) bool {
+	if v := os.Getenv(key); v != "" {
+		if b, err := strconv.ParseBool(v); err == nil {
+			return b
 		}
 	}
 	return def

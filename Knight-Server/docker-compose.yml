@@ -35,6 +35,8 @@ services:
       KNIGHT_SNOWFLAKE_WORKER_ID: "0"
       # 固定步长模拟频率（1~120，默认 30；Docs/server-tick-loop.md）
       KNIGHT_TICK_RATE: "30"
+      # 调试接口开关（/api/v1/debug/netem）；本地开发/演示容器显式开启，生产环境默认关闭
+      KNIGHT_DEBUG_API_ENABLED: "true"
       # 仅当登录链路不可用时临时打开（接受任意非空 token）；正常流程用真实 token
       # KNIGHT_DEV_TOKEN_BYPASS: "1"
     ports:

@@ -12,6 +12,7 @@ public interface INetworkMessageClient
     void Send<T>(T message) where T : IMessage;
     IDisposable Subscribe<T>(Action<T> handler) where T : IMessage;
     void Disconnect(string reason = "客户端主动断开");
+    NetworkTransportStats GetTransportStats() => default;
 }
 
 /// <summary>Session establishment used by account flow; message-only consumers use the base interface.</summary>

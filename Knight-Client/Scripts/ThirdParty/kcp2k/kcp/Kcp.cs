@@ -55,6 +55,7 @@ namespace kcp2k
         internal uint interval;
         internal uint ts_flush;      // last flush timestamp in milliseconds
         internal uint xmit;
+        internal uint fast_retransmits;
         internal uint nodelay;       // not a bool. original Kcp has '<2 else' check.
         internal bool updated;
         internal uint ts_probe;      // probe timestamp
@@ -877,6 +878,7 @@ namespace kcp2k
                     {
                         needsend = true;
                         segment.xmit++;
+                        fast_retransmits++;
                         segment.fastack = 0;
                         segment.resendts = current + (uint)segment.rto;
                         change++;

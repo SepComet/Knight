@@ -92,6 +92,12 @@ public sealed class InputBatchTracker
         return batch;
     }
 
+    /// <summary>清空当前未确认输入缓存，保持输入序号单调递增（切房时调用）。</summary>
+    public void ClearPending()
+    {
+        _unacked.Clear();
+    }
+
     /// <summary>重置输入序号与缓存（新对局开始时调用）。</summary>
     public void Reset()
     {

@@ -29,10 +29,13 @@ public sealed class BattleSessionClient : IDisposable
     public IReadOnlyList<uint> MapSequence { get; private set; } = Array.Empty<uint>();
     public bool IsRoomLoaded => _confirmedMapId != 0 && _confirmedMapId == CurrentMapId;
     public uint LastSnapshotTick { get; private set; }
+    public uint NextInputSeq => _inputs.NextSeq;
     public uint LastAckedInputSeq => _inputs.LastAckedSeq;
     public int PendingInputCount => _inputs.PendingCount;
+    public IReadOnlyList<InputCmd> PendingInputs => _inputs.PendingInputs;
     public IReadOnlyDictionary<uint, EntityState> Entities => _entities;
     public IReadOnlyDictionary<ulong, SpawnAssignment> Spawns => _spawns;
+    public NetworkTransportStats GetTransportStats() => _network.GetTransportStats();
 
     public event Action<RoomTransition>? RoomTransitionReceived;
     public event Action<EntityState>? EntitySpawned;
@@ -116,6 +119,7 @@ public sealed class BattleSessionClient : IDisposable
         CurrentMapId = transition.MapId;
         _confirmedMapId = 0;
         LastSnapshotTick = 0;
+        _inputs.ClearPending();
         _spawns.Clear();
         foreach (var spawn in transition.Spawns)
             _spawns[spawn.Uid] = spawn.Clone();

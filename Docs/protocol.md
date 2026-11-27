@@ -84,6 +84,8 @@ UDP 数据报 = [1B channel][4B cookie 小端][载荷]
 | `POST /api/v1/login` | 登录换取 token | `{name, password}` | `200 {uid, name, token}` | `401` 凭证错误 |
 | `GET /api/v1/users/{uid}` | 用户基本信息 | — | `200 {uid, name, coins, created_at}` | `404` |
 | `GET /api/v1/users/{uid}/matches` | 历史战绩列表 | — | `200 [{match_id, outcome, duration_sec, character_id, weapon_id, kills, damage_dealt, damage_taken, alive, finished_at}]` | `404` |
+| `GET /api/v1/debug/netem` | 查询 KCP 弱网注入配置与统计（需开启 `KNIGHT_DEBUG_API_ENABLED=true`） | — | `200 {enabled, delay_ms, jitter_ms, loss_percent, direction, stats}` | `403` 未开启 |
+| `POST /api/v1/debug/netem` | 热更新 KCP 弱网注入参数（`delay_ms` 为单向延迟） | `{delay_ms, jitter_ms, loss_percent, direction, reset_stats}` | `200 {enabled, delay_ms, jitter_ms, loss_percent, direction, stats}` | `400` / `403` |
 
 - 查询接口需带 `Authorization: Bearer <token>`。
 - token：服务端生成的随机 128 位串，**内存态**，有效期 24h，进程重启失效（MVP 接受，见 §12 待定项）。
@@ -338,7 +340,8 @@ Boss 被击败 / 全员被击败
 | `heartbeat_interval` | 3 s | 客户端 | §4.2 |
 | `server_timeout` | 10 s | 服务端 | §4.2 |
 | `interp_delay` | 100 ms | 客户端 | §7.2 |
-| `reconcile_snap_threshold` | 0.05 unit | 客户端 | §7.1（待实测调整） |
+| `reconcile_threshold` | 0.02 unit | 客户端 | §7.1（超阈值回滚重放 + 平滑纠偏） |
+| `reconcile_snap_threshold` | 1.5 unit | 客户端 | §7.1（超大偏差硬拉回） |
 | `room_loaded_timeout` | 3 s | 服务端 | §5.3 |
 | `min_players_to_start` | 2 | 服务端 | 开发期可配 1 |
 | `pickup_radius` | 待数值表 | 服务端 | P1 数值配置 |

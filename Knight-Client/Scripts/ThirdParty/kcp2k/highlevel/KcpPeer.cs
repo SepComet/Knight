@@ -149,6 +149,11 @@ namespace kcp2k
         // this is the time that it takes for a reliable message to travel to remote and back.
         public uint rttInMilliseconds { get; private set; }
 
+        // M2 network sync diagnostics: expose KCP SRTT and segment/retransmit counters.
+        public int SmoothedRttMs => kcp != null ? kcp.rx_srtt : 0;
+        public uint TotalSegmentsSent => kcp != null ? kcp.snd_nxt : 0u;
+        public uint TotalRetransmits => kcp != null ? kcp.xmit + kcp.fast_retransmits : 0u;
+
         // SetupKcp creates and configures a new KCP instance.
         // => useful to start from a fresh state every time the client connects
         // => NoDelay, interval, wnd size are the most important configurations.

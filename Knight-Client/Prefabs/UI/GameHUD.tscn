@@ -32,6 +32,22 @@ texture_margin_right = 2.0
 texture_margin_bottom = 2.0
 modulate_color = Color(0.25, 0.85, 0.75, 1)
 
+[sub_resource type="StyleBoxFlat" id="NetDebugPanelStyle"]
+content_margin_left = 12.0
+content_margin_top = 8.0
+content_margin_right = 12.0
+content_margin_bottom = 10.0
+bg_color = Color(0.06, 0.11, 0.16, 0.86)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.32, 0.56, 0.68, 0.85)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
 [node name="GameHUD" type="Control" unique_id=436281382]
 script = ExtResource("battle_view")
 texture_filter = 1
@@ -186,3 +202,129 @@ offset_bottom = 64.0
 grow_horizontal = 0
 text = "1-3"
 horizontal_alignment = 2
+
+[node name="NetDebugPanel" type="PanelContainer" parent="." unique_id=1840010001]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -312.0
+offset_top = 72.0
+offset_right = -24.0
+offset_bottom = 112.0
+grow_horizontal = 0
+theme_override_styles/panel = SubResource("NetDebugPanelStyle")
+
+[node name="NetDebugVBox" type="VBoxContainer" parent="NetDebugPanel" unique_id=1840010002]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="NetDebugToggleButton" type="Button" parent="NetDebugPanel/NetDebugVBox" unique_id=1840010003]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "网络同步 [F3] ▼"
+
+[node name="NetDebugBody" type="VBoxContainer" parent="NetDebugPanel/NetDebugVBox" unique_id=1840010004]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="MetricsGrid" type="GridContainer" parent="NetDebugPanel/NetDebugVBox/NetDebugBody" unique_id=1840010005]
+layout_mode = 2
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 4
+columns = 2
+
+[node name="FpsTitle" type="Label" parent="NetDebugPanel/NetDebugVBox/NetDebugBody/MetricsGrid" unique_id=1840010006]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.72, 0.85, 0.92, 1)
+theme_override_font_sizes/font_size = 14
+text = "FPS"
+
+[node name="FpsValueLabel" type="Label" parent="NetDebugPanel/NetDebugVBox/NetDebugBody/MetricsGrid" unique_id=1840010007]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.61, 0.96, 0.78, 1)
+theme_override_font_sizes/font_size = 14
+text = "0"
+horizontal_alignment = 2
+
+[node name="RttTitle" type="Label" parent="NetDebugPanel/NetDebugVBox/NetDebugBody/MetricsGrid" unique_id=1840010008]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.72, 0.85, 0.92, 1)
+theme_override_font_sizes/font_size = 14
+text = "RTT"
+
+[node name="RttValueLabel" type="Label" parent="NetDebugPanel/NetDebugVBox/NetDebugBody/MetricsGrid" unique_id=1840010009]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.95, 0.95, 1)
+theme_override_font_sizes/font_size = 14
+text = "0 ms"
+horizontal_alignment = 2
+
+[node name="LossTitle" type="Label" parent="NetDebugPanel/NetDebugVBox/NetDebugBody/MetricsGrid" unique_id=1840010010]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.72, 0.85, 0.92, 1)
+theme_override_font_sizes/font_size = 14
+text = "上行重传"
+
+[node name="LossValueLabel" type="Label" parent="NetDebugPanel/NetDebugVBox/NetDebugBody/MetricsGrid" unique_id=1840010011]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.95, 0.95, 1)
+theme_override_font_sizes/font_size = 14
+text = "0.0%"
+horizontal_alignment = 2
+
+[node name="ReconcileTitle" type="Label" parent="NetDebugPanel/NetDebugVBox/NetDebugBody/MetricsGrid" unique_id=1840010012]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.72, 0.85, 0.92, 1)
+theme_override_font_sizes/font_size = 14
+text = "校正/秒"
+
+[node name="ReconcileValueLabel" type="Label" parent="NetDebugPanel/NetDebugVBox/NetDebugBody/MetricsGrid" unique_id=1840010013]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.95, 0.95, 1)
+theme_override_font_sizes/font_size = 14
+text = "0.0 /s"
+horizontal_alignment = 2
+
+[node name="PosErrorTitle" type="Label" parent="NetDebugPanel/NetDebugVBox/NetDebugBody/MetricsGrid" unique_id=1840010014]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.72, 0.85, 0.92, 1)
+theme_override_font_sizes/font_size = 14
+text = "平均误差"
+
+[node name="PosErrorValueLabel" type="Label" parent="NetDebugPanel/NetDebugVBox/NetDebugBody/MetricsGrid" unique_id=1840010015]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.95, 0.95, 1)
+theme_override_font_sizes/font_size = 14
+text = "0.000 tile"
+horizontal_alignment = 2
+
+[node name="NetDebugDivider" type="HSeparator" parent="NetDebugPanel/NetDebugVBox/NetDebugBody" unique_id=1840010016]
+layout_mode = 2
+
+[node name="PredictionToggle" type="CheckButton" parent="NetDebugPanel/NetDebugVBox/NetDebugBody" unique_id=1840010017]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+button_pressed = true
+text = "客户端预测"
+
+[node name="InterpolationToggle" type="CheckButton" parent="NetDebugPanel/NetDebugVBox/NetDebugBody" unique_id=1840010018]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+button_pressed = true
+text = "远端插值"

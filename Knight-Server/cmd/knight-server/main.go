@@ -52,13 +52,6 @@ func main() {
 	tokens := auth.NewTokenStore(cfg.TokenTTL)
 	accounts := account.NewService(st, tokens, ids)
 
-	// ---- HTTP ----
-	httpSrv := &http.Server{
-		Addr:              ":" + strconv.Itoa(cfg.HTTPPort),
-		Handler:           httpapi.NewServer(st, accounts, tokens).Handler(),
-		ReadHeaderTimeout: 5 * time.Second,
-	}
-
 	// ---- KCP 游戏通道 + 会话层 ----
 	// 闭包先行捕获 mgr（gate 回调在 Run 前不会触发）
 	var mgr *session.Manager
@@ -75,6 +68,38 @@ func main() {
 	if err != nil {
 		slog.Error("kcp listen failed", "port", cfg.KCPPort, "err", err)
 		os.Exit(1)
+	}
+	netemInit := kcp2k.NetEmConfig{
+		DelayMs:     cfg.NetEmDelayMs,
+		JitterMs:    cfg.NetEmJitterMs,
+		LossPercent: cfg.NetEmLossPercent,
+		Direction:   kcp2k.NetEmDirection(cfg.NetEmDirection),
+	}
+	if err := gate.NetEm().SetConfig(netemInit); err != nil {
+		slog.Error("invalid initial netem config", "err", err)
+		gate.Stop()
+		os.Exit(1)
+	}
+	if netemInit.Enabled() {
+		slog.Warn("netem enabled at startup",
+			"delay_ms", netemInit.DelayMs,
+			"jitter_ms", netemInit.JitterMs,
+			"loss_percent", netemInit.LossPercent,
+			"direction", netemInit.Normalized().Direction,
+		)
+	}
+
+	// ---- HTTP ----
+	apiSrv := httpapi.NewServer(st, accounts, tokens)
+	if cfg.DebugAPIEnabled {
+		apiSrv.SetDebugEnabled(true)
+		apiSrv.SetNetEm(gate.NetEm())
+		slog.Warn("debug api enabled", "endpoint", "/api/v1/debug/netem")
+	}
+	httpSrv := &http.Server{
+		Addr:              ":" + strconv.Itoa(cfg.HTTPPort),
+		Handler:           apiSrv.Handler(),
+		ReadHeaderTimeout: 5 * time.Second,
 	}
 	// ---- 事件总线（服务端状态变化发布订阅，Docs/server-event-pipeline.md）----
 	bus := event.NewBus()

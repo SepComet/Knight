@@ -358,8 +358,8 @@ public partial class DevAgentComponent : GlobalComponent
             foreach (var entity in session.Entities.Values.OrderBy(e => e.EntityId))
             {
                 Vector2 godotPos;
-                if (world.PlayerNodes.TryGetValue(entity.EntityId, out var motor) && GodotObject.IsInstanceValid(motor))
-                    godotPos = motor.GlobalPosition;
+                if (world.EntityViews.TryGetValue(entity.EntityId, out var view) && GodotObject.IsInstanceValid(view.Node))
+                    godotPos = view.Node.GlobalPosition;
                 else
                     godotPos = world.ActiveMap.WorldToGodot(entity.PosX, entity.PosY);
 
@@ -376,12 +376,24 @@ public partial class DevAgentComponent : GlobalComponent
                     entity.Hp));
             }
 
+            var netSyncSnapshot = world.GetNetSyncSnapshot();
+            var netSyncDto = new NetSyncStateDto(
+                netSyncSnapshot.PredictionEnabled,
+                netSyncSnapshot.InterpolationEnabled,
+                netSyncSnapshot.Expanded,
+                netSyncSnapshot.Fps,
+                netSyncSnapshot.RttMs,
+                netSyncSnapshot.LossRate,
+                netSyncSnapshot.ReconciliationsPerSecond,
+                netSyncSnapshot.AveragePositionError);
+
             battleState = new BattleStateDto(
                 session.CurrentMapId,
                 session.LastSnapshotTick,
                 session.LastAckedInputSeq,
                 world.LocalPlayerEntityId,
-                entities);
+                entities,
+                netSyncDto);
         }
 
         var uiState = CollectUiState(tree?.Root);
@@ -404,6 +416,10 @@ public partial class DevAgentComponent : GlobalComponent
             "set_text" => ExecuteSetText(req),
             "set_input" => ExecuteSetInput(req),
             "clear_input" => ExecuteClearInput(),
+            "set_prediction" => ExecuteSetPrediction(req),
+            "set_interpolation" => ExecuteSetInterpolation(req),
+            "toggle_net_debug" => ExecuteToggleNetDebug(req),
+            "inject_prediction_offset" => ExecuteInjectPredictionOffset(req),
             _ => (400, new ErrorResponse(false, $"Unsupported action type: {actionType}")),
         };
     }
@@ -527,6 +543,66 @@ public partial class DevAgentComponent : GlobalComponent
         var localInput = FindActiveLocalInput();
         localInput?.ClearSyntheticInput();
         return (200, new ActionResult(true, "clear_input", null, null, null, localInput != null, null));
+    }
+
+    private (int StatusCode, object Payload) ExecuteSetPrediction(ActionRequest req)
+    {
+        if (GetTree()?.CurrentScene is not BattleWorld world)
+            return (404, new ErrorResponse(false, "Current scene is not BattleWorld"));
+
+        var target = req.Enabled ?? !world.PredictionEnabled;
+        world.SetPredictionEnabled(target);
+        return (200, new ActionResult(true, "set_prediction", null, null, null, null, null, target, null));
+    }
+
+    private (int StatusCode, object Payload) ExecuteSetInterpolation(ActionRequest req)
+    {
+        if (GetTree()?.CurrentScene is not BattleWorld world)
+            return (404, new ErrorResponse(false, "Current scene is not BattleWorld"));
+
+        var target = req.Enabled ?? !world.InterpolationEnabled;
+        world.SetInterpolationEnabled(target);
+        return (200, new ActionResult(true, "set_interpolation", null, null, null, null, null, target, null));
+    }
+
+    private (int StatusCode, object Payload) ExecuteToggleNetDebug(ActionRequest req)
+    {
+        if (GetTree()?.CurrentScene is not BattleWorld world)
+            return (404, new ErrorResponse(false, "Current scene is not BattleWorld"));
+
+        bool expanded;
+        if (req.Expanded.HasValue)
+        {
+            world.SetHudDebugExpanded(req.Expanded.Value);
+            expanded = world.HudDebugExpanded;
+        }
+        else if (req.Enabled.HasValue)
+        {
+            world.SetHudDebugExpanded(req.Enabled.Value);
+            expanded = world.HudDebugExpanded;
+        }
+        else
+        {
+            expanded = world.ToggleHudDebugExpanded();
+        }
+
+        return (200, new ActionResult(true, "toggle_net_debug", null, null, null, null, null, null, expanded));
+    }
+
+    private (int StatusCode, object Payload) ExecuteInjectPredictionOffset(ActionRequest req)
+    {
+        if (GetTree()?.CurrentScene is not BattleWorld world)
+            return (404, new ErrorResponse(false, "Current scene is not BattleWorld"));
+
+        var dx = req.Dx ?? 0f;
+        var dy = req.Dy ?? 0f;
+        if (!float.IsFinite(dx) || !float.IsFinite(dy))
+            return (400, new ErrorResponse(false, "dx and dy must be finite numbers"));
+
+        if (!world.InjectPredictionOffset(dx, dy))
+            return (409, new ErrorResponse(false, "Cannot inject prediction offset (prediction disabled or local player unavailable)"));
+
+        return (200, new ActionResult(true, "inject_prediction_offset", null, null, null, null, null));
     }
 
     private (int StatusCode, object Payload) CaptureScreenshotOnMainThread(string targetPath)
@@ -756,12 +832,23 @@ public partial class DevAgentComponent : GlobalComponent
         [property: JsonPropertyName("state")] string State,
         [property: JsonPropertyName("hp")] int Hp);
 
+    private sealed record NetSyncStateDto(
+        [property: JsonPropertyName("prediction_enabled")] bool PredictionEnabled,
+        [property: JsonPropertyName("interpolation_enabled")] bool InterpolationEnabled,
+        [property: JsonPropertyName("hud_debug_expanded")] bool HudDebugExpanded,
+        [property: JsonPropertyName("fps")] float Fps,
+        [property: JsonPropertyName("rtt_ms")] float RttMs,
+        [property: JsonPropertyName("loss_rate")] float LossRate,
+        [property: JsonPropertyName("reconciliations_per_sec")] float ReconciliationsPerSec,
+        [property: JsonPropertyName("avg_pos_error")] float AvgPosError);
+
     private sealed record BattleStateDto(
         [property: JsonPropertyName("map_id")] uint MapId,
         [property: JsonPropertyName("last_tick")] uint LastTick,
         [property: JsonPropertyName("last_input_seq")] uint LastInputSeq,
         [property: JsonPropertyName("local_entity_id")] uint LocalEntityId,
-        [property: JsonPropertyName("entities")] List<BattleEntityDto> Entities);
+        [property: JsonPropertyName("entities")] List<BattleEntityDto> Entities,
+        [property: JsonPropertyName("net_sync")] NetSyncStateDto NetSync);
 
     private sealed record UiButtonDto(
         [property: JsonPropertyName("name")] string Name,
@@ -806,6 +893,10 @@ public partial class DevAgentComponent : GlobalComponent
         [JsonPropertyName("attack")] public bool? Attack { get; set; }
         [JsonPropertyName("interact")] public bool? Interact { get; set; }
         [JsonPropertyName("duration_ms")] public int? DurationMs { get; set; }
+        [JsonPropertyName("enabled")] public bool? Enabled { get; set; }
+        [JsonPropertyName("expanded")] public bool? Expanded { get; set; }
+        [JsonPropertyName("dx")] public float? Dx { get; set; }
+        [JsonPropertyName("dy")] public float? Dy { get; set; }
     }
 
     private sealed record ActionResult(
@@ -815,7 +906,9 @@ public partial class DevAgentComponent : GlobalComponent
         [property: JsonPropertyName("text"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Text,
         [property: JsonPropertyName("path"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Path,
         [property: JsonPropertyName("cleared"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] bool? Cleared,
-        [property: JsonPropertyName("error"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Error);
+        [property: JsonPropertyName("error"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Error,
+        [property: JsonPropertyName("enabled"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] bool? Enabled = null,
+        [property: JsonPropertyName("expanded"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] bool? Expanded = null);
 
     private sealed class ScreenshotRequest
     {

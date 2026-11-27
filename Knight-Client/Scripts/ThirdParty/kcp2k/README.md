@@ -14,7 +14,10 @@
 ## 相对上游的改动
 
 - 移除 `kcp/AssemblyInfo.cs`（`InternalsVisibleTo("kcp2k.Tests")`，仅上游测试需要）。
-- 其余文件原样拷贝，无代码改动。
+- M2 网络同步诊断只读扩展（不改变 KCP 线协议与重传逻辑）：
+  - `kcp/Kcp.cs`：新增 `internal uint fast_retransmits` 并在快速重传分支递增计数。
+  - `highlevel/KcpPeer.cs`：暴露只读诊断属性 `SmoothedRttMs`（`kcp.rx_srtt`）、`TotalSegmentsSent`（`kcp.snd_nxt`）、`TotalRetransmits`（`kcp.xmit + kcp.fast_retransmits`）。
+- 其余文件原样拷贝，无其他代码改动。
 
 ## 线协议注意
 

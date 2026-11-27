@@ -18,3 +18,17 @@ public sealed record GameHudModel(ResourceValue Health, ResourceValue Mana, Reso
 }
 
 public readonly record struct TouchInputState(Vector2 Movement, bool AttackHeld);
+
+/// <summary>战斗 HUD 网络同步调试悬浮窗数据模型。</summary>
+public readonly record struct NetSyncDebugModel(
+    float Fps,
+    float RttMs,
+    float LossRate,
+    float ReconciliationsPerSecond,
+    float AveragePositionError,
+    bool PredictionEnabled,
+    bool InterpolationEnabled,
+    bool Expanded)
+{
+    public static NetSyncDebugModel Default { get; } = new(0f, 0f, 0f, 0f, 0f, true, true, true);
+}

@@ -1,12 +1,14 @@
 #nullable enable
 using System;
 using Godot;
+using SepCore.Battle;
 
 namespace SepCore.Gameplay.Player;
 
 /// <summary>Local fixed-step movement. Receives commands; does not read devices or animate.</summary>
-public partial class PlayerMotor : CharacterBody2D
+public partial class PlayerMotor : CharacterBody2D, IBattleEntityView
 {
+    public Node2D Node => this;
     [Export(PropertyHint.Range, "1,1000,1")] public float MoveSpeed { get; set; } = 96;
     [Export(PropertyHint.Range, "0.001,0.1,0.001")] public float FixedStep { get; set; } = 1f / 30;
 
@@ -104,6 +106,10 @@ public partial class PlayerMotor : CharacterBody2D
         _accumulator = 0;
         ResetPhysicsInterpolation();
     }
+
+    /// <summary>实现 <see cref="IBattleEntityView.ApplyWorldState"/>，委托至权威状态应用路径。</summary>
+    public void ApplyWorldState(Vector2 godotPosition, float facingRadians, bool moving, bool alive)
+        => ApplyAuthoritativeState(godotPosition, facingRadians, moving, alive);
 
     /// <summary>应用服务端权威快照状态（位置、朝向、移动动画与存活状态）。</summary>
     public void ApplyAuthoritativeState(Vector2 position, float facingRadians, bool moving, bool alive)

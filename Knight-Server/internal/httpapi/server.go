@@ -4,6 +4,8 @@
 //   - POST /api/v1/login             登录换 token
 //   - GET  /api/v1/users/{uid}       用户信息（Bearer）
 //   - GET  /api/v1/users/{uid}/matches  历史战绩（Bearer）
+//   - GET  /api/v1/debug/netem       查询运行时弱网配置与统计
+//   - POST /api/v1/debug/netem       热修改运行时弱网参数
 //
 // 错误统一 4xx/5xx + {"error": "<描述>"}。
 package httpapi
@@ -24,15 +26,27 @@ type Pinger interface {
 
 // Server HTTP 接口服务。
 type Server struct {
-	db       Pinger
-	accounts Accounts
-	tokens   TokenLookup
+	db           Pinger
+	accounts     Accounts
+	tokens       TokenLookup
+	netem        NetEmController
+	debugEnabled bool
 }
 
 // NewServer 构造 HTTP 接口服务。
 // db 可为 nil（healthz 只报服务状态）；accounts/tokens 为 nil 时账号路由返回 503。
 func NewServer(db Pinger, accounts Accounts, tokens TokenLookup) *Server {
 	return &Server{db: db, accounts: accounts, tokens: tokens}
+}
+
+// SetDebugEnabled 控制是否启用 /api/v1/debug/* 调试路由（默认关闭，未开启时返回 403）。
+func (s *Server) SetDebugEnabled(enabled bool) {
+	s.debugEnabled = enabled
+}
+
+// SetNetEm 注入运行时弱网控制器（需配合 SetDebugEnabled(true) 生效；未注入时返回 503）。
+func (s *Server) SetNetEm(netem NetEmController) {
+	s.netem = netem
 }
 
 // Handler 返回全部路由（含访问日志中间件）。
@@ -43,6 +57,8 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("POST /api/v1/login", s.guardAccounts(s.handleLogin))
 	mux.HandleFunc("GET /api/v1/users/{uid}", s.guardAccounts(s.handleUser))
 	mux.HandleFunc("GET /api/v1/users/{uid}/matches", s.guardAccounts(s.handleMatches))
+	mux.HandleFunc("GET /api/v1/debug/netem", s.guardNetEm(s.handleGetNetEm))
+	mux.HandleFunc("POST /api/v1/debug/netem", s.guardNetEm(s.handleSetNetEm))
 	return s.logRequests(mux)
 }
 

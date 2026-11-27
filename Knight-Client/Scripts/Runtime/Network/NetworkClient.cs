@@ -64,6 +64,8 @@ public sealed class NetworkClient : INetworkConnectionEvents, INetworkSessionCli
     private string? _disconnectReason;
     private float _handshakeElapsed;
     private float _heartbeatElapsed;
+    private double _elapsedSeconds;
+    private readonly KcpLossRateEstimator _lossEstimator = new();
 
     public NetworkClient(NetworkClientConfig? config = null)
     {
@@ -86,6 +88,8 @@ public sealed class NetworkClient : INetworkConnectionEvents, INetworkSessionCli
         _disconnectReason = null;
         _handshakeElapsed = 0f;
         _heartbeatElapsed = 0f;
+        _elapsedSeconds = 0.0;
+        _lossEstimator.Reset();
         State = NetworkState.Connecting;
 
         _client = new KcpClient(
@@ -157,6 +161,12 @@ public sealed class NetworkClient : INetworkConnectionEvents, INetworkSessionCli
             return;
 
         _client?.Tick();
+
+        if (float.IsFinite(delta) && delta > 0f)
+            _elapsedSeconds += delta;
+
+        if (_client != null && State == NetworkState.Connected)
+            _lossEstimator.Sample(_elapsedSeconds, _client.TotalSegmentsSent, _client.TotalRetransmits);
 
         if (State == NetworkState.Connecting)
         {
@@ -254,11 +264,26 @@ public sealed class NetworkClient : INetworkConnectionEvents, INetworkSessionCli
         Teardown();
     }
 
+    /// <summary>只读获取当前 KCP 传输层的实时 RTT（ms）与滑动窗口上行重传率（无副作用）。</summary>
+    public NetworkTransportStats GetTransportStats()
+    {
+        var client = _client;
+        if (client == null || State != NetworkState.Connected)
+            return default;
+
+        var srtt = client.SmoothedRttMs;
+        var rttMs = srtt > 0 ? (float)srtt : (float)client.rttInMilliseconds;
+        var sent = client.TotalSegmentsSent;
+        var retrans = client.TotalRetransmits;
+        return new NetworkTransportStats(rttMs, _lossEstimator.CurrentLossRate, sent, retrans);
+    }
+
     /// <summary>统一拆除状态机并上报断线原因:显式断开原因 > kcp2k 错误 > 默认文案。</summary>
     private void Teardown()
     {
         State = NetworkState.Disconnected;
         _client = null;
+        _lossEstimator.Reset();
         Disconnected?.Invoke(_disconnectReason ?? _lastError ?? "连接断开");
     }
 

@@ -47,11 +47,13 @@ public sealed class BattleMapLoader
 /// <summary>
 /// 联机战斗房间场景根（挂载于 res://Scenes/Main.tscn）。
 /// 复用 Player.tscn / PlayerMotor / LocalPlayerInput / PlayerCamera / GameHudController，
-/// 消费 BattleSessionClient 的房间切换与快照事件并上报 30Hz 玩家输入。
+/// 消费 BattleSessionClient 的房间切换与快照事件并上报 30Hz 玩家输入，
+/// 同时驱动本地玩家客户端预测校正（LocalPlayerPredictor）与远端实体快照插值（RemoteEntityInterpolator）。
 /// </summary>
 public partial class BattleWorld : Node2D
 {
     private const string PlayerPrefabPath = "res://Prefabs/Entity/Player.tscn";
+    private const float NetDebugRefreshIntervalSeconds = 0.1f;
 
     private Node2D _wallsRoot = null!;
     private Node2D _entitiesRoot = null!;
@@ -65,15 +67,36 @@ public partial class BattleWorld : Node2D
 
     private readonly BattleMapLoader _mapLoader = new();
     private BattleMapDefinition CurrentMap => _mapLoader.CurrentMap;
-    private readonly Dictionary<uint, PlayerMotor> _playerNodes = new();
+    private readonly Dictionary<uint, IBattleEntityView> _entityViews = new();
+    private readonly LocalPlayerPredictor _localPredictor = new();
+    private readonly Dictionary<uint, RemoteEntityInterpolator> _remoteInterpolators = new();
+    private readonly SyncMetricsTracker _syncMetrics = new();
+
     private uint _localPlayerEntityId;
     private LocalPlayerInput? _localInput;
+    private bool _interpolationEnabled = true;
+    private double _syncClockSeconds;
+    private float _netDebugRefreshAccumulator;
 
     public BattleSessionClient? ActiveSession => _session;
     public uint LocalPlayerEntityId => _localPlayerEntityId;
     public LocalPlayerInput? LocalInput => _localInput;
     public BattleMapDefinition ActiveMap => CurrentMap;
-    public IReadOnlyDictionary<uint, PlayerMotor> PlayerNodes => _playerNodes;
+    public IReadOnlyDictionary<uint, IBattleEntityView> EntityViews => _entityViews;
+
+    public bool PredictionEnabled
+    {
+        get => _localPredictor.Enabled;
+        set => SetPredictionEnabled(value);
+    }
+
+    public bool InterpolationEnabled
+    {
+        get => _interpolationEnabled;
+        set => SetInterpolationEnabled(value);
+    }
+
+    public bool HudDebugExpanded => _hud?.NetDebugModel.Expanded ?? false;
 
     public override void _Ready()
     {
@@ -82,6 +105,59 @@ public partial class BattleWorld : Node2D
         _entitiesRoot = GetNode<Node2D>("%EntitiesRoot");
         _camera = GetNode<PlayerCamera>("%PlayerCamera");
         _playerScene = GD.Load<PackedScene>(PlayerPrefabPath);
+    }
+
+    private const double MaxSyncDeltaSeconds = 0.05;
+
+    public override void _Process(double delta)
+    {
+        var clampedDelta = double.IsFinite(delta) && delta > 0.0
+            ? Math.Min(delta, MaxSyncDeltaSeconds)
+            : 0.0;
+        if (clampedDelta > 0.0)
+            _syncClockSeconds += clampedDelta;
+
+        if (_localPlayerEntityId != 0
+            && _localPredictor.HasState
+            && _entityViews.TryGetValue(_localPlayerEntityId, out var localView)
+            && IsInstanceValid(localView.Node))
+        {
+            _localPredictor.DecayVisualError((float)clampedDelta);
+            ApplyWorldStateToView(
+                localView,
+                _localPredictor.RenderPosition,
+                _localPredictor.FacingDegrees,
+                _localPredictor.IsMoving,
+                _localPredictor.Alive);
+        }
+
+        if (_interpolationEnabled && _remoteInterpolators.Count > 0)
+        {
+            foreach (var (entityId, interpolator) in _remoteInterpolators)
+            {
+                if (_entityViews.TryGetValue(entityId, out var remoteView)
+                    && IsInstanceValid(remoteView.Node)
+                    && interpolator.TrySample(_syncClockSeconds, out var sampled))
+                {
+                    ApplyWorldStateToView(
+                        remoteView,
+                        sampled.Position,
+                        sampled.FacingDegrees,
+                        sampled.Moving,
+                        sampled.Alive);
+                }
+            }
+        }
+
+        if (_hud != null)
+        {
+            _netDebugRefreshAccumulator += (float)delta;
+            if (_netDebugRefreshAccumulator >= NetDebugRefreshIntervalSeconds)
+            {
+                _netDebugRefreshAccumulator = 0f;
+                PushNetDebugToHud();
+            }
+        }
     }
 
     public void BindSession(
@@ -101,6 +177,15 @@ public partial class BattleWorld : Node2D
         _session.EntityUpdated += OnEntityUpdated;
         _session.EntityDespawned += OnEntityDespawned;
         _session.PlayerLeftReceived += OnPlayerLeft;
+
+        if (_hud != null)
+        {
+            _hud.PredictionToggled += OnHudPredictionToggled;
+            _hud.InterpolationToggled += OnHudInterpolationToggled;
+            if (OS.HasFeature("mobile"))
+                _hud.SetNetDebugExpanded(false);
+            PushNetDebugToHud();
+        }
     }
 
     public void UnbindSession()
@@ -115,11 +200,124 @@ public partial class BattleWorld : Node2D
             _session = null;
         }
 
+        if (_hud != null)
+        {
+            _hud.PredictionToggled -= OnHudPredictionToggled;
+            _hud.InterpolationToggled -= OnHudInterpolationToggled;
+        }
+
         ClearEntities();
+        _syncMetrics.Reset();
         _hud = null;
         _touch = null;
         _memberNames = null;
     }
+
+    public void SetPredictionEnabled(bool enabled)
+    {
+        _localPredictor.Enabled = enabled;
+        if (enabled && _localPredictor.HasState && _session != null)
+            _localPredictor.RebuildFromUnacked(_session.PendingInputs, CurrentMap);
+
+        if (_localPlayerEntityId != 0
+            && _localPredictor.HasState
+            && _entityViews.TryGetValue(_localPlayerEntityId, out var localView)
+            && IsInstanceValid(localView.Node))
+        {
+            ApplyWorldStateToView(
+                localView,
+                _localPredictor.RenderPosition,
+                _localPredictor.FacingDegrees,
+                _localPredictor.IsMoving,
+                _localPredictor.Alive);
+        }
+
+        PushNetDebugToHud();
+    }
+
+    /// <summary>
+    /// 仅用于调试/E2E 验证：偏移本地预测位置（不改变服务端权威位置），
+    /// 以便真实联机链路触发回滚重放与平滑收敛。
+    /// </summary>
+    public bool InjectPredictionOffset(float dx, float dy)
+    {
+        if (!_localPredictor.InjectPredictionOffset(dx, dy))
+            return false;
+
+        if (_localPlayerEntityId != 0
+            && _entityViews.TryGetValue(_localPlayerEntityId, out var localView)
+            && IsInstanceValid(localView.Node))
+        {
+            ApplyWorldStateToView(
+                localView,
+                _localPredictor.RenderPosition,
+                _localPredictor.FacingDegrees,
+                _localPredictor.IsMoving,
+                _localPredictor.Alive);
+        }
+
+        return true;
+    }
+
+    public void SetInterpolationEnabled(bool enabled)
+    {
+        _interpolationEnabled = enabled;
+        foreach (var (entityId, interpolator) in _remoteInterpolators)
+        {
+            interpolator.Enabled = enabled;
+            if (!enabled
+                && _entityViews.TryGetValue(entityId, out var remoteView)
+                && IsInstanceValid(remoteView.Node)
+                && interpolator.TrySample(_syncClockSeconds, out var latest))
+            {
+                ApplyWorldStateToView(
+                    remoteView,
+                    latest.Position,
+                    latest.FacingDegrees,
+                    latest.Moving,
+                    latest.Alive);
+            }
+        }
+
+        PushNetDebugToHud();
+    }
+
+    public void SetHudDebugExpanded(bool expanded)
+    {
+        _hud?.SetNetDebugExpanded(expanded);
+        PushNetDebugToHud();
+    }
+
+    public bool ToggleHudDebugExpanded()
+    {
+        var expanded = _hud?.ToggleNetDebugExpanded() ?? false;
+        PushNetDebugToHud();
+        return expanded;
+    }
+
+    public NetSyncDebugModel GetNetSyncSnapshot()
+    {
+        _syncMetrics.Prune(_syncClockSeconds);
+        var transport = _session?.GetTransportStats() ?? default;
+        var fps = (float)Engine.GetFramesPerSecond();
+        return new NetSyncDebugModel(
+            Fps: fps,
+            RttMs: transport.RttMs,
+            LossRate: transport.LossRate,
+            ReconciliationsPerSecond: _syncMetrics.ReconciliationsPerSecond,
+            AveragePositionError: _syncMetrics.AveragePositionError,
+            PredictionEnabled: PredictionEnabled,
+            InterpolationEnabled: InterpolationEnabled,
+            Expanded: HudDebugExpanded);
+    }
+
+    private void PushNetDebugToHud()
+    {
+        _hud?.SetNetDebugModel(GetNetSyncSnapshot());
+    }
+
+    private void OnHudPredictionToggled(bool enabled) => SetPredictionEnabled(enabled);
+    private void OnHudInterpolationToggled(bool enabled) => SetInterpolationEnabled(enabled);
 
     private void LoadMap(uint mapId)
     {
@@ -149,6 +347,7 @@ public partial class BattleWorld : Node2D
     private void OnRoomTransition(RoomTransition transition)
     {
         ClearEntities();
+        _syncMetrics.Reset();
         LoadMap(transition.MapId);
 
         // 镜头先对准本地玩家出生点，避免首帧快照到达前视野停在原点
@@ -166,16 +365,45 @@ public partial class BattleWorld : Node2D
 
     private void OnEntitySpawned(EntityState entity)
     {
-        if (entity.Type != EntityType.EntityPlayer)
-            return;
-
-        if (_playerNodes.ContainsKey(entity.EntityId))
+        if (_entityViews.ContainsKey(entity.EntityId))
         {
             OnEntityUpdated(entity);
             return;
         }
 
-        var isLocal = _session != null && entity.PlayerUid != 0 && entity.PlayerUid == _session.LocalUid;
+        var view = CreateEntityView(entity, out var isLocal);
+        if (view == null)
+            return;
+
+        if (ShouldInterpolateEntity(entity.Type, isLocal))
+        {
+            var interpolator = new RemoteEntityInterpolator { Enabled = _interpolationEnabled };
+            interpolator.PushSample(ToSnapshotSample(entity, _syncClockSeconds));
+            _remoteInterpolators[entity.EntityId] = interpolator;
+        }
+
+        ApplyStateToView(view, entity);
+        view.Node.ResetPhysicsInterpolation();
+
+        _entityViews[entity.EntityId] = view;
+        if (isLocal)
+            UpdateHud(entity.Hp, (int)Math.Max(1u, _session?.CurrentMapId ?? 1u));
+    }
+
+    private IBattleEntityView? CreateEntityView(EntityState entity, out bool isLocal)
+    {
+        isLocal = false;
+        return entity.Type switch
+        {
+            EntityType.EntityPlayer => CreatePlayerEntityView(entity, out isLocal),
+            // M3 扩展点：EntityEnemy / EntityBoss / EntityProjectile / EntityItem 按类型分发各自视图工厂
+            _ => null,
+        };
+    }
+
+    private IBattleEntityView CreatePlayerEntityView(EntityState entity, out bool isLocal)
+    {
+        isLocal = _session != null && entity.PlayerUid != 0 && entity.PlayerUid == _session.LocalUid;
         var motor = _playerScene.Instantiate<PlayerMotor>();
         motor.Name = $"Player_{entity.EntityId}";
         motor.AuthoritativeDrive = true;
@@ -185,11 +413,13 @@ public partial class BattleWorld : Node2D
         motor.GlobalPosition = godotPos;
         _entitiesRoot.AddChild(motor);
 
+        var alive = entity.State != EntityAnimState.AnimDead && entity.Hp > 0;
         var localInput = motor.GetNode<LocalPlayerInput>("%LocalInput");
         if (isLocal)
         {
             _localPlayerEntityId = entity.EntityId;
             _localInput = localInput;
+            _localPredictor.Reset(new BattleVec2(entity.PosX, entity.PosY), entity.Facing, alive);
             localInput.TouchMode = _touch != null;
             if (_touch != null)
                 localInput.BindTouch(_touch);
@@ -210,27 +440,76 @@ public partial class BattleWorld : Node2D
         }
 
         AttachNameTag(motor, entity.PlayerUid, isLocal);
-        ApplyStateToMotor(motor, entity);
-        motor.ResetPhysicsInterpolation();
+        return motor;
+    }
 
-        _playerNodes[entity.EntityId] = motor;
+    private static bool ShouldInterpolateEntity(EntityType entityType, bool isLocal)
+    {
         if (isLocal)
-            UpdateHud(entity.Hp, (int)Math.Max(1u, _session?.CurrentMapId ?? 1u));
+            return false;
+
+        return entityType switch
+        {
+            EntityType.EntityPlayer => true,
+            EntityType.EntityEnemy => true,
+            EntityType.EntityBoss => true,
+            EntityType.EntityProjectile => true,
+            _ => false,
+        };
     }
 
     private void OnEntityUpdated(EntityState entity)
     {
-        if (!_playerNodes.TryGetValue(entity.EntityId, out var motor))
+        if (!_entityViews.TryGetValue(entity.EntityId, out var view))
             return;
 
-        ApplyStateToMotor(motor, entity);
         if (entity.EntityId == _localPlayerEntityId)
+        {
+            var alive = entity.State != EntityAnimState.AnimDead && entity.Hp > 0;
+            var moving = entity.State == EntityAnimState.AnimMoving;
+            var result = _localPredictor.Reconcile(
+                new BattleVec2(entity.PosX, entity.PosY),
+                entity.Facing,
+                moving,
+                alive,
+                _session?.LastAckedInputSeq ?? 0u,
+                _session?.PendingInputs ?? Array.Empty<InputCmd>(),
+                CurrentMap);
+
+            _syncMetrics.RecordSample(_syncClockSeconds, result.PositionError, result.Reconciled);
+
+            ApplyWorldStateToView(
+                view,
+                _localPredictor.RenderPosition,
+                _localPredictor.FacingDegrees,
+                _localPredictor.IsMoving,
+                _localPredictor.Alive);
+
             UpdateHud(entity.Hp, (int)Math.Max(1u, _session?.CurrentMapId ?? 1u));
+            return;
+        }
+
+        if (!ShouldInterpolateEntity(entity.Type, isLocal: false))
+        {
+            ApplyStateToView(view, entity);
+            return;
+        }
+
+        if (!_remoteInterpolators.TryGetValue(entity.EntityId, out var interpolator))
+        {
+            interpolator = new RemoteEntityInterpolator { Enabled = _interpolationEnabled };
+            _remoteInterpolators[entity.EntityId] = interpolator;
+        }
+
+        interpolator.PushSample(ToSnapshotSample(entity, _syncClockSeconds));
+        if (!_interpolationEnabled)
+            ApplyStateToView(view, entity);
     }
 
     private void OnEntityDespawned(uint entityId, ulong playerUid)
     {
-        if (!_playerNodes.Remove(entityId, out var motor))
+        _remoteInterpolators.Remove(entityId);
+        if (!_entityViews.Remove(entityId, out var view))
             return;
 
         if (entityId == _localPlayerEntityId)
@@ -241,12 +520,13 @@ public partial class BattleWorld : Node2D
                 _localInput = null;
             }
             _localPlayerEntityId = 0;
-            if (IsInstanceValid(_camera) && _camera.Target == motor)
+            _localPredictor.Clear();
+            if (IsInstanceValid(_camera) && _camera.Target == view.Node)
                 _camera.Target = null;
         }
 
-        if (IsInstanceValid(motor))
-            motor.QueueFree();
+        if (IsInstanceValid(view.Node))
+            view.Node.QueueFree();
     }
 
     private void OnPlayerLeft(ulong uid, LeftReason reason)
@@ -267,16 +547,53 @@ public partial class BattleWorld : Node2D
         if (command.InteractPressed)
             buttons |= (uint)InputButtons.BtnInteract;
 
-        _session.SampleAndSendInput(moveX, moveY, aimDeg, buttons);
+        var cmd = _session.SampleAndSendInput(moveX, moveY, aimDeg, buttons);
+        if (cmd != null && _localPlayerEntityId != 0 && _localPredictor.HasState)
+        {
+            _localPredictor.ApplyLocalInput(cmd, CurrentMap);
+            if (_localPredictor.Enabled
+                && _entityViews.TryGetValue(_localPlayerEntityId, out var localView)
+                && IsInstanceValid(localView.Node))
+            {
+                ApplyWorldStateToView(
+                    localView,
+                    _localPredictor.RenderPosition,
+                    _localPredictor.FacingDegrees,
+                    _localPredictor.IsMoving,
+                    _localPredictor.Alive);
+            }
+        }
     }
 
-    private void ApplyStateToMotor(PlayerMotor motor, EntityState entity)
+    private void ApplyStateToView(IBattleEntityView view, EntityState entity)
     {
-        var godotPos = CurrentMap.WorldToGodot(entity.PosX, entity.PosY);
-        var godotFacing = BattleMapDefinition.WorldDegreesToGodotRadians(entity.Facing);
         var alive = entity.State != EntityAnimState.AnimDead && entity.Hp > 0;
         var moving = entity.State == EntityAnimState.AnimMoving;
-        motor.ApplyAuthoritativeState(godotPos, godotFacing, moving, alive);
+        ApplyWorldStateToView(view, new BattleVec2(entity.PosX, entity.PosY), entity.Facing, moving, alive);
+    }
+
+    private void ApplyWorldStateToView(
+        IBattleEntityView view,
+        BattleVec2 worldPos,
+        float facingDegrees,
+        bool moving,
+        bool alive)
+    {
+        var godotPos = CurrentMap.WorldToGodot(worldPos.X, worldPos.Y);
+        var godotFacing = BattleMapDefinition.WorldDegreesToGodotRadians(facingDegrees);
+        view.ApplyWorldState(godotPos, godotFacing, moving, alive);
+    }
+
+    private static EntitySnapshotSample ToSnapshotSample(EntityState entity, double timestampSeconds)
+    {
+        var alive = entity.State != EntityAnimState.AnimDead && entity.Hp > 0;
+        var moving = entity.State == EntityAnimState.AnimMoving;
+        return new EntitySnapshotSample(
+            timestampSeconds,
+            new BattleVec2(entity.PosX, entity.PosY),
+            entity.Facing,
+            moving,
+            alive);
     }
 
     private void AttachNameTag(PlayerMotor motor, ulong uid, bool isLocal)
@@ -319,16 +636,18 @@ public partial class BattleWorld : Node2D
             _localInput = null;
         }
         _localPlayerEntityId = 0;
+        _localPredictor.Clear();
+        _remoteInterpolators.Clear();
 
         if (IsInstanceValid(_camera))
             _camera.Target = null;
 
-        foreach (var motor in _playerNodes.Values)
+        foreach (var view in _entityViews.Values)
         {
-            if (IsInstanceValid(motor))
-                motor.QueueFree();
+            if (IsInstanceValid(view.Node))
+                view.Node.QueueFree();
         }
-        _playerNodes.Clear();
+        _entityViews.Clear();
     }
 
     public override void _Draw()
