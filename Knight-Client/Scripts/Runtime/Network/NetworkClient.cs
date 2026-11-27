@@ -39,7 +39,7 @@ public sealed class NetworkClientConfig
 public sealed class NetworkClient : INetworkConnectionEvents, INetworkSessionClient
 {
     /// <summary>当前协议版本,与 Knight-Proto/knight.proto 中 HandshakeReq 注释的 PROTO_VERSION 保持同步(文件头规则 2)。</summary>
-    public const uint ProtoVersion = 5;
+    public const uint ProtoVersion = 6;
 
     public NetworkState State { get; private set; } = NetworkState.Disconnected;
 

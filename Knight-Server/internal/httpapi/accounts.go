@@ -33,6 +33,7 @@ type MatchEntry struct {
 	MatchID     uint64    `json:"match_id,string"` // 雪花 ID：字符串化
 	Outcome     uint32    `json:"outcome"`
 	DurationSec uint32    `json:"duration_sec"`
+	Seed        uint64    `json:"seed,string"` // 本局随机种子：字符串化防 JS 丢精度
 	CharacterID uint32    `json:"character_id"` // 对局时使用的角色 config_id
 	WeaponID    uint32    `json:"weapon_id"`    // 对局时装备的武器 config_id
 	Kills       uint32    `json:"kills"`

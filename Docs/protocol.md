@@ -1,6 +1,6 @@
 # Knight 网络协议规范
 
-**文档版本：** V0.2（草案，待评审；`proto_version = 5`）
+**文档版本：** V0.3（M3 同步；`proto_version = 6`）
 **上游需求：** [SRS-需求规格说明书.md](./SRS-需求规格说明书.md) §3 / §4 / §6 / §7
 **契约源：** [Knight-Proto/knight.proto](../Knight-Proto/knight.proto) —— 唯一消息定义处，本文档不复制定义，只描述流程与语义
 **代码生成：** [Knight-Tools/gen-proto.ps1](../Knight-Tools/gen-proto.ps1)
@@ -83,14 +83,14 @@ UDP 数据报 = [1B channel][4B cookie 小端][载荷]
 | `POST /api/v1/register` | 注册账号 | `{name, password}` | `200 {uid}` | `409` 名称已存在 |
 | `POST /api/v1/login` | 登录换取 token | `{name, password}` | `200 {uid, name, token}` | `401` 凭证错误 |
 | `GET /api/v1/users/{uid}` | 用户基本信息 | — | `200 {uid, name, coins, created_at}` | `404` |
-| `GET /api/v1/users/{uid}/matches` | 历史战绩列表 | — | `200 [{match_id, outcome, duration_sec, character_id, weapon_id, kills, damage_dealt, damage_taken, alive, finished_at}]` | `404` |
+| `GET /api/v1/users/{uid}/matches` | 历史战绩列表 | — | `200 [{match_id, outcome, duration_sec, seed, character_id, weapon_id, kills, damage_dealt, damage_taken, alive, finished_at}]` | `404` |
 | `GET /api/v1/debug/netem` | 查询 KCP 弱网注入配置与统计（需开启 `KNIGHT_DEBUG_API_ENABLED=true`） | — | `200 {enabled, delay_ms, jitter_ms, loss_percent, direction, stats}` | `403` 未开启 |
 | `POST /api/v1/debug/netem` | 热更新 KCP 弱网注入参数（`delay_ms` 为单向延迟） | `{delay_ms, jitter_ms, loss_percent, direction, reset_stats}` | `200 {enabled, delay_ms, jitter_ms, loss_percent, direction, stats}` | `400` / `403` |
 
 - 查询接口需带 `Authorization: Bearer <token>`。
 - token：服务端生成的随机 128 位串，**内存态**，有效期 24h，进程重启失效（MVP 接受，见 §12 待定项）。
 - 密码加盐哈希存储，不落明文。
-- uid 与 match_id 为服务端雪花 ID（64 位，超 JS 安全整数 2^53）：**JSON 中一律序列化为字符串**；KCP 侧 proto `uint64` 不受影响。
+- uid、match_id 与 seed 为 64 位无符号整数（超 JS 安全整数 2^53）：**JSON 中一律序列化为字符串**；KCP 侧 proto `uint64` 不受影响。
 - `coins` = 蓝币；`character_id` / `weapon_id` 为对局时角色/武器 config_id 快照（对齐 Luban 配置，与 `EntityState.config_id` 同约定，非数据库外键）。
 
 ---
@@ -151,7 +151,7 @@ sequenceDiagram
 | 1~31 连接/会话 | `HandshakeReq` / `HandshakeAck` / `Heartbeat` / `Error` | 见表 | 握手、保活、错误 |
 | 32~63 大厅/房间 | `CreateRoomReq` `JoinRoomReq` `LeaveRoom` `SetReady` `StartGame` `GetRoomListReq` | C→S | 房间操作 |
 | | `RoomStatePush` `GameStart` `GetRoomListResp` | S→C | 房间状态广播、开局、房间列表 |
-| 64~95 游戏事件 | `EntitySpawn` `EntityDespawn` `DamageEvent` `DoorState` `RoomTransition` `ItemPicked` `PlayerLeft` `GameResult` | S→C | 可靠事件 |
+| 64~95 游戏事件 | `EntitySpawn` `EntityDespawn` `DamageEvent` `DoorState` `RoomTransition` `ItemPicked` `PlayerLeft` `GameResult` `SkillEvent` | S→C | 可靠事件（`MSG_SKILL_EVENT = 73`） |
 | | `RoomLoaded` | C→S | 加载确认 |
 | 96~127 高频 | `Snapshot` | S→C 单播 | 全量快照 |
 | | `InputBatch` | C→S | 批量输入 |
@@ -206,17 +206,20 @@ sequenceDiagram
 | `EntitySpawn` | 子弹生成、道具生成、（兜底）房间实体补发 | 可批量 |
 | `EntityDespawn` | 死亡 / 被拾取 / 到寿 / 房间清理 | `DespawnReason` 区分 |
 | `DamageEvent` | 每次命中 | `damage` 为本次实际扣血量（非负，致死时按剩余 HP 截断），驱动命中特效与飘字；权威 HP 以快照为准 |
-| `DoorState` | 房间内敌人清空时 `DOOR_OPEN` | SRS §5.5 |
-| `RoomTransition` | 服务端控制切换（§6.4） | 携带全员出生点 |
-| `ItemPicked` | `BTN_INTERACT` 校验通过后 | `healed_hp` 为截断后实际恢复量 |
+| `DoorState` | 房间内敌人清空（或 0 怪补给房激活）时 `DOOR_OPEN` | SRS §5.5 |
+| `RoomTransition` | 服务端控制切换（§6.4） | 携带全员出生点及 `room_index`（0-based）/ `total_rooms` 进度 |
+| `ItemPicked` | `BTN_INTERACT` 校验通过后 | `healed_hp` 为截断后实际恢复量，`item_config_id` 区分回血/攻增/护盾道具 |
+| `SkillEvent` | `BTN_SKILL` 冷却校验通过后 | 携带 `caster_id`、`skill_id`、施法位置/朝向与冷却时长，驱动客户端技能特效与音效 |
 | `PlayerLeft` | 对局中玩家心跳超时 | 该玩家规则判定视同被击败 |
-| `GameResult` | Boss 被击败（Victory）或全员被击败（Defeat） | 携带 `match_id`，服务端已持久化 |
+| `GameResult` | Boss 被击败（Victory）或全员被击败（Defeat） | 携带 `match_id`，服务端已持久化（含 `seed` 与角色/武器快照） |
 
 服务端校验规则：
 
 - **攻击**：输入带 `BTN_ATTACK` 且玩家存活且冷却结束 → 生成子弹（`EntitySpawn`）；冷却未结束则静默忽略，不回错。
+- **技能**：输入带 `BTN_SKILL`（bit2）且玩家存活且主动技能冷却结束 → 执行权威技能策略并广播 `SkillEvent`；冷却进度通过 `EntityState.skill_cd_remaining` / `skill_cd_total` 同步。
 - **拾取**：输入带 `BTN_INTERACT`（单帧边沿）→ 取拾取半径内最近且状态合法的道具；无合法目标静默忽略。半径数值归数值配置表（P1）。
 - **移动输入**：`move_x/move_y` 模长 > 1 时钳制到 1（防作弊加速）。
+- **实体扩展状态**：`EntityState` 携带 `max_hp`、`skill_cd_remaining`、`skill_cd_total` 与 `status_flags` 位掩码（`1=无敌/冲刺`、`2=护盾减伤`、`4=攻击增益`、`8=Boss二阶段`）；已阵亡玩家在 `EntityDespawn` 后不再写入 `Snapshot.entities`（仍接收快照观战队友）。
 
 ### 5.5 高频通道
 
@@ -324,8 +327,8 @@ Boss 被击败 / 全员被击败
 | 移动输入 | 已归一化 `float32`，模长 ≤ 1 |
 | 生命值 / 伤害 / 恢复量 | `int32` |
 | 为什么不用定点数 | 服务端权威单点模拟，无跨端确定性需求；SRS §9.2 已排除 Rollback |
-| ID 空间 | `uid`（`uint64`）= 持久账号 ID；`entity_id`（`uint32`）= 会话内运行时实体 ID，服务端单调分配不复用；`room_id`（`uint32`）= 服务端生成的房间号；`map_id`（`uint32`）= 客户端内置资源映射键，MVP：1、2 = 普通房，3 = Boss 房 |
-| 按钮 | `BTN_ATTACK`（bit0）按住持续；`BTN_INTERACT`（bit1）单帧边沿 |
+| ID 空间 | `uid`（`uint64`）= 持久账号 ID；`entity_id`（`uint32`）= 会话内运行时实体 ID，服务端单调分配不复用；`room_id`（`uint32`）= 服务端生成的房间号；`map_id`（`uint32`）= 9 张 30×20 预制房间模板键：`1` 出生前厅、`2..5` 普通战斗房、`6..7` 补给房（0 怪自动开门）、`8` 精英房、`9` Boss 房；`GameStart` 携带 `seed` 与 4 房不重复序列 `[1, 2..5, 6..8, 9]` |
+| 按钮 | `BTN_ATTACK`（bit0）按住持续；`BTN_INTERACT`（bit1）单帧边沿；`BTN_SKILL`（bit2）主动技能触发 |
 
 ---
 
@@ -348,7 +351,7 @@ Boss 被击败 / 全员被击败
 | `kcp_port` | 37777/UDP | 服务端 | 可配置 |
 | `http_port` | 37780/TCP | 服务端 | 可配置 |
 | KCP 参数 | nodelay=1, interval=10, resend=2, nc=1 | 服务端 | 待网络测试调优 |
-| `proto_version` | 5 | 双端 | 随 proto 改动递增 |
+| `proto_version` | 6 | 双端 | 随 proto 改动递增 |
 
 ---
 

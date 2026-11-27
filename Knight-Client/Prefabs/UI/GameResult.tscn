@@ -49,10 +49,18 @@ layout_mode = 2
 theme_override_constants/separation = 16
 
 
-[node name="Title" type="Label" parent="Margin/Layout"]
+[node name="ResultTitleLabel" type="Label" parent="Margin/Layout"]
+unique_name_in_owner = true
 theme_type_variation = &"PrimaryTitle"
 layout_mode = 2
 text = "本局结算"
+
+[node name="ResultSummaryLabel" type="Label" parent="Margin/Layout"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = ""
 
 [node name="PlayerResults" type="VBoxContainer" parent="Margin/Layout"]
 unique_name_in_owner = true

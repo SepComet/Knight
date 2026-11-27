@@ -9,6 +9,9 @@ public sealed class GameHudController : UIController<GameHudView>
     private GameHudView? _boundView;
 
     public GameHudModel Model { get; private set; } = GameHudModel.Empty;
+    public SkillHudModel SkillModel { get; private set; } = SkillHudModel.Default;
+    public BossHudModel BossModel { get; private set; } = BossHudModel.Hidden;
+    public DungeonProgressModel DungeonModel { get; private set; } = DungeonProgressModel.Empty;
     public NetSyncDebugModel NetDebugModel { get; private set; } = NetSyncDebugModel.Default;
 
     public event Action<bool>? PredictionToggled;
@@ -22,6 +25,9 @@ public sealed class GameHudController : UIController<GameHudView>
         {
             BindView(existing);
             existing.Render(Model);
+            existing.RenderSkill(SkillModel);
+            existing.RenderBoss(BossModel);
+            existing.RenderDungeonProgress(DungeonModel);
             existing.RenderNetDebug(NetDebugModel);
             UI.BringToTop(existing);
         }
@@ -31,6 +37,9 @@ public sealed class GameHudController : UIController<GameHudView>
             if (View is { } created)
             {
                 BindView(created);
+                created.RenderSkill(SkillModel);
+                created.RenderBoss(BossModel);
+                created.RenderDungeonProgress(DungeonModel);
                 created.RenderNetDebug(NetDebugModel);
             }
         }
@@ -39,6 +48,9 @@ public sealed class GameHudController : UIController<GameHudView>
     public override void OnCloseRequest()
     {
         UnbindView();
+        SkillModel = SkillHudModel.Default;
+        BossModel = BossHudModel.Hidden;
+        DungeonModel = DungeonProgressModel.Empty;
         NetDebugModel = NetSyncDebugModel.Default;
         base.OnCloseRequest();
     }
@@ -47,6 +59,24 @@ public sealed class GameHudController : UIController<GameHudView>
     {
         Model = model;
         View?.Render(Model);
+    }
+
+    public void SetSkillModel(SkillHudModel model)
+    {
+        SkillModel = model;
+        View?.RenderSkill(model);
+    }
+
+    public void SetBossModel(BossHudModel model)
+    {
+        BossModel = model;
+        View?.RenderBoss(model);
+    }
+
+    public void SetDungeonProgress(DungeonProgressModel model)
+    {
+        DungeonModel = model;
+        View?.RenderDungeonProgress(model);
     }
 
     public void SetNetDebugModel(NetSyncDebugModel model)

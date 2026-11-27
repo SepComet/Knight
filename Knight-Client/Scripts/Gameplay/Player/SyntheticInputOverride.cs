@@ -11,6 +11,7 @@ namespace SepCore.Gameplay.Player;
 public sealed class SyntheticInputOverride
 {
     private bool _pendingInteract;
+    private bool _pendingSkill;
 
     public bool IsActive { get; private set; }
     public Vector2 Movement { get; private set; }
@@ -28,12 +29,14 @@ public sealed class SyntheticInputOverride
         float? aimRadians = null,
         bool attackHeld = false,
         bool interact = false,
-        double? durationSeconds = null)
+        double? durationSeconds = null,
+        bool skill = false)
     {
         Movement = PlayerMotor.SanitizeMoveInput(movement);
         AimRadians = aimRadians.HasValue && float.IsFinite(aimRadians.Value) ? aimRadians.Value : null;
         AttackHeld = attackHeld;
         _pendingInteract = interact;
+        _pendingSkill = skill;
         RemainingSeconds = durationSeconds.HasValue && double.IsFinite(durationSeconds.Value) && durationSeconds.Value > 0
             ? durationSeconds.Value
             : null;
@@ -48,6 +51,7 @@ public sealed class SyntheticInputOverride
         AimRadians = null;
         AttackHeld = false;
         _pendingInteract = false;
+        _pendingSkill = false;
         RemainingSeconds = null;
     }
 
@@ -68,7 +72,7 @@ public sealed class SyntheticInputOverride
 
     /// <summary>
     /// Samples the active synthetic override as a <see cref="PlayerCommand"/>.
-    /// Returns false when inactive. Interaction is edge-triggered and consumed on the first sample.
+    /// Returns false when inactive. Interaction and skill are edge-triggered and consumed on the first sample.
     /// </summary>
     public bool TrySample(float fallbackAimRadians, out PlayerCommand command)
     {
@@ -79,8 +83,9 @@ public sealed class SyntheticInputOverride
         }
 
         var aim = AimRadians ?? (float.IsFinite(fallbackAimRadians) ? fallbackAimRadians : 0f);
-        command = new PlayerCommand(Movement, aim, AttackHeld, _pendingInteract);
+        command = new PlayerCommand(Movement, aim, AttackHeld, _pendingInteract, _pendingSkill);
         _pendingInteract = false;
+        _pendingSkill = false;
         return true;
     }
 }

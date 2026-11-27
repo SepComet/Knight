@@ -120,6 +120,7 @@ public class EnvelopeCodecTests
         Assert.Equal(MsgId.MsgItemPicked, EnvelopeCodec.MsgIdFor<ItemPicked>());
         Assert.Equal(MsgId.MsgPlayerLeft, EnvelopeCodec.MsgIdFor<PlayerLeft>());
         Assert.Equal(MsgId.MsgGameResult, EnvelopeCodec.MsgIdFor<GameResult>());
+        Assert.Equal(MsgId.MsgSkillEvent, EnvelopeCodec.MsgIdFor<SkillEvent>());
         Assert.Equal(MsgId.MsgSnapshot, EnvelopeCodec.MsgIdFor<Snapshot>());
         Assert.Equal(MsgId.MsgInputBatch, EnvelopeCodec.MsgIdFor<InputBatch>());
     }
@@ -179,6 +180,7 @@ public class EnvelopeCodecTests
             case Envelope.PayloadOneofCase.ItemPicked: envelope.ItemPicked = new ItemPicked(); break;
             case Envelope.PayloadOneofCase.PlayerLeft: envelope.PlayerLeft = new PlayerLeft(); break;
             case Envelope.PayloadOneofCase.GameResult: envelope.GameResult = new GameResult(); break;
+            case Envelope.PayloadOneofCase.SkillEvent: envelope.SkillEvent = new SkillEvent(); break;
             case Envelope.PayloadOneofCase.Snapshot: envelope.Snapshot = new Snapshot(); break;
             case Envelope.PayloadOneofCase.InputBatch: envelope.InputBatch = new InputBatch(); break;
         }

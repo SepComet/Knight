@@ -39,98 +39,106 @@ namespace SepCore.Definition {
             "B3Jvb21faWQYASABKA0SJwoFc3RhdGUYAiABKA4yGC5rbmlnaHQuUm9vbVNl",
             "c3Npb25TdGF0ZRIRCglvd25lcl91aWQYAyABKAQSIwoHbWVtYmVycxgEIAMo",
             "CzISLmtuaWdodC5Sb29tTWVtYmVyIjYKClJvb21NZW1iZXISCwoDdWlkGAEg",
-            "ASgEEgwKBG5hbWUYAiABKAkSDQoFcmVhZHkYAyABKAgiHAoJR2FtZVN0YXJ0",
-            "Eg8KB21hcF9pZHMYASADKA0iNAoLRW50aXR5U3Bhd24SJQoIZW50aXRpZXMY",
-            "ASADKAsyEy5rbmlnaHQuRW50aXR5U3RhdGUiSgoNRW50aXR5RGVzcGF3bhIS",
-            "CgplbnRpdHlfaWRzGAEgAygNEiUKBnJlYXNvbhgCIAEoDjIVLmtuaWdodC5E",
-            "ZXNwYXduUmVhc29uInMKC0RhbWFnZUV2ZW50EhMKC2F0dGFja2VyX2lkGAEg",
-            "ASgNEhEKCXRhcmdldF9pZBgCIAEoDRINCgVwb3NfeBgDIAEoAhINCgVwb3Nf",
-            "eRgEIAEoAhIOCgZuZXdfaHAYBSABKAUSDgoGZGFtYWdlGAYgASgFIjIKCURv",
-            "b3JTdGF0ZRIlCgVzdGF0ZRgBIAEoDjIWLmtuaWdodC5Eb29yU3RhdGVWYWx1",
-            "ZSJJCg5Sb29tVHJhbnNpdGlvbhIOCgZtYXBfaWQYASABKA0SJwoGc3Bhd25z",
-            "GAIgAygLMhcua25pZ2h0LlNwYXduQXNzaWdubWVudCI8Cg9TcGF3bkFzc2ln",
-            "bm1lbnQSCwoDdWlkGAEgASgEEg0KBXBvc194GAIgASgCEg0KBXBvc195GAMg",
-            "ASgCIhwKClJvb21Mb2FkZWQSDgoGbWFwX2lkGAEgASgNIkQKCkl0ZW1QaWNr",
-            "ZWQSFgoOaXRlbV9lbnRpdHlfaWQYASABKA0SCwoDdWlkGAIgASgEEhEKCWhl",
-            "YWxlZF9ocBgDIAEoBSI9CgpQbGF5ZXJMZWZ0EgsKA3VpZBgBIAEoBBIiCgZy",
-            "ZWFzb24YAiABKA4yEi5rbmlnaHQuTGVmdFJlYXNvbiKBAQoKR2FtZVJlc3Vs",
-            "dBIQCghtYXRjaF9pZBgBIAEoBBIkCgdvdXRjb21lGAIgASgOMhMua25pZ2h0",
-            "LkdhbWVPdXRjb21lEhQKDGR1cmF0aW9uX3NlYxgDIAEoDRIlCgdyZXN1bHRz",
-            "GAQgAygLMhQua25pZ2h0LlBsYXllclJlc3VsdCJlCgxQbGF5ZXJSZXN1bHQS",
-            "CwoDdWlkGAEgASgEEg0KBWtpbGxzGAIgASgNEhQKDGRhbWFnZV9kZWFsdBgD",
-            "IAEoBRIUCgxkYW1hZ2VfdGFrZW4YBCABKAUSDQoFYWxpdmUYBSABKAgiywEK",
-            "C0VudGl0eVN0YXRlEhEKCWVudGl0eV9pZBgBIAEoDRIgCgR0eXBlGAIgASgO",
-            "MhIua25pZ2h0LkVudGl0eVR5cGUSDQoFcG9zX3gYAyABKAISDQoFcG9zX3kY",
-            "BCABKAISDgoGZmFjaW5nGAUgASgCEiYKBXN0YXRlGAYgASgOMhcua25pZ2h0",
-            "LkVudGl0eUFuaW1TdGF0ZRIKCgJocBgHIAEoBRISCgpwbGF5ZXJfdWlkGAgg",
-            "ASgEEhEKCWNvbmZpZ19pZBgJIAEoDSJtCghTbmFwc2hvdBIMCgR0aWNrGAEg",
-            "ASgNEhYKDmxhc3RfaW5wdXRfc2VxGAIgASgNEhQKDGJhc2VsaW5lX3NlcRgD",
-            "IAEoDRIlCghlbnRpdGllcxgEIAMoCzITLmtuaWdodC5FbnRpdHlTdGF0ZSJb",
-            "CghJbnB1dENtZBILCgNzZXEYASABKA0SDgoGbW92ZV94GAIgASgCEg4KBm1v",
-            "dmVfeRgDIAEoAhIRCglhaW1fYW5nbGUYBCABKAISDwoHYnV0dG9ucxgFIAEo",
-            "DSJBCgpJbnB1dEJhdGNoEhEKCWZpcnN0X3NlcRgBIAEoDRIgCgZpbnB1dHMY",
-            "AiADKAsyEC5rbmlnaHQuSW5wdXRDbWQi3ggKCEVudmVsb3BlEh0KBm1zZ19p",
-            "ZBgBIAEoDjINLmtuaWdodC5Nc2dJZBItCg1oYW5kc2hha2VfcmVxGAogASgL",
-            "MhQua25pZ2h0LkhhbmRzaGFrZVJlcUgAEi0KDWhhbmRzaGFrZV9hY2sYCyAB",
-            "KAsyFC5rbmlnaHQuSGFuZHNoYWtlQWNrSAASJgoJaGVhcnRiZWF0GAwgASgL",
-            "MhEua25pZ2h0LkhlYXJ0YmVhdEgAEh4KBWVycm9yGA0gASgLMg0ua25pZ2h0",
-            "LkVycm9ySAASMAoPY3JlYXRlX3Jvb21fcmVxGBQgASgLMhUua25pZ2h0LkNy",
-            "ZWF0ZVJvb21SZXFIABIsCg1qb2luX3Jvb21fcmVxGBUgASgLMhMua25pZ2h0",
-            "LkpvaW5Sb29tUmVxSAASJwoKbGVhdmVfcm9vbRgWIAEoCzIRLmtuaWdodC5M",
-            "ZWF2ZVJvb21IABIlCglzZXRfcmVhZHkYFyABKAsyEC5rbmlnaHQuU2V0UmVh",
-            "ZHlIABInCgpzdGFydF9nYW1lGBggASgLMhEua25pZ2h0LlN0YXJ0R2FtZUgA",
-            "EjAKD3Jvb21fc3RhdGVfcHVzaBgZIAEoCzIVLmtuaWdodC5Sb29tU3RhdGVQ",
-            "dXNoSAASJwoKZ2FtZV9zdGFydBgaIAEoCzIRLmtuaWdodC5HYW1lU3RhcnRI",
-            "ABIzChFnZXRfcm9vbV9saXN0X3JlcRgbIAEoCzIWLmtuaWdodC5HZXRSb29t",
-            "TGlzdFJlcUgAEjUKEmdldF9yb29tX2xpc3RfcmVzcBgcIAEoCzIXLmtuaWdo",
-            "dC5HZXRSb29tTGlzdFJlc3BIABIrCgxlbnRpdHlfc3Bhd24YHiABKAsyEy5r",
-            "bmlnaHQuRW50aXR5U3Bhd25IABIvCg5lbnRpdHlfZGVzcGF3bhgfIAEoCzIV",
-            "LmtuaWdodC5FbnRpdHlEZXNwYXduSAASKwoMZGFtYWdlX2V2ZW50GCAgASgL",
-            "MhMua25pZ2h0LkRhbWFnZUV2ZW50SAASJwoKZG9vcl9zdGF0ZRghIAEoCzIR",
-            "LmtuaWdodC5Eb29yU3RhdGVIABIxCg9yb29tX3RyYW5zaXRpb24YIiABKAsy",
-            "Fi5rbmlnaHQuUm9vbVRyYW5zaXRpb25IABIpCgtyb29tX2xvYWRlZBgjIAEo",
-            "CzISLmtuaWdodC5Sb29tTG9hZGVkSAASKQoLaXRlbV9waWNrZWQYJCABKAsy",
-            "Ei5rbmlnaHQuSXRlbVBpY2tlZEgAEikKC3BsYXllcl9sZWZ0GCUgASgLMhIu",
-            "a25pZ2h0LlBsYXllckxlZnRIABIpCgtnYW1lX3Jlc3VsdBgmIAEoCzISLmtu",
-            "aWdodC5HYW1lUmVzdWx0SAASJAoIc25hcHNob3QYKCABKAsyEC5rbmlnaHQu",
-            "U25hcHNob3RIABIpCgtpbnB1dF9iYXRjaBgpIAEoCzISLmtuaWdodC5JbnB1",
-            "dEJhdGNoSABCCQoHcGF5bG9hZCqgBAoFTXNnSWQSDAoITVNHX05PTkUQABIV",
-            "ChFNU0dfSEFORFNIQUtFX1JFURABEhUKEU1TR19IQU5EU0hBS0VfQUNLEAIS",
-            "EQoNTVNHX0hFQVJUQkVBVBADEg0KCU1TR19FUlJPUhAEEhcKE01TR19DUkVB",
-            "VEVfUk9PTV9SRVEQIBIVChFNU0dfSk9JTl9ST09NX1JFURAhEhIKDk1TR19M",
-            "RUFWRV9ST09NECISEQoNTVNHX1NFVF9SRUFEWRAjEhIKDk1TR19TVEFSVF9H",
-            "QU1FECQSFwoTTVNHX1JPT01fU1RBVEVfUFVTSBAlEhIKDk1TR19HQU1FX1NU",
-            "QVJUECYSGQoVTVNHX0dFVF9ST09NX0xJU1RfUkVRECcSGgoWTVNHX0dFVF9S",
-            "T09NX0xJU1RfUkVTUBAoEhQKEE1TR19FTlRJVFlfU1BBV04QQBIWChJNU0df",
-            "RU5USVRZX0RFU1BBV04QQRIUChBNU0dfREFNQUdFX0VWRU5UEEISEgoOTVNH",
-            "X0RPT1JfU1RBVEUQQxIXChNNU0dfUk9PTV9UUkFOU0lUSU9OEEQSEwoPTVNH",
-            "X1JPT01fTE9BREVEEEUSEwoPTVNHX0lURU1fUElDS0VEEEYSEwoPTVNHX1BM",
-            "QVlFUl9MRUZUEEcSEwoPTVNHX0dBTUVfUkVTVUxUEEgSEAoMTVNHX1NOQVBT",
-            "SE9UEGASEwoPTVNHX0lOUFVUX0JBVENIEGEqpwIKCUVycm9yQ29kZRIKCgZF",
-            "UlJfT0sQABIYChRFUlJfVkVSU0lPTl9NSVNNQVRDSBABEhUKEUVSUl9JTlZB",
-            "TElEX1RPS0VOEAISFgoSRVJSX0FMUkVBRFlfT05MSU5FEAMSFgoSRVJSX1JP",
-            "T01fTk9UX0ZPVU5EEAQSEQoNRVJSX1JPT01fRlVMTBAFEhwKGEVSUl9HQU1F",
-            "X0FMUkVBRFlfU1RBUlRFRBAGEhYKEkVSUl9OT1RfUk9PTV9PV05FUhAHEhcK",
-            "E0VSUl9JTlZBTElEX1JFUVVFU1QQCBITCg9FUlJfU0VSVkVSX0ZVTEwQCRIW",
-            "ChJFUlJfS0lDS0VEX1RJTUVPVVQQChIeChpFUlJfUk9PTV9QQVNTV09SRF9N",
-            "SVNNQVRDSBALKn4KEFJvb21TZXNzaW9uU3RhdGUSEAoMUk9PTV9XQUlUSU5H",
-            "EAASEgoOUk9PTV9QUkVQQVJJTkcQARIQCgxST09NX1JVTk5JTkcQAhIQCgxS",
-            "T09NX1ZJQ1RPUlkQAxIPCgtST09NX0RFRkVBVBAEEg8KC1JPT01fQ0xPU0VE",
-            "EAUqbQoNRGVzcGF3blJlYXNvbhISCg5ERVNQQVdOX0tJTExFRBAAEhQKEERF",
-            "U1BBV05fQ09OU1VNRUQQARIYChRERVNQQVdOX0xJRkVUSU1FX0VORBACEhgK",
-            "FERFU1BBV05fUk9PTV9DTEVBTlVQEAMqMAoORG9vclN0YXRlVmFsdWUSDwoL",
-            "RE9PUl9MT0NLRUQQABINCglET09SX09QRU4QASohCgpMZWZ0UmVhc29uEhMK",
-            "D0xFRlRfRElTQ09OTkVDVBAAKkgKC0dhbWVPdXRjb21lEhAKDE9VVENPTUVf",
-            "Tk9ORRAAEhMKD09VVENPTUVfVklDVE9SWRABEhIKDk9VVENPTUVfREVGRUFU",
-            "EAIqfQoKRW50aXR5VHlwZRIPCgtFTlRJVFlfTk9ORRAAEhEKDUVOVElUWV9Q",
-            "TEFZRVIQARIQCgxFTlRJVFlfRU5FTVkQAhIPCgtFTlRJVFlfQk9TUxADEhUK",
-            "EUVOVElUWV9QUk9KRUNUSUxFEAQSEQoNRU5USVRZX1BJQ0tVUBAFKnUKD0Vu",
-            "dGl0eUFuaW1TdGF0ZRINCglBTklNX05PTkUQABINCglBTklNX0lETEUQARIP",
-            "CgtBTklNX01PVklORxACEhIKDkFOSU1fQVRUQUNLSU5HEAMSEAoMQU5JTV9E",
-            "QU1BR0VEEAQSDQoJQU5JTV9ERUFEEAUqPgoMSW5wdXRCdXR0b25zEgwKCEJU",
-            "Tl9OT05FEAASDgoKQlROX0FUVEFDSxABEhAKDEJUTl9JTlRFUkFDVBACQi1a",
-            "FmtuaWdodC1zZXJ2ZXIvcHJvdG9nZW6qAhJTZXBDb3JlLkRlZmluaXRpb25i",
-            "BnByb3RvMw=="));
+            "ASgEEgwKBG5hbWUYAiABKAkSDQoFcmVhZHkYAyABKAgiKgoJR2FtZVN0YXJ0",
+            "Eg8KB21hcF9pZHMYASADKA0SDAoEc2VlZBgCIAEoBCI0CgtFbnRpdHlTcGF3",
+            "bhIlCghlbnRpdGllcxgBIAMoCzITLmtuaWdodC5FbnRpdHlTdGF0ZSJKCg1F",
+            "bnRpdHlEZXNwYXduEhIKCmVudGl0eV9pZHMYASADKA0SJQoGcmVhc29uGAIg",
+            "ASgOMhUua25pZ2h0LkRlc3Bhd25SZWFzb24icwoLRGFtYWdlRXZlbnQSEwoL",
+            "YXR0YWNrZXJfaWQYASABKA0SEQoJdGFyZ2V0X2lkGAIgASgNEg0KBXBvc194",
+            "GAMgASgCEg0KBXBvc195GAQgASgCEg4KBm5ld19ocBgFIAEoBRIOCgZkYW1h",
+            "Z2UYBiABKAUiMgoJRG9vclN0YXRlEiUKBXN0YXRlGAEgASgOMhYua25pZ2h0",
+            "LkRvb3JTdGF0ZVZhbHVlInIKDlJvb21UcmFuc2l0aW9uEg4KBm1hcF9pZBgB",
+            "IAEoDRInCgZzcGF3bnMYAiADKAsyFy5rbmlnaHQuU3Bhd25Bc3NpZ25tZW50",
+            "EhIKCnJvb21faW5kZXgYAyABKA0SEwoLdG90YWxfcm9vbXMYBCABKA0iPAoP",
+            "U3Bhd25Bc3NpZ25tZW50EgsKA3VpZBgBIAEoBBINCgVwb3NfeBgCIAEoAhIN",
+            "CgVwb3NfeRgDIAEoAiIcCgpSb29tTG9hZGVkEg4KBm1hcF9pZBgBIAEoDSJc",
+            "CgpJdGVtUGlja2VkEhYKDml0ZW1fZW50aXR5X2lkGAEgASgNEgsKA3VpZBgC",
+            "IAEoBBIRCgloZWFsZWRfaHAYAyABKAUSFgoOaXRlbV9jb25maWdfaWQYBCAB",
+            "KA0ieAoKU2tpbGxFdmVudBIRCgljYXN0ZXJfaWQYASABKA0SEAoIc2tpbGxf",
+            "aWQYAiABKA0SDQoFcG9zX3gYAyABKAISDQoFcG9zX3kYBCABKAISEQoJZGly",
+            "X2FuZ2xlGAUgASgCEhQKDGNvb2xkb3duX3NlYxgGIAEoAiI9CgpQbGF5ZXJM",
+            "ZWZ0EgsKA3VpZBgBIAEoBBIiCgZyZWFzb24YAiABKA4yEi5rbmlnaHQuTGVm",
+            "dFJlYXNvbiKBAQoKR2FtZVJlc3VsdBIQCghtYXRjaF9pZBgBIAEoBBIkCgdv",
+            "dXRjb21lGAIgASgOMhMua25pZ2h0LkdhbWVPdXRjb21lEhQKDGR1cmF0aW9u",
+            "X3NlYxgDIAEoDRIlCgdyZXN1bHRzGAQgAygLMhQua25pZ2h0LlBsYXllclJl",
+            "c3VsdCJlCgxQbGF5ZXJSZXN1bHQSCwoDdWlkGAEgASgEEg0KBWtpbGxzGAIg",
+            "ASgNEhQKDGRhbWFnZV9kZWFsdBgDIAEoBRIUCgxkYW1hZ2VfdGFrZW4YBCAB",
+            "KAUSDQoFYWxpdmUYBSABKAgipQIKC0VudGl0eVN0YXRlEhEKCWVudGl0eV9p",
+            "ZBgBIAEoDRIgCgR0eXBlGAIgASgOMhIua25pZ2h0LkVudGl0eVR5cGUSDQoF",
+            "cG9zX3gYAyABKAISDQoFcG9zX3kYBCABKAISDgoGZmFjaW5nGAUgASgCEiYK",
+            "BXN0YXRlGAYgASgOMhcua25pZ2h0LkVudGl0eUFuaW1TdGF0ZRIKCgJocBgH",
+            "IAEoBRISCgpwbGF5ZXJfdWlkGAggASgEEhEKCWNvbmZpZ19pZBgJIAEoDRIO",
+            "CgZtYXhfaHAYCiABKAUSGgoSc2tpbGxfY2RfcmVtYWluaW5nGAsgASgCEhYK",
+            "DnNraWxsX2NkX3RvdGFsGAwgASgCEhQKDHN0YXR1c19mbGFncxgNIAEoDSJt",
+            "CghTbmFwc2hvdBIMCgR0aWNrGAEgASgNEhYKDmxhc3RfaW5wdXRfc2VxGAIg",
+            "ASgNEhQKDGJhc2VsaW5lX3NlcRgDIAEoDRIlCghlbnRpdGllcxgEIAMoCzIT",
+            "LmtuaWdodC5FbnRpdHlTdGF0ZSJbCghJbnB1dENtZBILCgNzZXEYASABKA0S",
+            "DgoGbW92ZV94GAIgASgCEg4KBm1vdmVfeRgDIAEoAhIRCglhaW1fYW5nbGUY",
+            "BCABKAISDwoHYnV0dG9ucxgFIAEoDSJBCgpJbnB1dEJhdGNoEhEKCWZpcnN0",
+            "X3NlcRgBIAEoDRIgCgZpbnB1dHMYAiADKAsyEC5rbmlnaHQuSW5wdXRDbWQi",
+            "iQkKCEVudmVsb3BlEh0KBm1zZ19pZBgBIAEoDjINLmtuaWdodC5Nc2dJZBIt",
+            "Cg1oYW5kc2hha2VfcmVxGAogASgLMhQua25pZ2h0LkhhbmRzaGFrZVJlcUgA",
+            "Ei0KDWhhbmRzaGFrZV9hY2sYCyABKAsyFC5rbmlnaHQuSGFuZHNoYWtlQWNr",
+            "SAASJgoJaGVhcnRiZWF0GAwgASgLMhEua25pZ2h0LkhlYXJ0YmVhdEgAEh4K",
+            "BWVycm9yGA0gASgLMg0ua25pZ2h0LkVycm9ySAASMAoPY3JlYXRlX3Jvb21f",
+            "cmVxGBQgASgLMhUua25pZ2h0LkNyZWF0ZVJvb21SZXFIABIsCg1qb2luX3Jv",
+            "b21fcmVxGBUgASgLMhMua25pZ2h0LkpvaW5Sb29tUmVxSAASJwoKbGVhdmVf",
+            "cm9vbRgWIAEoCzIRLmtuaWdodC5MZWF2ZVJvb21IABIlCglzZXRfcmVhZHkY",
+            "FyABKAsyEC5rbmlnaHQuU2V0UmVhZHlIABInCgpzdGFydF9nYW1lGBggASgL",
+            "MhEua25pZ2h0LlN0YXJ0R2FtZUgAEjAKD3Jvb21fc3RhdGVfcHVzaBgZIAEo",
+            "CzIVLmtuaWdodC5Sb29tU3RhdGVQdXNoSAASJwoKZ2FtZV9zdGFydBgaIAEo",
+            "CzIRLmtuaWdodC5HYW1lU3RhcnRIABIzChFnZXRfcm9vbV9saXN0X3JlcRgb",
+            "IAEoCzIWLmtuaWdodC5HZXRSb29tTGlzdFJlcUgAEjUKEmdldF9yb29tX2xp",
+            "c3RfcmVzcBgcIAEoCzIXLmtuaWdodC5HZXRSb29tTGlzdFJlc3BIABIrCgxl",
+            "bnRpdHlfc3Bhd24YHiABKAsyEy5rbmlnaHQuRW50aXR5U3Bhd25IABIvCg5l",
+            "bnRpdHlfZGVzcGF3bhgfIAEoCzIVLmtuaWdodC5FbnRpdHlEZXNwYXduSAAS",
+            "KwoMZGFtYWdlX2V2ZW50GCAgASgLMhMua25pZ2h0LkRhbWFnZUV2ZW50SAAS",
+            "JwoKZG9vcl9zdGF0ZRghIAEoCzIRLmtuaWdodC5Eb29yU3RhdGVIABIxCg9y",
+            "b29tX3RyYW5zaXRpb24YIiABKAsyFi5rbmlnaHQuUm9vbVRyYW5zaXRpb25I",
+            "ABIpCgtyb29tX2xvYWRlZBgjIAEoCzISLmtuaWdodC5Sb29tTG9hZGVkSAAS",
+            "KQoLaXRlbV9waWNrZWQYJCABKAsyEi5rbmlnaHQuSXRlbVBpY2tlZEgAEikK",
+            "C3BsYXllcl9sZWZ0GCUgASgLMhIua25pZ2h0LlBsYXllckxlZnRIABIpCgtn",
+            "YW1lX3Jlc3VsdBgmIAEoCzISLmtuaWdodC5HYW1lUmVzdWx0SAASKQoLc2tp",
+            "bGxfZXZlbnQYJyABKAsyEi5rbmlnaHQuU2tpbGxFdmVudEgAEiQKCHNuYXBz",
+            "aG90GCggASgLMhAua25pZ2h0LlNuYXBzaG90SAASKQoLaW5wdXRfYmF0Y2gY",
+            "KSABKAsyEi5rbmlnaHQuSW5wdXRCYXRjaEgAQgkKB3BheWxvYWQqtQQKBU1z",
+            "Z0lkEgwKCE1TR19OT05FEAASFQoRTVNHX0hBTkRTSEFLRV9SRVEQARIVChFN",
+            "U0dfSEFORFNIQUtFX0FDSxACEhEKDU1TR19IRUFSVEJFQVQQAxINCglNU0df",
+            "RVJST1IQBBIXChNNU0dfQ1JFQVRFX1JPT01fUkVRECASFQoRTVNHX0pPSU5f",
+            "Uk9PTV9SRVEQIRISCg5NU0dfTEVBVkVfUk9PTRAiEhEKDU1TR19TRVRfUkVB",
+            "RFkQIxISCg5NU0dfU1RBUlRfR0FNRRAkEhcKE01TR19ST09NX1NUQVRFX1BV",
+            "U0gQJRISCg5NU0dfR0FNRV9TVEFSVBAmEhkKFU1TR19HRVRfUk9PTV9MSVNU",
+            "X1JFURAnEhoKFk1TR19HRVRfUk9PTV9MSVNUX1JFU1AQKBIUChBNU0dfRU5U",
+            "SVRZX1NQQVdOEEASFgoSTVNHX0VOVElUWV9ERVNQQVdOEEESFAoQTVNHX0RB",
+            "TUFHRV9FVkVOVBBCEhIKDk1TR19ET09SX1NUQVRFEEMSFwoTTVNHX1JPT01f",
+            "VFJBTlNJVElPThBEEhMKD01TR19ST09NX0xPQURFRBBFEhMKD01TR19JVEVN",
+            "X1BJQ0tFRBBGEhMKD01TR19QTEFZRVJfTEVGVBBHEhMKD01TR19HQU1FX1JF",
+            "U1VMVBBIEhMKD01TR19TS0lMTF9FVkVOVBBJEhAKDE1TR19TTkFQU0hPVBBg",
+            "EhMKD01TR19JTlBVVF9CQVRDSBBhKqcCCglFcnJvckNvZGUSCgoGRVJSX09L",
+            "EAASGAoURVJSX1ZFUlNJT05fTUlTTUFUQ0gQARIVChFFUlJfSU5WQUxJRF9U",
+            "T0tFThACEhYKEkVSUl9BTFJFQURZX09OTElORRADEhYKEkVSUl9ST09NX05P",
+            "VF9GT1VORBAEEhEKDUVSUl9ST09NX0ZVTEwQBRIcChhFUlJfR0FNRV9BTFJF",
+            "QURZX1NUQVJURUQQBhIWChJFUlJfTk9UX1JPT01fT1dORVIQBxIXChNFUlJf",
+            "SU5WQUxJRF9SRVFVRVNUEAgSEwoPRVJSX1NFUlZFUl9GVUxMEAkSFgoSRVJS",
+            "X0tJQ0tFRF9USU1FT1VUEAoSHgoaRVJSX1JPT01fUEFTU1dPUkRfTUlTTUFU",
+            "Q0gQCyp+ChBSb29tU2Vzc2lvblN0YXRlEhAKDFJPT01fV0FJVElORxAAEhIK",
+            "DlJPT01fUFJFUEFSSU5HEAESEAoMUk9PTV9SVU5OSU5HEAISEAoMUk9PTV9W",
+            "SUNUT1JZEAMSDwoLUk9PTV9ERUZFQVQQBBIPCgtST09NX0NMT1NFRBAFKm0K",
+            "DURlc3Bhd25SZWFzb24SEgoOREVTUEFXTl9LSUxMRUQQABIUChBERVNQQVdO",
+            "X0NPTlNVTUVEEAESGAoUREVTUEFXTl9MSUZFVElNRV9FTkQQAhIYChRERVNQ",
+            "QVdOX1JPT01fQ0xFQU5VUBADKjAKDkRvb3JTdGF0ZVZhbHVlEg8KC0RPT1Jf",
+            "TE9DS0VEEAASDQoJRE9PUl9PUEVOEAEqIQoKTGVmdFJlYXNvbhITCg9MRUZU",
+            "X0RJU0NPTk5FQ1QQACpICgtHYW1lT3V0Y29tZRIQCgxPVVRDT01FX05PTkUQ",
+            "ABITCg9PVVRDT01FX1ZJQ1RPUlkQARISCg5PVVRDT01FX0RFRkVBVBACKn0K",
+            "CkVudGl0eVR5cGUSDwoLRU5USVRZX05PTkUQABIRCg1FTlRJVFlfUExBWUVS",
+            "EAESEAoMRU5USVRZX0VORU1ZEAISDwoLRU5USVRZX0JPU1MQAxIVChFFTlRJ",
+            "VFlfUFJPSkVDVElMRRAEEhEKDUVOVElUWV9QSUNLVVAQBSp1Cg9FbnRpdHlB",
+            "bmltU3RhdGUSDQoJQU5JTV9OT05FEAASDQoJQU5JTV9JRExFEAESDwoLQU5J",
+            "TV9NT1ZJTkcQAhISCg5BTklNX0FUVEFDS0lORxADEhAKDEFOSU1fREFNQUdF",
+            "RBAEEg0KCUFOSU1fREVBRBAFKk0KDElucHV0QnV0dG9ucxIMCghCVE5fTk9O",
+            "RRAAEg4KCkJUTl9BVFRBQ0sQARIQCgxCVE5fSU5URVJBQ1QQAhINCglCVE5f",
+            "U0tJTEwQBEItWhZrbmlnaHQtc2VydmVyL3Byb3RvZ2VuqgISU2VwQ29yZS5E",
+            "ZWZpbml0aW9uYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::SepCore.Definition.MsgId), typeof(global::SepCore.Definition.ErrorCode), typeof(global::SepCore.Definition.RoomSessionState), typeof(global::SepCore.Definition.DespawnReason), typeof(global::SepCore.Definition.DoorStateValue), typeof(global::SepCore.Definition.LeftReason), typeof(global::SepCore.Definition.GameOutcome), typeof(global::SepCore.Definition.EntityType), typeof(global::SepCore.Definition.EntityAnimState), typeof(global::SepCore.Definition.InputButtons), }, null, new pbr::GeneratedClrTypeInfo[] {
@@ -148,23 +156,24 @@ namespace SepCore.Definition {
             new pbr::GeneratedClrTypeInfo(typeof(global::SepCore.Definition.GetRoomListResp), global::SepCore.Definition.GetRoomListResp.Parser, new[]{ "Rooms" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::SepCore.Definition.RoomStatePush), global::SepCore.Definition.RoomStatePush.Parser, new[]{ "RoomId", "State", "OwnerUid", "Members" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::SepCore.Definition.RoomMember), global::SepCore.Definition.RoomMember.Parser, new[]{ "Uid", "Name", "Ready" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::SepCore.Definition.GameStart), global::SepCore.Definition.GameStart.Parser, new[]{ "MapIds" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::SepCore.Definition.GameStart), global::SepCore.Definition.GameStart.Parser, new[]{ "MapIds", "Seed" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::SepCore.Definition.EntitySpawn), global::SepCore.Definition.EntitySpawn.Parser, new[]{ "Entities" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::SepCore.Definition.EntityDespawn), global::SepCore.Definition.EntityDespawn.Parser, new[]{ "EntityIds", "Reason" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::SepCore.Definition.DamageEvent), global::SepCore.Definition.DamageEvent.Parser, new[]{ "AttackerId", "TargetId", "PosX", "PosY", "NewHp", "Damage" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::SepCore.Definition.DoorState), global::SepCore.Definition.DoorState.Parser, new[]{ "State" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::SepCore.Definition.RoomTransition), global::SepCore.Definition.RoomTransition.Parser, new[]{ "MapId", "Spawns" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::SepCore.Definition.RoomTransition), global::SepCore.Definition.RoomTransition.Parser, new[]{ "MapId", "Spawns", "RoomIndex", "TotalRooms" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::SepCore.Definition.SpawnAssignment), global::SepCore.Definition.SpawnAssignment.Parser, new[]{ "Uid", "PosX", "PosY" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::SepCore.Definition.RoomLoaded), global::SepCore.Definition.RoomLoaded.Parser, new[]{ "MapId" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::SepCore.Definition.ItemPicked), global::SepCore.Definition.ItemPicked.Parser, new[]{ "ItemEntityId", "Uid", "HealedHp" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::SepCore.Definition.ItemPicked), global::SepCore.Definition.ItemPicked.Parser, new[]{ "ItemEntityId", "Uid", "HealedHp", "ItemConfigId" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::SepCore.Definition.SkillEvent), global::SepCore.Definition.SkillEvent.Parser, new[]{ "CasterId", "SkillId", "PosX", "PosY", "DirAngle", "CooldownSec" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::SepCore.Definition.PlayerLeft), global::SepCore.Definition.PlayerLeft.Parser, new[]{ "Uid", "Reason" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::SepCore.Definition.GameResult), global::SepCore.Definition.GameResult.Parser, new[]{ "MatchId", "Outcome", "DurationSec", "Results" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::SepCore.Definition.PlayerResult), global::SepCore.Definition.PlayerResult.Parser, new[]{ "Uid", "Kills", "DamageDealt", "DamageTaken", "Alive" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::SepCore.Definition.EntityState), global::SepCore.Definition.EntityState.Parser, new[]{ "EntityId", "Type", "PosX", "PosY", "Facing", "State", "Hp", "PlayerUid", "ConfigId" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::SepCore.Definition.EntityState), global::SepCore.Definition.EntityState.Parser, new[]{ "EntityId", "Type", "PosX", "PosY", "Facing", "State", "Hp", "PlayerUid", "ConfigId", "MaxHp", "SkillCdRemaining", "SkillCdTotal", "StatusFlags" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::SepCore.Definition.Snapshot), global::SepCore.Definition.Snapshot.Parser, new[]{ "Tick", "LastInputSeq", "BaselineSeq", "Entities" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::SepCore.Definition.InputCmd), global::SepCore.Definition.InputCmd.Parser, new[]{ "Seq", "MoveX", "MoveY", "AimAngle", "Buttons" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::SepCore.Definition.InputBatch), global::SepCore.Definition.InputBatch.Parser, new[]{ "FirstSeq", "Inputs" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::SepCore.Definition.Envelope), global::SepCore.Definition.Envelope.Parser, new[]{ "MsgId", "HandshakeReq", "HandshakeAck", "Heartbeat", "Error", "CreateRoomReq", "JoinRoomReq", "LeaveRoom", "SetReady", "StartGame", "RoomStatePush", "GameStart", "GetRoomListReq", "GetRoomListResp", "EntitySpawn", "EntityDespawn", "DamageEvent", "DoorState", "RoomTransition", "RoomLoaded", "ItemPicked", "PlayerLeft", "GameResult", "Snapshot", "InputBatch" }, new[]{ "Payload" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::SepCore.Definition.Envelope), global::SepCore.Definition.Envelope.Parser, new[]{ "MsgId", "HandshakeReq", "HandshakeAck", "Heartbeat", "Error", "CreateRoomReq", "JoinRoomReq", "LeaveRoom", "SetReady", "StartGame", "RoomStatePush", "GameStart", "GetRoomListReq", "GetRoomListResp", "EntitySpawn", "EntityDespawn", "DamageEvent", "DoorState", "RoomTransition", "RoomLoaded", "ItemPicked", "PlayerLeft", "GameResult", "SkillEvent", "Snapshot", "InputBatch" }, new[]{ "Payload" }, null, null, null)
           }));
     }
     #endregion
@@ -270,6 +279,10 @@ namespace SepCore.Definition {
     /// S→C 结算
     /// </summary>
     [pbr::OriginalName("MSG_GAME_RESULT")] MsgGameResult = 72,
+    /// <summary>
+    /// S→C 主动技能触发事件
+    /// </summary>
+    [pbr::OriginalName("MSG_SKILL_EVENT")] MsgSkillEvent = 73,
     /// <summary>
     /// —— 96~127 高频通道 ——
     /// </summary>
@@ -415,13 +428,17 @@ namespace SepCore.Definition {
     /// bit1：单帧边沿（拾取请求，服务端取半径内最近合法道具）
     /// </summary>
     [pbr::OriginalName("BTN_INTERACT")] BtnInteract = 2,
+    /// <summary>
+    /// bit2：触发主动技能（服务端按冷却校验）
+    /// </summary>
+    [pbr::OriginalName("BTN_SKILL")] BtnSkill = 4,
   }
 
   #endregion
 
   #region Messages
   /// <summary>
-  /// PROTO_VERSION = 5（任何改动 +1，见文件头规则 2）
+  /// PROTO_VERSION = 6（任何改动 +1，见文件头规则 2）
   /// </summary>
   [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class HandshakeReq : pb::IMessage<HandshakeReq>
@@ -3562,6 +3579,7 @@ namespace SepCore.Definition {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public GameStart(GameStart other) : this() {
       mapIds_ = other.mapIds_.Clone();
+      seed_ = other.seed_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -3577,12 +3595,27 @@ namespace SepCore.Definition {
         = pb::FieldCodec.ForUInt32(10);
     private readonly pbc::RepeatedField<uint> mapIds_ = new pbc::RepeatedField<uint>();
     /// <summary>
-    /// MVP 固定 [1, 2, 3]，3 = Boss 房
+    /// 程序化生成的地牢房间序列（末房为 Boss 房）
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public pbc::RepeatedField<uint> MapIds {
       get { return mapIds_; }
+    }
+
+    /// <summary>Field number for the "seed" field.</summary>
+    public const int SeedFieldNumber = 2;
+    private ulong seed_;
+    /// <summary>
+    /// 本局程序化地牢随机种子
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ulong Seed {
+      get { return seed_; }
+      set {
+        seed_ = value;
+      }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -3601,6 +3634,7 @@ namespace SepCore.Definition {
         return true;
       }
       if(!mapIds_.Equals(other.mapIds_)) return false;
+      if (Seed != other.Seed) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -3609,6 +3643,7 @@ namespace SepCore.Definition {
     public override int GetHashCode() {
       int hash = 1;
       hash ^= mapIds_.GetHashCode();
+      if (Seed != 0UL) hash ^= Seed.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -3628,6 +3663,10 @@ namespace SepCore.Definition {
       output.WriteRawMessage(this);
     #else
       mapIds_.WriteTo(output, _repeated_mapIds_codec);
+      if (Seed != 0UL) {
+        output.WriteRawTag(16);
+        output.WriteUInt64(Seed);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -3639,6 +3678,10 @@ namespace SepCore.Definition {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
       mapIds_.WriteTo(ref output, _repeated_mapIds_codec);
+      if (Seed != 0UL) {
+        output.WriteRawTag(16);
+        output.WriteUInt64(Seed);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -3650,6 +3693,9 @@ namespace SepCore.Definition {
     public int CalculateSize() {
       int size = 0;
       size += mapIds_.CalculateSize(_repeated_mapIds_codec);
+      if (Seed != 0UL) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt64Size(Seed);
+      }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
       }
@@ -3663,6 +3709,9 @@ namespace SepCore.Definition {
         return;
       }
       mapIds_.Add(other.mapIds_);
+      if (other.Seed != 0UL) {
+        Seed = other.Seed;
+      }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
 
@@ -3687,6 +3736,10 @@ namespace SepCore.Definition {
             mapIds_.AddEntriesFrom(input, _repeated_mapIds_codec);
             break;
           }
+          case 16: {
+            Seed = input.ReadUInt64();
+            break;
+          }
         }
       }
     #endif
@@ -3709,6 +3762,10 @@ namespace SepCore.Definition {
           case 10:
           case 8: {
             mapIds_.AddEntriesFrom(ref input, _repeated_mapIds_codec);
+            break;
+          }
+          case 16: {
+            Seed = input.ReadUInt64();
             break;
           }
         }
@@ -4771,6 +4828,8 @@ namespace SepCore.Definition {
     public RoomTransition(RoomTransition other) : this() {
       mapId_ = other.mapId_;
       spawns_ = other.spawns_.Clone();
+      roomIndex_ = other.roomIndex_;
+      totalRooms_ = other.totalRooms_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -4806,6 +4865,36 @@ namespace SepCore.Definition {
       get { return spawns_; }
     }
 
+    /// <summary>Field number for the "room_index" field.</summary>
+    public const int RoomIndexFieldNumber = 3;
+    private uint roomIndex_;
+    /// <summary>
+    /// 当前房间在 map_ids 中的 0-based 序号
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public uint RoomIndex {
+      get { return roomIndex_; }
+      set {
+        roomIndex_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "total_rooms" field.</summary>
+    public const int TotalRoomsFieldNumber = 4;
+    private uint totalRooms_;
+    /// <summary>
+    /// 本局总房间数
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public uint TotalRooms {
+      get { return totalRooms_; }
+      set {
+        totalRooms_ = value;
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -4823,6 +4912,8 @@ namespace SepCore.Definition {
       }
       if (MapId != other.MapId) return false;
       if(!spawns_.Equals(other.spawns_)) return false;
+      if (RoomIndex != other.RoomIndex) return false;
+      if (TotalRooms != other.TotalRooms) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -4832,6 +4923,8 @@ namespace SepCore.Definition {
       int hash = 1;
       if (MapId != 0) hash ^= MapId.GetHashCode();
       hash ^= spawns_.GetHashCode();
+      if (RoomIndex != 0) hash ^= RoomIndex.GetHashCode();
+      if (TotalRooms != 0) hash ^= TotalRooms.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -4855,6 +4948,14 @@ namespace SepCore.Definition {
         output.WriteUInt32(MapId);
       }
       spawns_.WriteTo(output, _repeated_spawns_codec);
+      if (RoomIndex != 0) {
+        output.WriteRawTag(24);
+        output.WriteUInt32(RoomIndex);
+      }
+      if (TotalRooms != 0) {
+        output.WriteRawTag(32);
+        output.WriteUInt32(TotalRooms);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -4870,6 +4971,14 @@ namespace SepCore.Definition {
         output.WriteUInt32(MapId);
       }
       spawns_.WriteTo(ref output, _repeated_spawns_codec);
+      if (RoomIndex != 0) {
+        output.WriteRawTag(24);
+        output.WriteUInt32(RoomIndex);
+      }
+      if (TotalRooms != 0) {
+        output.WriteRawTag(32);
+        output.WriteUInt32(TotalRooms);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -4884,6 +4993,12 @@ namespace SepCore.Definition {
         size += 1 + pb::CodedOutputStream.ComputeUInt32Size(MapId);
       }
       size += spawns_.CalculateSize(_repeated_spawns_codec);
+      if (RoomIndex != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(RoomIndex);
+      }
+      if (TotalRooms != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(TotalRooms);
+      }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
       }
@@ -4900,6 +5015,12 @@ namespace SepCore.Definition {
         MapId = other.MapId;
       }
       spawns_.Add(other.spawns_);
+      if (other.RoomIndex != 0) {
+        RoomIndex = other.RoomIndex;
+      }
+      if (other.TotalRooms != 0) {
+        TotalRooms = other.TotalRooms;
+      }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
 
@@ -4927,6 +5048,14 @@ namespace SepCore.Definition {
             spawns_.AddEntriesFrom(input, _repeated_spawns_codec);
             break;
           }
+          case 24: {
+            RoomIndex = input.ReadUInt32();
+            break;
+          }
+          case 32: {
+            TotalRooms = input.ReadUInt32();
+            break;
+          }
         }
       }
     #endif
@@ -4952,6 +5081,14 @@ namespace SepCore.Definition {
           }
           case 18: {
             spawns_.AddEntriesFrom(ref input, _repeated_spawns_codec);
+            break;
+          }
+          case 24: {
+            RoomIndex = input.ReadUInt32();
+            break;
+          }
+          case 32: {
+            TotalRooms = input.ReadUInt32();
             break;
           }
         }
@@ -5476,6 +5613,7 @@ namespace SepCore.Definition {
       itemEntityId_ = other.itemEntityId_;
       uid_ = other.uid_;
       healedHp_ = other.healedHp_;
+      itemConfigId_ = other.itemConfigId_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -5527,6 +5665,21 @@ namespace SepCore.Definition {
       }
     }
 
+    /// <summary>Field number for the "item_config_id" field.</summary>
+    public const int ItemConfigIdFieldNumber = 4;
+    private uint itemConfigId_;
+    /// <summary>
+    /// 道具 config_id（1=回血药水, 2=攻击增益, 3=护盾核心）
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public uint ItemConfigId {
+      get { return itemConfigId_; }
+      set {
+        itemConfigId_ = value;
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -5545,6 +5698,7 @@ namespace SepCore.Definition {
       if (ItemEntityId != other.ItemEntityId) return false;
       if (Uid != other.Uid) return false;
       if (HealedHp != other.HealedHp) return false;
+      if (ItemConfigId != other.ItemConfigId) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -5555,6 +5709,7 @@ namespace SepCore.Definition {
       if (ItemEntityId != 0) hash ^= ItemEntityId.GetHashCode();
       if (Uid != 0UL) hash ^= Uid.GetHashCode();
       if (HealedHp != 0) hash ^= HealedHp.GetHashCode();
+      if (ItemConfigId != 0) hash ^= ItemConfigId.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -5585,6 +5740,10 @@ namespace SepCore.Definition {
         output.WriteRawTag(24);
         output.WriteInt32(HealedHp);
       }
+      if (ItemConfigId != 0) {
+        output.WriteRawTag(32);
+        output.WriteUInt32(ItemConfigId);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -5607,6 +5766,10 @@ namespace SepCore.Definition {
         output.WriteRawTag(24);
         output.WriteInt32(HealedHp);
       }
+      if (ItemConfigId != 0) {
+        output.WriteRawTag(32);
+        output.WriteUInt32(ItemConfigId);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -5625,6 +5788,9 @@ namespace SepCore.Definition {
       }
       if (HealedHp != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(HealedHp);
+      }
+      if (ItemConfigId != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(ItemConfigId);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -5646,6 +5812,9 @@ namespace SepCore.Definition {
       }
       if (other.HealedHp != 0) {
         HealedHp = other.HealedHp;
+      }
+      if (other.ItemConfigId != 0) {
+        ItemConfigId = other.ItemConfigId;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -5676,6 +5845,10 @@ namespace SepCore.Definition {
           }
           case 24: {
             HealedHp = input.ReadInt32();
+            break;
+          }
+          case 32: {
+            ItemConfigId = input.ReadUInt32();
             break;
           }
         }
@@ -5709,6 +5882,414 @@ namespace SepCore.Definition {
             HealedHp = input.ReadInt32();
             break;
           }
+          case 32: {
+            ItemConfigId = input.ReadUInt32();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  /// <summary>
+  /// 主动技能触发事件（S→C，驱动客户端技能特效/音效与冷却同步）
+  /// </summary>
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class SkillEvent : pb::IMessage<SkillEvent>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<SkillEvent> _parser = new pb::MessageParser<SkillEvent>(() => new SkillEvent());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<SkillEvent> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::SepCore.Definition.KnightReflection.Descriptor.MessageTypes[23]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public SkillEvent() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public SkillEvent(SkillEvent other) : this() {
+      casterId_ = other.casterId_;
+      skillId_ = other.skillId_;
+      posX_ = other.posX_;
+      posY_ = other.posY_;
+      dirAngle_ = other.dirAngle_;
+      cooldownSec_ = other.cooldownSec_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public SkillEvent Clone() {
+      return new SkillEvent(this);
+    }
+
+    /// <summary>Field number for the "caster_id" field.</summary>
+    public const int CasterIdFieldNumber = 1;
+    private uint casterId_;
+    /// <summary>
+    /// 施法实体 ID
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public uint CasterId {
+      get { return casterId_; }
+      set {
+        casterId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "skill_id" field.</summary>
+    public const int SkillIdFieldNumber = 2;
+    private uint skillId_;
+    /// <summary>
+    /// 技能配置 ID（1=冲刺闪避斩, 2=护盾, 3=范围爆发, 4=群体治疗）
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public uint SkillId {
+      get { return skillId_; }
+      set {
+        skillId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "pos_x" field.</summary>
+    public const int PosXFieldNumber = 3;
+    private float posX_;
+    /// <summary>
+    /// 施法/目标点 X
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public float PosX {
+      get { return posX_; }
+      set {
+        posX_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "pos_y" field.</summary>
+    public const int PosYFieldNumber = 4;
+    private float posY_;
+    /// <summary>
+    /// 施法/目标点 Y
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public float PosY {
+      get { return posY_; }
+      set {
+        posY_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "dir_angle" field.</summary>
+    public const int DirAngleFieldNumber = 5;
+    private float dirAngle_;
+    /// <summary>
+    /// 施法方向（度）
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public float DirAngle {
+      get { return dirAngle_; }
+      set {
+        dirAngle_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "cooldown_sec" field.</summary>
+    public const int CooldownSecFieldNumber = 6;
+    private float cooldownSec_;
+    /// <summary>
+    /// 触发后的冷却时长（秒）
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public float CooldownSec {
+      get { return cooldownSec_; }
+      set {
+        cooldownSec_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as SkillEvent);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(SkillEvent other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (CasterId != other.CasterId) return false;
+      if (SkillId != other.SkillId) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosX, other.PosX)) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PosY, other.PosY)) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(DirAngle, other.DirAngle)) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(CooldownSec, other.CooldownSec)) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (CasterId != 0) hash ^= CasterId.GetHashCode();
+      if (SkillId != 0) hash ^= SkillId.GetHashCode();
+      if (PosX != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosX);
+      if (PosY != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PosY);
+      if (DirAngle != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(DirAngle);
+      if (CooldownSec != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(CooldownSec);
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (CasterId != 0) {
+        output.WriteRawTag(8);
+        output.WriteUInt32(CasterId);
+      }
+      if (SkillId != 0) {
+        output.WriteRawTag(16);
+        output.WriteUInt32(SkillId);
+      }
+      if (PosX != 0F) {
+        output.WriteRawTag(29);
+        output.WriteFloat(PosX);
+      }
+      if (PosY != 0F) {
+        output.WriteRawTag(37);
+        output.WriteFloat(PosY);
+      }
+      if (DirAngle != 0F) {
+        output.WriteRawTag(45);
+        output.WriteFloat(DirAngle);
+      }
+      if (CooldownSec != 0F) {
+        output.WriteRawTag(53);
+        output.WriteFloat(CooldownSec);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (CasterId != 0) {
+        output.WriteRawTag(8);
+        output.WriteUInt32(CasterId);
+      }
+      if (SkillId != 0) {
+        output.WriteRawTag(16);
+        output.WriteUInt32(SkillId);
+      }
+      if (PosX != 0F) {
+        output.WriteRawTag(29);
+        output.WriteFloat(PosX);
+      }
+      if (PosY != 0F) {
+        output.WriteRawTag(37);
+        output.WriteFloat(PosY);
+      }
+      if (DirAngle != 0F) {
+        output.WriteRawTag(45);
+        output.WriteFloat(DirAngle);
+      }
+      if (CooldownSec != 0F) {
+        output.WriteRawTag(53);
+        output.WriteFloat(CooldownSec);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (CasterId != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(CasterId);
+      }
+      if (SkillId != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(SkillId);
+      }
+      if (PosX != 0F) {
+        size += 1 + 4;
+      }
+      if (PosY != 0F) {
+        size += 1 + 4;
+      }
+      if (DirAngle != 0F) {
+        size += 1 + 4;
+      }
+      if (CooldownSec != 0F) {
+        size += 1 + 4;
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(SkillEvent other) {
+      if (other == null) {
+        return;
+      }
+      if (other.CasterId != 0) {
+        CasterId = other.CasterId;
+      }
+      if (other.SkillId != 0) {
+        SkillId = other.SkillId;
+      }
+      if (other.PosX != 0F) {
+        PosX = other.PosX;
+      }
+      if (other.PosY != 0F) {
+        PosY = other.PosY;
+      }
+      if (other.DirAngle != 0F) {
+        DirAngle = other.DirAngle;
+      }
+      if (other.CooldownSec != 0F) {
+        CooldownSec = other.CooldownSec;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 8: {
+            CasterId = input.ReadUInt32();
+            break;
+          }
+          case 16: {
+            SkillId = input.ReadUInt32();
+            break;
+          }
+          case 29: {
+            PosX = input.ReadFloat();
+            break;
+          }
+          case 37: {
+            PosY = input.ReadFloat();
+            break;
+          }
+          case 45: {
+            DirAngle = input.ReadFloat();
+            break;
+          }
+          case 53: {
+            CooldownSec = input.ReadFloat();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 8: {
+            CasterId = input.ReadUInt32();
+            break;
+          }
+          case 16: {
+            SkillId = input.ReadUInt32();
+            break;
+          }
+          case 29: {
+            PosX = input.ReadFloat();
+            break;
+          }
+          case 37: {
+            PosY = input.ReadFloat();
+            break;
+          }
+          case 45: {
+            DirAngle = input.ReadFloat();
+            break;
+          }
+          case 53: {
+            CooldownSec = input.ReadFloat();
+            break;
+          }
         }
       }
     }
@@ -5735,7 +6316,7 @@ namespace SepCore.Definition {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::SepCore.Definition.KnightReflection.Descriptor.MessageTypes[23]; }
+      get { return global::SepCore.Definition.KnightReflection.Descriptor.MessageTypes[24]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -5970,7 +6551,7 @@ namespace SepCore.Definition {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::SepCore.Definition.KnightReflection.Descriptor.MessageTypes[24]; }
+      get { return global::SepCore.Definition.KnightReflection.Descriptor.MessageTypes[25]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -6271,7 +6852,7 @@ namespace SepCore.Definition {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::SepCore.Definition.KnightReflection.Descriptor.MessageTypes[25]; }
+      get { return global::SepCore.Definition.KnightReflection.Descriptor.MessageTypes[26]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -6622,7 +7203,7 @@ namespace SepCore.Definition {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::SepCore.Definition.KnightReflection.Descriptor.MessageTypes[26]; }
+      get { return global::SepCore.Definition.KnightReflection.Descriptor.MessageTypes[27]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -6651,6 +7232,10 @@ namespace SepCore.Definition {
       hp_ = other.hp_;
       playerUid_ = other.playerUid_;
       configId_ = other.configId_;
+      maxHp_ = other.maxHp_;
+      skillCdRemaining_ = other.skillCdRemaining_;
+      skillCdTotal_ = other.skillCdTotal_;
+      statusFlags_ = other.statusFlags_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -6783,6 +7368,66 @@ namespace SepCore.Definition {
       }
     }
 
+    /// <summary>Field number for the "max_hp" field.</summary>
+    public const int MaxHpFieldNumber = 10;
+    private int maxHp_;
+    /// <summary>
+    /// 最大生命值
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int MaxHp {
+      get { return maxHp_; }
+      set {
+        maxHp_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "skill_cd_remaining" field.</summary>
+    public const int SkillCdRemainingFieldNumber = 11;
+    private float skillCdRemaining_;
+    /// <summary>
+    /// 仅 ENTITY_PLAYER：主动技能剩余冷却（秒）
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public float SkillCdRemaining {
+      get { return skillCdRemaining_; }
+      set {
+        skillCdRemaining_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "skill_cd_total" field.</summary>
+    public const int SkillCdTotalFieldNumber = 12;
+    private float skillCdTotal_;
+    /// <summary>
+    /// 仅 ENTITY_PLAYER：主动技能总冷却（秒）
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public float SkillCdTotal {
+      get { return skillCdTotal_; }
+      set {
+        skillCdTotal_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "status_flags" field.</summary>
+    public const int StatusFlagsFieldNumber = 13;
+    private uint statusFlags_;
+    /// <summary>
+    /// 位掩码：1=无敌/冲刺, 2=护盾减伤, 4=攻击增益, 8=Boss二阶段
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public uint StatusFlags {
+      get { return statusFlags_; }
+      set {
+        statusFlags_ = value;
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -6807,6 +7452,10 @@ namespace SepCore.Definition {
       if (Hp != other.Hp) return false;
       if (PlayerUid != other.PlayerUid) return false;
       if (ConfigId != other.ConfigId) return false;
+      if (MaxHp != other.MaxHp) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(SkillCdRemaining, other.SkillCdRemaining)) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(SkillCdTotal, other.SkillCdTotal)) return false;
+      if (StatusFlags != other.StatusFlags) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -6823,6 +7472,10 @@ namespace SepCore.Definition {
       if (Hp != 0) hash ^= Hp.GetHashCode();
       if (PlayerUid != 0UL) hash ^= PlayerUid.GetHashCode();
       if (ConfigId != 0) hash ^= ConfigId.GetHashCode();
+      if (MaxHp != 0) hash ^= MaxHp.GetHashCode();
+      if (SkillCdRemaining != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(SkillCdRemaining);
+      if (SkillCdTotal != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(SkillCdTotal);
+      if (StatusFlags != 0) hash ^= StatusFlags.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -6877,6 +7530,22 @@ namespace SepCore.Definition {
         output.WriteRawTag(72);
         output.WriteUInt32(ConfigId);
       }
+      if (MaxHp != 0) {
+        output.WriteRawTag(80);
+        output.WriteInt32(MaxHp);
+      }
+      if (SkillCdRemaining != 0F) {
+        output.WriteRawTag(93);
+        output.WriteFloat(SkillCdRemaining);
+      }
+      if (SkillCdTotal != 0F) {
+        output.WriteRawTag(101);
+        output.WriteFloat(SkillCdTotal);
+      }
+      if (StatusFlags != 0) {
+        output.WriteRawTag(104);
+        output.WriteUInt32(StatusFlags);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -6923,6 +7592,22 @@ namespace SepCore.Definition {
         output.WriteRawTag(72);
         output.WriteUInt32(ConfigId);
       }
+      if (MaxHp != 0) {
+        output.WriteRawTag(80);
+        output.WriteInt32(MaxHp);
+      }
+      if (SkillCdRemaining != 0F) {
+        output.WriteRawTag(93);
+        output.WriteFloat(SkillCdRemaining);
+      }
+      if (SkillCdTotal != 0F) {
+        output.WriteRawTag(101);
+        output.WriteFloat(SkillCdTotal);
+      }
+      if (StatusFlags != 0) {
+        output.WriteRawTag(104);
+        output.WriteUInt32(StatusFlags);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -6959,6 +7644,18 @@ namespace SepCore.Definition {
       }
       if (ConfigId != 0) {
         size += 1 + pb::CodedOutputStream.ComputeUInt32Size(ConfigId);
+      }
+      if (MaxHp != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(MaxHp);
+      }
+      if (SkillCdRemaining != 0F) {
+        size += 1 + 4;
+      }
+      if (SkillCdTotal != 0F) {
+        size += 1 + 4;
+      }
+      if (StatusFlags != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(StatusFlags);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -6998,6 +7695,18 @@ namespace SepCore.Definition {
       }
       if (other.ConfigId != 0) {
         ConfigId = other.ConfigId;
+      }
+      if (other.MaxHp != 0) {
+        MaxHp = other.MaxHp;
+      }
+      if (other.SkillCdRemaining != 0F) {
+        SkillCdRemaining = other.SkillCdRemaining;
+      }
+      if (other.SkillCdTotal != 0F) {
+        SkillCdTotal = other.SkillCdTotal;
+      }
+      if (other.StatusFlags != 0) {
+        StatusFlags = other.StatusFlags;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -7052,6 +7761,22 @@ namespace SepCore.Definition {
           }
           case 72: {
             ConfigId = input.ReadUInt32();
+            break;
+          }
+          case 80: {
+            MaxHp = input.ReadInt32();
+            break;
+          }
+          case 93: {
+            SkillCdRemaining = input.ReadFloat();
+            break;
+          }
+          case 101: {
+            SkillCdTotal = input.ReadFloat();
+            break;
+          }
+          case 104: {
+            StatusFlags = input.ReadUInt32();
             break;
           }
         }
@@ -7109,6 +7834,22 @@ namespace SepCore.Definition {
             ConfigId = input.ReadUInt32();
             break;
           }
+          case 80: {
+            MaxHp = input.ReadInt32();
+            break;
+          }
+          case 93: {
+            SkillCdRemaining = input.ReadFloat();
+            break;
+          }
+          case 101: {
+            SkillCdTotal = input.ReadFloat();
+            break;
+          }
+          case 104: {
+            StatusFlags = input.ReadUInt32();
+            break;
+          }
         }
       }
     }
@@ -7134,7 +7875,7 @@ namespace SepCore.Definition {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::SepCore.Definition.KnightReflection.Descriptor.MessageTypes[27]; }
+      get { return global::SepCore.Definition.KnightReflection.Descriptor.MessageTypes[28]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -7441,7 +8182,7 @@ namespace SepCore.Definition {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::SepCore.Definition.KnightReflection.Descriptor.MessageTypes[28]; }
+      get { return global::SepCore.Definition.KnightReflection.Descriptor.MessageTypes[29]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -7804,7 +8545,7 @@ namespace SepCore.Definition {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::SepCore.Definition.KnightReflection.Descriptor.MessageTypes[29]; }
+      get { return global::SepCore.Definition.KnightReflection.Descriptor.MessageTypes[30]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -8035,7 +8776,7 @@ namespace SepCore.Definition {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::SepCore.Definition.KnightReflection.Descriptor.MessageTypes[30]; }
+      get { return global::SepCore.Definition.KnightReflection.Descriptor.MessageTypes[31]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -8122,6 +8863,9 @@ namespace SepCore.Definition {
           break;
         case PayloadOneofCase.GameResult:
           GameResult = other.GameResult.Clone();
+          break;
+        case PayloadOneofCase.SkillEvent:
+          SkillEvent = other.SkillEvent.Clone();
           break;
         case PayloadOneofCase.Snapshot:
           Snapshot = other.Snapshot.Clone();
@@ -8425,6 +9169,18 @@ namespace SepCore.Definition {
       }
     }
 
+    /// <summary>Field number for the "skill_event" field.</summary>
+    public const int SkillEventFieldNumber = 39;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::SepCore.Definition.SkillEvent SkillEvent {
+      get { return payloadCase_ == PayloadOneofCase.SkillEvent ? (global::SepCore.Definition.SkillEvent) payload_ : null; }
+      set {
+        payload_ = value;
+        payloadCase_ = value == null ? PayloadOneofCase.None : PayloadOneofCase.SkillEvent;
+      }
+    }
+
     /// <summary>Field number for the "snapshot" field.</summary>
     public const int SnapshotFieldNumber = 40;
     /// <summary>
@@ -8478,6 +9234,7 @@ namespace SepCore.Definition {
       ItemPicked = 36,
       PlayerLeft = 37,
       GameResult = 38,
+      SkillEvent = 39,
       Snapshot = 40,
       InputBatch = 41,
     }
@@ -8533,6 +9290,7 @@ namespace SepCore.Definition {
       if (!object.Equals(ItemPicked, other.ItemPicked)) return false;
       if (!object.Equals(PlayerLeft, other.PlayerLeft)) return false;
       if (!object.Equals(GameResult, other.GameResult)) return false;
+      if (!object.Equals(SkillEvent, other.SkillEvent)) return false;
       if (!object.Equals(Snapshot, other.Snapshot)) return false;
       if (!object.Equals(InputBatch, other.InputBatch)) return false;
       if (PayloadCase != other.PayloadCase) return false;
@@ -8566,6 +9324,7 @@ namespace SepCore.Definition {
       if (payloadCase_ == PayloadOneofCase.ItemPicked) hash ^= ItemPicked.GetHashCode();
       if (payloadCase_ == PayloadOneofCase.PlayerLeft) hash ^= PlayerLeft.GetHashCode();
       if (payloadCase_ == PayloadOneofCase.GameResult) hash ^= GameResult.GetHashCode();
+      if (payloadCase_ == PayloadOneofCase.SkillEvent) hash ^= SkillEvent.GetHashCode();
       if (payloadCase_ == PayloadOneofCase.Snapshot) hash ^= Snapshot.GetHashCode();
       if (payloadCase_ == PayloadOneofCase.InputBatch) hash ^= InputBatch.GetHashCode();
       hash ^= (int) payloadCase_;
@@ -8679,6 +9438,10 @@ namespace SepCore.Definition {
         output.WriteRawTag(178, 2);
         output.WriteMessage(GameResult);
       }
+      if (payloadCase_ == PayloadOneofCase.SkillEvent) {
+        output.WriteRawTag(186, 2);
+        output.WriteMessage(SkillEvent);
+      }
       if (payloadCase_ == PayloadOneofCase.Snapshot) {
         output.WriteRawTag(194, 2);
         output.WriteMessage(Snapshot);
@@ -8789,6 +9552,10 @@ namespace SepCore.Definition {
         output.WriteRawTag(178, 2);
         output.WriteMessage(GameResult);
       }
+      if (payloadCase_ == PayloadOneofCase.SkillEvent) {
+        output.WriteRawTag(186, 2);
+        output.WriteMessage(SkillEvent);
+      }
       if (payloadCase_ == PayloadOneofCase.Snapshot) {
         output.WriteRawTag(194, 2);
         output.WriteMessage(Snapshot);
@@ -8875,6 +9642,9 @@ namespace SepCore.Definition {
       }
       if (payloadCase_ == PayloadOneofCase.GameResult) {
         size += 2 + pb::CodedOutputStream.ComputeMessageSize(GameResult);
+      }
+      if (payloadCase_ == PayloadOneofCase.SkillEvent) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(SkillEvent);
       }
       if (payloadCase_ == PayloadOneofCase.Snapshot) {
         size += 2 + pb::CodedOutputStream.ComputeMessageSize(Snapshot);
@@ -9029,6 +9799,12 @@ namespace SepCore.Definition {
             GameResult = new global::SepCore.Definition.GameResult();
           }
           GameResult.MergeFrom(other.GameResult);
+          break;
+        case PayloadOneofCase.SkillEvent:
+          if (SkillEvent == null) {
+            SkillEvent = new global::SepCore.Definition.SkillEvent();
+          }
+          SkillEvent.MergeFrom(other.SkillEvent);
           break;
         case PayloadOneofCase.Snapshot:
           if (Snapshot == null) {
@@ -9263,6 +10039,15 @@ namespace SepCore.Definition {
             }
             input.ReadMessage(subBuilder);
             GameResult = subBuilder;
+            break;
+          }
+          case 314: {
+            global::SepCore.Definition.SkillEvent subBuilder = new global::SepCore.Definition.SkillEvent();
+            if (payloadCase_ == PayloadOneofCase.SkillEvent) {
+              subBuilder.MergeFrom(SkillEvent);
+            }
+            input.ReadMessage(subBuilder);
+            SkillEvent = subBuilder;
             break;
           }
           case 322: {
@@ -9502,6 +10287,15 @@ namespace SepCore.Definition {
             }
             input.ReadMessage(subBuilder);
             GameResult = subBuilder;
+            break;
+          }
+          case 314: {
+            global::SepCore.Definition.SkillEvent subBuilder = new global::SepCore.Definition.SkillEvent();
+            if (payloadCase_ == PayloadOneofCase.SkillEvent) {
+              subBuilder.MergeFrom(SkillEvent);
+            }
+            input.ReadMessage(subBuilder);
+            SkillEvent = subBuilder;
             break;
           }
           case 322: {

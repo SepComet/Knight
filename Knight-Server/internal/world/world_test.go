@@ -159,11 +159,11 @@ func TestRoomTransitionAndAllRoomLoaded(t *testing.T) {
 		if len(snaps) != 1 {
 			t.Fatalf("uid=%d snapshots = %d, want 1", uid, len(snaps))
 		}
-		if len(snaps[0].Entities) != 2 {
-			t.Fatalf("entities = %d, want 2", len(snaps[0].Entities))
+		if players := countPlayerEntities(snaps[0]); players != 2 {
+			t.Fatalf("player entities = %d, want 2", players)
 		}
 		e1 := findEntityByUID(snaps[0], 101)
-		if e1 == nil || e1.Type != knight.EntityType_ENTITY_PLAYER || e1.ConfigId != 1 || e1.Hp != DefaultPlayerHP {
+		if e1 == nil || e1.Type != knight.EntityType_ENTITY_PLAYER || e1.ConfigId != 1 || e1.Hp != DefaultPlayerHP || e1.MaxHp != DefaultPlayerHP {
 			t.Fatalf("unexpected entity 101: %+v", e1)
 		}
 	}
@@ -463,8 +463,8 @@ func TestPlayerDisconnectDuringBattleAndRoomCleanup(t *testing.T) {
 	if !gotDespawn || !gotLeft {
 		t.Fatalf("missing disconnect events: despawn=%t left=%t", gotDespawn, gotLeft)
 	}
-	if lastSnap == nil || len(lastSnap.Entities) != 1 || lastSnap.Entities[0].PlayerUid != 101 {
-		t.Fatalf("snapshot after disconnect should only contain 101: %+v", lastSnap)
+	if lastSnap == nil || countPlayerEntities(lastSnap) != 1 || findEntityByUID(lastSnap, 101) == nil {
+		t.Fatalf("snapshot after disconnect should only contain player 101: %+v", lastSnap)
 	}
 
 	// 最后一名玩家离开 → 房间清理
@@ -503,9 +503,19 @@ func TestPlayerDisconnectDuringLoadingActivatesRemaining(t *testing.T) {
 	runner.Step(1)
 
 	snaps := sender.snapshots(101)
-	if len(snaps) != 1 || len(snaps[0].Entities) != 1 {
-		t.Fatalf("expected immediate activation snapshot with 1 entity, got %+v", snaps)
+	if len(snaps) != 1 || countPlayerEntities(snaps[0]) != 1 {
+		t.Fatalf("expected immediate activation snapshot with 1 player entity, got %+v", snaps)
 	}
+}
+
+func countPlayerEntities(snap *knight.Snapshot) int {
+	n := 0
+	for _, e := range snap.Entities {
+		if e.Type == knight.EntityType_ENTITY_PLAYER {
+			n++
+		}
+	}
+	return n
 }
 
 // TestInputRateBudgetAntiSpeedHackAndBurstRecovery 验证 P1-1：

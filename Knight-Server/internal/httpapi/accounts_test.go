@@ -176,9 +176,9 @@ func TestUserNotFound(t *testing.T) {
 func TestMatchesListAndNotFound(t *testing.T) {
 	hdr := map[string]string{"Authorization": "Bearer tok"}
 
-	// 有战绩（含角色/武器快照；match_id 字符串化）
+	// 有战绩（含角色/武器快照与随机种子；match_id 与 seed 字符串化）
 	h := newAccountsServer(t, &fakeAccounts{matches: []MatchEntry{{
-		MatchID: 1, Outcome: 1, DurationSec: 120, CharacterID: 3, WeaponID: 9,
+		MatchID: 1, Outcome: 1, DurationSec: 120, Seed: 42, CharacterID: 3, WeaponID: 9,
 		Kills: 3, DamageDealt: 300, DamageTaken: 80, Alive: true,
 		FinishedAt: time.Date(2026, 1, 2, 3, 4, 5, 0, time.UTC),
 	}}}, fakeTokens{ok: true})
@@ -187,6 +187,7 @@ func TestMatchesListAndNotFound(t *testing.T) {
 		t.Fatalf("code = %d", rec.Code)
 	}
 	if !strings.Contains(rec.Body.String(), `"match_id":"1"`) ||
+		!strings.Contains(rec.Body.String(), `"seed":"42"`) ||
 		!strings.Contains(rec.Body.String(), `"outcome":1`) ||
 		!strings.Contains(rec.Body.String(), `"character_id":3`) ||
 		!strings.Contains(rec.Body.String(), `"weapon_id":9`) {

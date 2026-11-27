@@ -66,7 +66,7 @@ func newBattleRig(t *testing.T) *battleRig {
 	r.runner = runner
 
 	mgr = session.NewManager(
-		session.Config{ProtoVersion: 5, SessionLimit: 64, HeartbeatTimeout: 10 * time.Second, DisconnectDelay: 5 * time.Millisecond},
+		session.Config{ProtoVersion: 6, SessionLimit: 64, HeartbeatTimeout: 10 * time.Second, DisconnectDelay: 5 * time.Millisecond},
 		mapValidator{"tok-a": 1, "tok-b": 2},
 		gate,
 		bus,
@@ -105,7 +105,7 @@ func (r *battleRig) dial(token string) int {
 
 	r.pumpUntil(func() bool { return cli.State() == kcp2k.PeerAuthenticated }, "kcp2k handshake")
 	r.send(i, &knight.Envelope{Payload: &knight.Envelope_HandshakeReq{
-		HandshakeReq: &knight.HandshakeReq{ProtoVersion: 5, Token: token},
+		HandshakeReq: &knight.HandshakeReq{ProtoVersion: 6, Token: token},
 	}})
 	r.pumpUntil(func() bool {
 		return len(r.inbox[i]) > 0 && r.inbox[i][0].GetHandshakeAck() != nil
@@ -346,7 +346,7 @@ func TestConcurrentGateAndRunnerGracefulShutdown(t *testing.T) {
 
 	mgr = session.NewManager(
 		session.Config{
-			ProtoVersion:     5,
+			ProtoVersion:     6,
 			SessionLimit:     64,
 			HeartbeatTimeout: 10 * time.Second,
 			DisconnectDelay:  200 * time.Millisecond, // 刻意留出停机时仍挂起的延迟断开定时器
@@ -416,7 +416,7 @@ func TestConcurrentGateAndRunnerGracefulShutdown(t *testing.T) {
 				if !authed && cli.State() == kcp2k.PeerAuthenticated {
 					authed = true
 					data, _ := protocol.Encode(&knight.Envelope{Payload: &knight.Envelope_HandshakeReq{
-						HandshakeReq: &knight.HandshakeReq{ProtoVersion: 5, Token: token},
+						HandshakeReq: &knight.HandshakeReq{ProtoVersion: 6, Token: token},
 					}})
 					cli.Send(data, kcp2k.ChannelReliable)
 					close(lc.ready)

@@ -22,6 +22,7 @@ type MatchRow struct {
 	MatchID     uint64
 	Outcome     uint32 // knight.GameOutcome：1=Victory 2=Defeat
 	DurationSec uint32
+	Seed        uint64
 	CharacterID uint32
 	WeaponID    uint32
 	Kills       uint32
@@ -31,9 +32,14 @@ type MatchRow struct {
 	FinishedAt  time.Time
 }
 
-// InsertMatch 写入一局结算（match 主记录 + 全体玩家明细，事务）。
-// matchID 由应用层雪花生成后传入；uid 不存在的玩家会因外键约束写入失败。
+// InsertMatch 写入一局结算（兼容旧签名，seed=0）。
 func (s *Store) InsertMatch(ctx context.Context, matchID uint64, outcome uint32, durationSec uint32, players []MatchPlayerRow) error {
+	return s.InsertMatchWithSeed(ctx, matchID, outcome, durationSec, 0, players)
+}
+
+// InsertMatchWithSeed 写入一局结算（match 主记录含随机种子 + 全体玩家明细，事务）。
+// matchID 由应用层雪花生成后传入；uid 不存在的玩家会因外键约束写入失败。
+func (s *Store) InsertMatchWithSeed(ctx context.Context, matchID uint64, outcome uint32, durationSec uint32, seed uint64, players []MatchPlayerRow) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -41,8 +47,8 @@ func (s *Store) InsertMatch(ctx context.Context, matchID uint64, outcome uint32,
 	defer func() { _ = tx.Rollback() }()
 
 	if _, err := tx.ExecContext(ctx,
-		`INSERT INTO matches (match_id, outcome, duration_sec) VALUES (?, ?, ?)`,
-		matchID, outcome, durationSec); err != nil {
+		`INSERT INTO matches (match_id, outcome, duration_sec, seed) VALUES (?, ?, ?, ?)`,
+		matchID, outcome, durationSec, seed); err != nil {
 		return err
 	}
 
@@ -66,7 +72,7 @@ func (s *Store) InsertMatch(ctx context.Context, matchID uint64, outcome uint32,
 // 账号不存在无法在单查询中区分——调用方先用 GetUserByID 校验。
 func (s *Store) ListMatchesByUID(ctx context.Context, uid uint64) ([]MatchRow, error) {
 	rows, err := s.db.QueryContext(ctx, `
-SELECT m.match_id, m.outcome, m.duration_sec,
+SELECT m.match_id, m.outcome, m.duration_sec, m.seed,
        p.character_id, p.weapon_id,
        p.kills, p.damage_dealt, p.damage_taken, p.alive, m.finished_at
 FROM match_players p
@@ -83,7 +89,7 @@ ORDER BY m.finished_at DESC, m.match_id DESC`, uid)
 		var r MatchRow
 		var finishedAt time.Time
 		var alive int
-		if err := rows.Scan(&r.MatchID, &r.Outcome, &r.DurationSec,
+		if err := rows.Scan(&r.MatchID, &r.Outcome, &r.DurationSec, &r.Seed,
 			&r.CharacterID, &r.WeaponID,
 			&r.Kills, &r.DamageDealt, &r.DamageTaken, &alive, &finishedAt); err != nil {
 			return nil, err

@@ -90,6 +90,7 @@ type OwnerChangedArgs struct {
 type GameStartedArgs struct {
 	RoomID     uint32
 	MapIDs     []uint32
+	Seed       uint64
 	PlayerUIDs []uint64
 }
 

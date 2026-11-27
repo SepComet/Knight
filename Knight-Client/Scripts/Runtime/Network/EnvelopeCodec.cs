@@ -48,6 +48,7 @@ public static class EnvelopeCodec
             case MsgId.MsgItemPicked: envelope.ItemPicked = As<ItemPicked>(message); break;
             case MsgId.MsgPlayerLeft: envelope.PlayerLeft = As<PlayerLeft>(message); break;
             case MsgId.MsgGameResult: envelope.GameResult = As<GameResult>(message); break;
+            case MsgId.MsgSkillEvent: envelope.SkillEvent = As<SkillEvent>(message); break;
             // 96~127 高频通道
             case MsgId.MsgSnapshot: envelope.Snapshot = As<Snapshot>(message); break;
             case MsgId.MsgInputBatch: envelope.InputBatch = As<InputBatch>(message); break;
@@ -110,6 +111,7 @@ public static class EnvelopeCodec
             Envelope.PayloadOneofCase.ItemPicked => envelope.ItemPicked,
             Envelope.PayloadOneofCase.PlayerLeft => envelope.PlayerLeft,
             Envelope.PayloadOneofCase.GameResult => envelope.GameResult,
+            Envelope.PayloadOneofCase.SkillEvent => envelope.SkillEvent,
             Envelope.PayloadOneofCase.Snapshot => envelope.Snapshot,
             Envelope.PayloadOneofCase.InputBatch => envelope.InputBatch,
             _ => null,
@@ -143,6 +145,7 @@ public static class EnvelopeCodec
             Envelope.PayloadOneofCase.ItemPicked => MsgId.MsgItemPicked,
             Envelope.PayloadOneofCase.PlayerLeft => MsgId.MsgPlayerLeft,
             Envelope.PayloadOneofCase.GameResult => MsgId.MsgGameResult,
+            Envelope.PayloadOneofCase.SkillEvent => MsgId.MsgSkillEvent,
             Envelope.PayloadOneofCase.Snapshot => MsgId.MsgSnapshot,
             Envelope.PayloadOneofCase.InputBatch => MsgId.MsgInputBatch,
             _ => MsgId.MsgNone,
@@ -184,6 +187,7 @@ public static class EnvelopeCodec
             var t when t == typeof(ItemPicked) => MsgId.MsgItemPicked,
             var t when t == typeof(PlayerLeft) => MsgId.MsgPlayerLeft,
             var t when t == typeof(GameResult) => MsgId.MsgGameResult,
+            var t when t == typeof(SkillEvent) => MsgId.MsgSkillEvent,
             // 96~127 高频通道
             var t when t == typeof(Snapshot) => MsgId.MsgSnapshot,
             var t when t == typeof(InputBatch) => MsgId.MsgInputBatch,

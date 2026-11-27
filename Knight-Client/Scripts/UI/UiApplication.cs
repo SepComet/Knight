@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using HttpClient = System.Net.Http.HttpClient;
 using Godot;
 using SepCore.Definition;
@@ -47,6 +49,8 @@ public partial class UiApplication : Node
     private RoomSessionClient _roomSession = null!;
     private bool _lobbyActive;
     private HttpClient? _authHttp;
+    private MatchHistoryApi? _matchHistoryApi;
+    private CancellationTokenSource? _historyCts;
     private bool _registeredDuringAttempt;
 
     public override void _Ready()
@@ -65,6 +69,9 @@ public partial class UiApplication : Node
         Accounts.RegistrationCompleted += OnRegistered;
         Accounts.PersistenceWarning += OnPersistenceWarning;
         MainMenu.AccountRequested += OnAccountRequested;
+        MainMenu.HistoryRequested += OpenMatchHistory;
+        MainMenu.HistoryRefreshRequested += RefreshMatchHistory;
+        MainMenu.HistoryCloseRequested += CloseMatchHistory;
         Login.SubmissionRequested += OnLoginSubmitted;
         Login.Closed += Accounts.Cancel;
         OnAccountChanged();
@@ -89,24 +96,109 @@ public partial class UiApplication : Node
         Waiting.LeaveRequested += _roomSession.Leave;
         Waiting.ReadyChanged += _roomSession.SetReady;
         Waiting.StartRequested += _roomSession.StartGame;
-        Results.ReturnRoomRequested += ShowWaitingRoom;
-        Results.ReturnMenuRequested += ShowMainMenu;
+        Results.ReturnRoomRequested += () => { if (_lobbyActive) ShowWaitingRoom(); };
+        Results.ReturnMenuRequested += () => { if (_lobbyActive) ShowMainMenu(); };
         _ui.FormOpened += OnFormOpened;
     }
 
     public async void EnterLobby()
     {
         _lobbyActive = true;
-        if (_roomSession.Room is { } room) OnRoomChanged(room);
-        else ShowMainMenu();
+        if (_roomSession.Room is { } room && room.State == RoomSessionState.RoomWaiting)
+            OnRoomChanged(room);
+        else
+            ShowMainMenu();
         await Accounts.InitializeAsync();
     }
+
     public void LeaveLobby()
     {
         _lobbyActive = false;
+        CancelHistoryRequest();
         Accounts.Cancel();
         if (_roomSession.IsBusy || _roomSession.IsListing)
             NetworkComponent.Instance!.Client.Disconnect("退出大厅，取消房间请求");
+    }
+
+    /// <summary>主动清理本地房间缓存并通知服务端离房（用于结算页返回大厅/房间时避免旧 RoomRunning 残留）。</summary>
+    public void LeaveRoomSession()
+    {
+        _roomSession.Leave();
+    }
+
+    public void OpenMatchHistory()
+    {
+        if (!_lobbyActive)
+            return;
+        if (!Accounts.IsAuthenticated || Accounts.Session == null)
+        {
+            OpenLoginDialog();
+            return;
+        }
+        if (_ui.FindView(UIFormType.LobbyForm) == null)
+            ShowMainMenu();
+        MainMenu.SetMatchHistory(true, true, "", MainMenu.MatchHistory);
+        _ = FetchMatchHistoryAsync();
+    }
+
+    public void RefreshMatchHistory()
+    {
+        if (!_lobbyActive || !Accounts.IsAuthenticated || Accounts.Session == null)
+            return;
+        MainMenu.SetMatchHistory(true, true, "", MainMenu.MatchHistory);
+        _ = FetchMatchHistoryAsync();
+    }
+
+    public void CloseMatchHistory()
+    {
+        CancelHistoryRequest();
+        MainMenu.SetMatchHistory(false, false, "", MainMenu.MatchHistory);
+    }
+
+    private async Task FetchMatchHistoryAsync()
+    {
+        if (_matchHistoryApi == null || Accounts.Session == null)
+        {
+            MainMenu.SetMatchHistory(true, false, "历史战绩服务未初始化", Array.Empty<MatchHistoryEntry>());
+            return;
+        }
+
+        CancelHistoryRequest();
+        var cts = new CancellationTokenSource();
+        _historyCts = cts;
+        var session = Accounts.Session;
+
+        try
+        {
+            var entries = await _matchHistoryApi.FetchAsync(session.Uid, session.Token, cts.Token);
+            if (!cts.IsCancellationRequested && _lobbyActive)
+                MainMenu.SetMatchHistory(true, false, "", entries);
+        }
+        catch (OperationCanceledException)
+        {
+            // Cancelled by user or navigation.
+        }
+        catch (MatchHistoryApiException ex)
+        {
+            if (!cts.IsCancellationRequested && _lobbyActive)
+                MainMenu.SetMatchHistory(true, false, ex.Message, Array.Empty<MatchHistoryEntry>());
+        }
+        catch (Exception ex)
+        {
+            if (!cts.IsCancellationRequested && _lobbyActive)
+                MainMenu.SetMatchHistory(true, false, $"获取历史战绩失败：{ex.Message}", Array.Empty<MatchHistoryEntry>());
+        }
+    }
+
+    private void CancelHistoryRequest()
+    {
+        var cts = Interlocked.Exchange(ref _historyCts, null);
+        if (cts != null)
+        {
+            try { cts.Cancel(); }
+            catch (ObjectDisposedException) { }
+            cts.Dispose();
+        }
     }
 
     public override void _Process(double delta) => _roomSession.Update((float)delta);
@@ -171,6 +263,7 @@ public partial class UiApplication : Node
         if (portNumber is < 1 or > 65535) throw new InvalidOperationException("KCP 端口配置无效");
         var port = (ushort)portNumber;
         _authHttp = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
+        _matchHistoryApi = new MatchHistoryApi(_authHttp, baseUri);
         Accounts = new AccountSessionManager(new AuthApi(_authHttp, baseUri),
             new JsonLoginStore(ProjectSettings.GlobalizePath(LoginCachePath.Resolve(OS.GetCmdlineUserArgs()))),
             NetworkComponent.Instance!.Client, host, port, $"{baseUri.AbsoluteUri}|{host}:{port}");
@@ -223,6 +316,7 @@ public partial class UiApplication : Node
         {
             if (!Accounts.Logout()) { OnPersistenceWarning(Accounts.Message); return; }
             _registeredDuringAttempt = false;
+            CloseMatchHistory();
             ShowMainMenu();
         }
         OpenLoginDialog();
@@ -245,6 +339,7 @@ public partial class UiApplication : Node
 
     public override void _ExitTree()
     {
+        CancelHistoryRequest();
         Accounts.Changed -= OnAccountChanged;
         Accounts.LoginRequired -= OnLoginRequired;
         Accounts.RegistrationCompleted -= OnRegistered;

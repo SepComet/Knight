@@ -48,7 +48,7 @@ func newRig(t *testing.T, tokens session.TokenValidator, cfg session.Config) *ri
 		cfg.DisconnectDelay = 5 * time.Millisecond // 测试用短延迟
 	}
 	if cfg.ProtoVersion == 0 {
-		cfg.ProtoVersion = 5
+		cfg.ProtoVersion = 6
 	}
 	if cfg.SessionLimit == 0 {
 		cfg.SessionLimit = 256
@@ -175,7 +175,7 @@ func (m mapValidator) Validate(token string) (uint64, string, bool) {
 func TestHandshakeSuccess(t *testing.T) {
 	r := newRig(t, mapValidator{"tok-a": 1}, session.Config{})
 	r.dial()
-	r.sendHandshakeReq(5, "tok-a")
+	r.sendHandshakeReq(6, "tok-a")
 
 	ack := r.awaitHandshakeAck()
 	if ack.Uid != 1 || ack.Name != "user-tok-a" {
@@ -207,7 +207,7 @@ func TestHandshakeVersionMismatch(t *testing.T) {
 func TestHandshakeInvalidToken(t *testing.T) {
 	r := newRig(t, mapValidator{"tok-a": 1}, session.Config{})
 	r.dial()
-	r.sendHandshakeReq(5, "wrong-token")
+	r.sendHandshakeReq(6, "wrong-token")
 
 	e := r.expectError()
 	if e.Code != knight.ErrorCode_ERR_INVALID_TOKEN {
@@ -221,12 +221,12 @@ func TestHandshakeAlreadyOnline(t *testing.T) {
 
 	// 第一个客户端正常握手
 	r.dial()
-	r.sendHandshakeReq(5, "tok-a")
+	r.sendHandshakeReq(6, "tok-a")
 	r.awaitHandshakeAck()
 
 	// 第二个客户端同 uid：拒绝新连接，旧会话保留
 	r.dial()
-	r.sendHandshakeReq(5, "tok-a")
+	r.sendHandshakeReq(6, "tok-a")
 	e := r.expectError()
 	if e.Code != knight.ErrorCode_ERR_ALREADY_ONLINE {
 		t.Fatalf("code = %v", e.Code)
@@ -244,12 +244,12 @@ func TestHandshakeServerFull(t *testing.T) {
 	r := newRig(t, mapValidator{"tok-a": 1, "tok-b": 2}, session.Config{SessionLimit: 1})
 
 	r.dial()
-	r.sendHandshakeReq(5, "tok-a")
+	r.sendHandshakeReq(6, "tok-a")
 	r.awaitHandshakeAck()
 
 	// 第二个客户端（不同 uid）：会话数达上限
 	r.dial()
-	r.sendHandshakeReq(5, "tok-b")
+	r.sendHandshakeReq(6, "tok-b")
 	e := r.expectError()
 	if e.Code != knight.ErrorCode_ERR_SERVER_FULL {
 		t.Fatalf("code = %v", e.Code)
@@ -275,7 +275,7 @@ func TestPreHandshakeMessageRejected(t *testing.T) {
 func TestBusinessMessageNotImplementedKeepsConnection(t *testing.T) {
 	r := newRig(t, mapValidator{"tok-a": 1}, session.Config{})
 	r.dial()
-	r.sendHandshakeReq(5, "tok-a")
+	r.sendHandshakeReq(6, "tok-a")
 	r.awaitHandshakeAck()
 	r.cliData = nil
 
@@ -301,7 +301,7 @@ func TestBusinessMessageNotImplementedKeepsConnection(t *testing.T) {
 func TestHeartbeatTimeoutKicksSession(t *testing.T) {
 	r := newRig(t, mapValidator{"tok-a": 1}, session.Config{HeartbeatTimeout: 100 * time.Millisecond})
 	r.dial()
-	r.sendHandshakeReq(5, "tok-a")
+	r.sendHandshakeReq(6, "tok-a")
 	r.awaitHandshakeAck()
 	r.cliData = nil
 
@@ -325,7 +325,7 @@ func TestHeartbeatTimeoutKicksSession(t *testing.T) {
 func TestSendToUID(t *testing.T) {
 	r := newRig(t, mapValidator{"tok-a": 1}, session.Config{})
 	r.dial()
-	r.sendHandshakeReq(5, "tok-a")
+	r.sendHandshakeReq(6, "tok-a")
 	r.awaitHandshakeAck()
 	r.cliData = nil
 

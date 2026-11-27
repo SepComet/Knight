@@ -11,8 +11,9 @@ namespace SepCore.Battle;
 /// 负责：
 /// - 消费 RoomTransition (68) 并发送 RoomLoaded (69)；
 /// - 30Hz 采样打包并发送 InputBatch (97)；
-/// - 接收 Snapshot (96) / EntitySpawn (64) / EntityDespawn (65) / PlayerLeft (71)，维护权威实体表与兜底生成；
-/// - 感知 GameResult (72) / ROOM_CLOSED / 断线并通知流程层收尾。
+/// - 接收 Snapshot (96) / EntitySpawn (64) / EntityDespawn (65) / DamageEvent (66) /
+///   DoorState (67) / ItemPicked (70) / PlayerLeft (71) / GameResult (72) / SkillEvent (73)；
+/// - 维护权威实体表、地牢房间进度、出口门状态与结算状态。
 /// </summary>
 public sealed class BattleSessionClient : IDisposable
 {
@@ -25,7 +26,11 @@ public sealed class BattleSessionClient : IDisposable
     private uint _confirmedMapId;
 
     public ulong LocalUid => _network.Uid;
+    public ulong DungeonSeed { get; private set; }
     public uint CurrentMapId { get; private set; }
+    public uint CurrentRoomIndex { get; private set; }
+    public uint TotalRooms { get; private set; }
+    public bool DoorOpen { get; private set; }
     public IReadOnlyList<uint> MapSequence { get; private set; } = Array.Empty<uint>();
     public bool IsRoomLoaded => _confirmedMapId != 0 && _confirmedMapId == CurrentMapId;
     public uint LastSnapshotTick { get; private set; }
@@ -35,12 +40,18 @@ public sealed class BattleSessionClient : IDisposable
     public IReadOnlyList<InputCmd> PendingInputs => _inputs.PendingInputs;
     public IReadOnlyDictionary<uint, EntityState> Entities => _entities;
     public IReadOnlyDictionary<ulong, SpawnAssignment> Spawns => _spawns;
+    public GameResult? LastGameResult { get; private set; }
+    public bool IsMatchFinished => LastGameResult != null;
     public NetworkTransportStats GetTransportStats() => _network.GetTransportStats();
 
     public event Action<RoomTransition>? RoomTransitionReceived;
     public event Action<EntityState>? EntitySpawned;
     public event Action<EntityState>? EntityUpdated;
     public event Action<uint, ulong>? EntityDespawned;
+    public event Action<DamageEvent>? DamageEventReceived;
+    public event Action<DoorStateValue>? DoorStateChanged;
+    public event Action<ItemPicked>? ItemPickedReceived;
+    public event Action<SkillEvent>? SkillEventReceived;
     public event Action<ulong, LeftReason>? PlayerLeftReceived;
     public event Action<Snapshot>? SnapshotReceived;
     public event Action<GameResult>? GameResultReceived;
@@ -53,6 +64,10 @@ public sealed class BattleSessionClient : IDisposable
         _subscriptions.Add(_network.Subscribe<Snapshot>(OnSnapshot));
         _subscriptions.Add(_network.Subscribe<EntitySpawn>(OnEntitySpawn));
         _subscriptions.Add(_network.Subscribe<EntityDespawn>(OnEntityDespawn));
+        _subscriptions.Add(_network.Subscribe<DamageEvent>(OnDamageEvent));
+        _subscriptions.Add(_network.Subscribe<DoorState>(OnDoorState));
+        _subscriptions.Add(_network.Subscribe<ItemPicked>(OnItemPicked));
+        _subscriptions.Add(_network.Subscribe<SkillEvent>(OnSkillEvent));
         _subscriptions.Add(_network.Subscribe<PlayerLeft>(OnPlayerLeft));
         _subscriptions.Add(_network.Subscribe<GameResult>(OnGameResult));
         _subscriptions.Add(_network.Subscribe<RoomStatePush>(OnRoomStatePush));
@@ -63,12 +78,16 @@ public sealed class BattleSessionClient : IDisposable
     public void Start(GameStart? gameStart, RoomTransition? pendingTransition)
     {
         _inputs.Reset();
+        LastGameResult = null;
+        DoorOpen = false;
         if (gameStart != null)
         {
+            DungeonSeed = gameStart.Seed;
             var seq = new uint[gameStart.MapIds.Count];
             for (var i = 0; i < gameStart.MapIds.Count; i++)
                 seq[i] = gameStart.MapIds[i];
             MapSequence = Array.AsReadOnly(seq);
+            TotalRooms = (uint)seq.Length;
         }
 
         if (pendingTransition != null)
@@ -91,7 +110,7 @@ public sealed class BattleSessionClient : IDisposable
     /// <summary>在 30Hz 固定步长上记录一条输入并发送包含全部未确认输入的 InputBatch (97)。</summary>
     public InputCmd? SampleAndSendInput(float worldMoveX, float worldMoveY, float worldAimDeg, uint buttons)
     {
-        if (_disposed || !IsRoomLoaded || _network.State != NetworkState.Connected)
+        if (_disposed || !IsRoomLoaded || IsMatchFinished || _network.State != NetworkState.Connected)
             return null;
 
         var cmd = _inputs.Record(worldMoveX, worldMoveY, worldAimDeg, buttons);
@@ -117,6 +136,13 @@ public sealed class BattleSessionClient : IDisposable
         }
 
         CurrentMapId = transition.MapId;
+        CurrentRoomIndex = transition.RoomIndex;
+        if (transition.TotalRooms > 0)
+            TotalRooms = transition.TotalRooms;
+        else if (TotalRooms == 0 && MapSequence.Count > 0)
+            TotalRooms = (uint)MapSequence.Count;
+
+        DoorOpen = false;
         _confirmedMapId = 0;
         LastSnapshotTick = 0;
         _inputs.ClearPending();
@@ -216,6 +242,31 @@ public sealed class BattleSessionClient : IDisposable
         }
     }
 
+    private void OnDamageEvent(DamageEvent damage)
+    {
+        if (_disposed) return;
+        DamageEventReceived?.Invoke(damage.Clone());
+    }
+
+    private void OnDoorState(DoorState door)
+    {
+        if (_disposed) return;
+        DoorOpen = door.State == DoorStateValue.DoorOpen;
+        DoorStateChanged?.Invoke(door.State);
+    }
+
+    private void OnItemPicked(ItemPicked picked)
+    {
+        if (_disposed) return;
+        ItemPickedReceived?.Invoke(picked.Clone());
+    }
+
+    private void OnSkillEvent(SkillEvent skill)
+    {
+        if (_disposed) return;
+        SkillEventReceived?.Invoke(skill.Clone());
+    }
+
     private void OnPlayerLeft(PlayerLeft left)
     {
         if (_disposed) return;
@@ -247,13 +298,15 @@ public sealed class BattleSessionClient : IDisposable
     private void OnGameResult(GameResult result)
     {
         if (_disposed) return;
-        GameResultReceived?.Invoke(result.Clone());
+        var clone = result.Clone();
+        LastGameResult = clone;
+        GameResultReceived?.Invoke(clone);
     }
 
     private void OnRoomStatePush(RoomStatePush push)
     {
         if (_disposed) return;
-        if (push.State == RoomSessionState.RoomClosed)
+        if (push.State == RoomSessionState.RoomClosed && !IsMatchFinished)
             SessionEnded?.Invoke("房间已关闭");
     }
 

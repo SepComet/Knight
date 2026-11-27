@@ -210,9 +210,9 @@ anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -312.0
-offset_top = 72.0
+offset_top = 152.0
 offset_right = -24.0
-offset_bottom = 112.0
+offset_bottom = 192.0
 grow_horizontal = 0
 theme_override_styles/panel = SubResource("NetDebugPanelStyle")
 
@@ -328,3 +328,153 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 14
 button_pressed = true
 text = "远端插值"
+
+
+[node name="DungeonPanel" type="PanelContainer" parent="." unique_id=1840020001]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -312.0
+offset_top = 60.0
+offset_right = -24.0
+offset_bottom = 144.0
+grow_horizontal = 0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("NetDebugPanelStyle")
+
+[node name="DungeonVBox" type="VBoxContainer" parent="DungeonPanel" unique_id=1840020002]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 3
+
+[node name="RoomProgressLabel" type="Label" parent="DungeonPanel/DungeonVBox" unique_id=1840020003]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "房间 1/4 · 出生前厅"
+horizontal_alignment = 2
+
+[node name="MinimapLabel" type="Label" parent="DungeonPanel/DungeonVBox" unique_id=1840020004]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "[1★]─[2]─[3]─[B]"
+horizontal_alignment = 2
+
+[node name="DoorStateLabel" type="Label" parent="DungeonPanel/DungeonVBox" unique_id=1840020005]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.75, 0.14, 1)
+theme_override_font_sizes/font_size = 13
+text = "出口锁定（清怪解锁）"
+horizontal_alignment = 2
+
+[node name="BossPanel" type="PanelContainer" parent="." unique_id=1840020010]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -220.0
+offset_top = 20.0
+offset_right = 220.0
+offset_bottom = 86.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("NetDebugPanelStyle")
+
+[node name="BossVBox" type="VBoxContainer" parent="BossPanel" unique_id=1840020011]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="BossNameLabel" type="Label" parent="BossPanel/BossVBox" unique_id=1840020012]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.99, 0.65, 0.65, 1)
+theme_override_font_sizes/font_size = 16
+text = "地牢领主"
+horizontal_alignment = 1
+
+[node name="BossHealthBar" type="ProgressBar" parent="BossPanel/BossVBox" unique_id=1840020013]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/fill = SubResource("HealthFill")
+max_value = 450.0
+value = 450.0
+show_percentage = false
+
+[node name="BossHealthText" type="Label" parent="BossPanel/BossVBox/BossHealthBar" unique_id=1840020014]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 14
+text = "450 / 450"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SkillPanel" type="PanelContainer" parent="." unique_id=1840020020]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -104.0
+offset_right = 284.0
+offset_bottom = -24.0
+grow_vertical = 0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("NetDebugPanelStyle")
+
+[node name="SkillVBox" type="VBoxContainer" parent="SkillPanel" unique_id=1840020021]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="SkillHeader" type="HBoxContainer" parent="SkillPanel/SkillVBox" unique_id=1840020022]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="SkillNameLabel" type="Label" parent="SkillPanel/SkillVBox/SkillHeader" unique_id=1840020023]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+text = "冲刺斩 [Space]"
+
+[node name="SkillCooldownText" type="Label" parent="SkillPanel/SkillVBox/SkillHeader" unique_id=1840020024]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.53, 0.94, 0.67, 1)
+theme_override_font_sizes/font_size = 14
+text = "就绪"
+horizontal_alignment = 2
+
+[node name="SkillCooldownBar" type="ProgressBar" parent="SkillPanel/SkillVBox" unique_id=1840020025]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 14)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/fill = SubResource("ShieldFill")
+max_value = 5.0
+value = 5.0
+show_percentage = false
+
+[node name="BuffStatusLabel" type="Label" parent="SkillPanel/SkillVBox" unique_id=1840020026]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.99, 0.78, 0.25, 1)
+theme_override_font_sizes/font_size = 13
+text = ""

@@ -126,6 +126,67 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("focus")
 
+[node name="HistoryButton" type="Button" parent="Center/Menu" unique_id=723855199]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 64)
+layout_mode = 2
+theme_override_styles/normal = SubResource("button_empty")
+theme_override_styles/pressed = SubResource("button_empty")
+theme_override_styles/hover = SubResource("button_empty")
+theme_override_styles/disabled = SubResource("button_empty")
+theme_override_styles/focus = SubResource("button_empty")
+
+[node name="Panel" type="Panel" parent="Center/Menu/HistoryButton" unique_id=1851709699]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"PrimaryButtonVisual"
+theme_override_styles/panel = SubResource("PrimaryButton_normal")
+script = ExtResource("button_visual")
+
+[node name="Shadow" type="Panel" parent="Center/Menu/HistoryButton/Panel" unique_id=382814899]
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"PrimaryButtonShadow"
+
+[node name="Label" type="Label" parent="Center/Menu/HistoryButton/Panel" unique_id=1864334499]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.96, 0.84, 1)
+theme_override_font_sizes/font_size = 32
+text = "历史战绩"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Focus" type="Panel" parent="Center/Menu/HistoryButton/Panel" unique_id=409999599]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("focus")
+
 [node name="SettingsButton" type="Button" parent="Center/Menu" unique_id=723855101]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(200, 80)
@@ -313,3 +374,69 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 visible = false
+
+
+[node name="MatchHistoryPanel" type="PanelContainer" parent="." unique_id=1990010001]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -360.0
+offset_top = -240.0
+offset_right = 360.0
+offset_bottom = 240.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HistoryMargin" type="MarginContainer" parent="MatchHistoryPanel" unique_id=1990010002]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 16
+
+[node name="HistoryVBox" type="VBoxContainer" parent="MatchHistoryPanel/HistoryMargin" unique_id=1990010003]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="HistoryHeader" type="HBoxContainer" parent="MatchHistoryPanel/HistoryMargin/HistoryVBox" unique_id=1990010004]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="HistoryTitle" type="Label" parent="MatchHistoryPanel/HistoryMargin/HistoryVBox/HistoryHeader" unique_id=1990010005]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
+text = "历史战绩"
+
+[node name="MatchHistoryRefreshButton" type="Button" parent="MatchHistoryPanel/HistoryMargin/HistoryVBox/HistoryHeader" unique_id=1990010006]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(88, 36)
+layout_mode = 2
+text = "刷新"
+
+[node name="MatchHistoryCloseButton" type="Button" parent="MatchHistoryPanel/HistoryMargin/HistoryVBox/HistoryHeader" unique_id=1990010007]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(88, 36)
+layout_mode = 2
+text = "关闭"
+
+[node name="MatchHistoryStatusLabel" type="Label" parent="MatchHistoryPanel/HistoryMargin/HistoryVBox" unique_id=1990010008]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "暂无历史战绩"
+
+[node name="HistoryScroll" type="ScrollContainer" parent="MatchHistoryPanel/HistoryMargin/HistoryVBox" unique_id=1990010009]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="MatchHistoryList" type="VBoxContainer" parent="MatchHistoryPanel/HistoryMargin/HistoryVBox/HistoryScroll" unique_id=1990010010]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8

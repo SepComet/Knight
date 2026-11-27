@@ -91,6 +91,7 @@ func (s *Store) migrate(ctx context.Context) error {
 		    match_id     BIGINT UNSIGNED PRIMARY KEY,
 		    outcome      TINYINT UNSIGNED NOT NULL, -- GameOutcome 枚举值：1=Victory 2=Defeat
 		    duration_sec INT UNSIGNED NOT NULL,
+		    seed         BIGINT UNSIGNED NOT NULL DEFAULT 0, -- 本局程序化地牢随机种子
 		    finished_at  TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
 		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
 		`CREATE TABLE IF NOT EXISTS match_players (
@@ -113,7 +114,28 @@ func (s *Store) migrate(ctx context.Context) error {
 			return fmt.Errorf("migrate: %w", err)
 		}
 	}
+	if err := s.ensureColumn(ctx, "matches", "seed", "BIGINT UNSIGNED NOT NULL DEFAULT 0 AFTER duration_sec"); err != nil {
+		return err
+	}
 	return s.requireSchema(ctx)
+}
+
+// ensureColumn 幂等补齐新增列（对已有老库安全迁移）。
+func (s *Store) ensureColumn(ctx context.Context, table, column, definition string) error {
+	var cnt int
+	err := s.db.QueryRowContext(ctx,
+		`SELECT COUNT(*) FROM information_schema.columns
+		 WHERE table_schema = DATABASE() AND table_name = ? AND column_name = ?`,
+		table, column).Scan(&cnt)
+	if err != nil {
+		return fmt.Errorf("migrate check %s.%s: %w", table, column, err)
+	}
+	if cnt == 0 {
+		if _, err := s.db.ExecContext(ctx, fmt.Sprintf("ALTER TABLE %s ADD COLUMN %s %s", table, column, definition)); err != nil {
+			return fmt.Errorf("migrate add %s.%s: %w", table, column, err)
+		}
+	}
+	return nil
 }
 
 // requireSchema 校验关键列存在；旧基线数据给出清库指引，避免运行期才暴露。

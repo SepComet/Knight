@@ -89,6 +89,7 @@ func (s *Service) Matches(ctx context.Context, uid uint64) ([]httpapi.MatchEntry
 			MatchID:     r.MatchID,
 			Outcome:     r.Outcome,
 			DurationSec: r.DurationSec,
+			Seed:        r.Seed,
 			CharacterID: r.CharacterID,
 			WeaponID:    r.WeaponID,
 			Kills:       r.Kills,

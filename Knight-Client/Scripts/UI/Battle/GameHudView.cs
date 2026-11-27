@@ -22,10 +22,27 @@ public partial class GameHudView : UIForm
     private CheckButton? _interpolationToggle;
     private bool _netDebugWired;
 
+    private Control? _bossPanel;
+    private Label? _bossNameLabel;
+    private ProgressBar? _bossHealthBar;
+    private Label? _bossHealthText;
+
+    private Label? _skillNameLabel;
+    private ProgressBar? _skillCooldownBar;
+    private Label? _skillCooldownText;
+    private Label? _buffStatusLabel;
+
+    private Label? _roomProgressLabel;
+    private Label? _doorStateLabel;
+    private Label? _minimapLabel;
+
     public override void OnOpen(object? userData)
     {
-        WireNetDebugControls();
+        WireControls();
         Render(userData as GameHudModel ?? GameHudModel.Empty);
+        RenderSkill(SkillHudModel.Default);
+        RenderBoss(BossHudModel.Hidden);
+        RenderDungeonProgress(DungeonProgressModel.Empty);
         RenderNetDebug(NetSyncDebugModel.Default);
     }
 
@@ -51,9 +68,81 @@ public partial class GameHudView : UIForm
         GetNode<Label>("%StageLabel").Text = model.StageText;
     }
 
+    public void RenderSkill(SkillHudModel model)
+    {
+        WireControls();
+        if (_skillNameLabel != null)
+            _skillNameLabel.Text = model.SkillName;
+
+        var total = float.IsFinite(model.CooldownTotal) && model.CooldownTotal > 0f ? model.CooldownTotal : 1f;
+        var rem = float.IsFinite(model.CooldownRemaining) ? Math.Clamp(model.CooldownRemaining, 0f, total) : 0f;
+        if (_skillCooldownBar != null)
+        {
+            _skillCooldownBar.MaxValue = total;
+            _skillCooldownBar.Value = total - rem;
+        }
+        if (_skillCooldownText != null)
+        {
+            _skillCooldownText.Text = model.StatusText;
+            _skillCooldownText.Modulate = model.IsReady ? new Color("86efac") : new Color("fde047");
+        }
+        if (_buffStatusLabel != null)
+        {
+            var flags = model.StatusFlags;
+            var buffText = "";
+            if ((flags & 1u) != 0) buffText += "[无敌] ";
+            if ((flags & 2u) != 0) buffText += "[护盾] ";
+            if ((flags & 4u) != 0) buffText += "[攻击+50%] ";
+            _buffStatusLabel.Text = buffText.Trim();
+            _buffStatusLabel.Visible = !string.IsNullOrEmpty(buffText);
+        }
+    }
+
+    public void RenderBoss(BossHudModel model)
+    {
+        WireControls();
+        if (_bossPanel == null)
+            return;
+
+        _bossPanel.Visible = model.Visible;
+        if (!model.Visible)
+            return;
+
+        if (_bossNameLabel != null)
+        {
+            _bossNameLabel.Text = model.DisplayTitle;
+            _bossNameLabel.Modulate = model.IsPhase2 ? new Color("ff5c8a") : new Color("fca5a5");
+        }
+
+        var maxHp = Math.Max(1, model.MaxHp);
+        var curHp = Math.Clamp(model.CurrentHp, 0, maxHp);
+        if (_bossHealthBar != null)
+        {
+            _bossHealthBar.MaxValue = maxHp;
+            _bossHealthBar.Value = curHp;
+            _bossHealthBar.Modulate = model.IsPhase2 ? new Color("ff2e63") : Colors.White;
+        }
+        if (_bossHealthText != null)
+            _bossHealthText.Text = $"{curHp} / {maxHp}";
+    }
+
+    public void RenderDungeonProgress(DungeonProgressModel model)
+    {
+        WireControls();
+        if (_roomProgressLabel != null)
+            _roomProgressLabel.Text = model.ProgressText;
+        if (_doorStateLabel != null)
+        {
+            _doorStateLabel.Text = model.DoorText;
+            _doorStateLabel.Modulate = model.DoorOpen ? new Color("4ade80") : new Color("fbbf24");
+        }
+        if (_minimapLabel != null)
+            _minimapLabel.Text = model.MinimapText;
+    }
+
     public void RenderNetDebug(NetSyncDebugModel model)
     {
-        WireNetDebugControls();
+        WireControls();
         if (_netDebugToggleButton == null)
             return;
 
@@ -86,7 +175,7 @@ public partial class GameHudView : UIForm
         _interpolationToggle?.SetPressedNoSignal(model.InterpolationEnabled);
     }
 
-    private void WireNetDebugControls()
+    private void WireControls()
     {
         if (_netDebugWired)
             return;
@@ -100,6 +189,20 @@ public partial class GameHudView : UIForm
         _posErrorValueLabel = GetNodeOrNull<Label>("%PosErrorValueLabel");
         _predictionToggle = GetNodeOrNull<CheckButton>("%PredictionToggle");
         _interpolationToggle = GetNodeOrNull<CheckButton>("%InterpolationToggle");
+
+        _bossPanel = GetNodeOrNull<Control>("%BossPanel");
+        _bossNameLabel = GetNodeOrNull<Label>("%BossNameLabel");
+        _bossHealthBar = GetNodeOrNull<ProgressBar>("%BossHealthBar");
+        _bossHealthText = GetNodeOrNull<Label>("%BossHealthText");
+
+        _skillNameLabel = GetNodeOrNull<Label>("%SkillNameLabel");
+        _skillCooldownBar = GetNodeOrNull<ProgressBar>("%SkillCooldownBar");
+        _skillCooldownText = GetNodeOrNull<Label>("%SkillCooldownText");
+        _buffStatusLabel = GetNodeOrNull<Label>("%BuffStatusLabel");
+
+        _roomProgressLabel = GetNodeOrNull<Label>("%RoomProgressLabel");
+        _doorStateLabel = GetNodeOrNull<Label>("%DoorStateLabel");
+        _minimapLabel = GetNodeOrNull<Label>("%MinimapLabel");
 
         if (_netDebugToggleButton != null)
             _netDebugToggleButton.Pressed += OnNetDebugTogglePressed;

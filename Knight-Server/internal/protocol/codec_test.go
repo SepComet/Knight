@@ -86,3 +86,30 @@ func TestEncodeRejectsEmptyPayload(t *testing.T) {
 		t.Fatal("expected error for empty payload")
 	}
 }
+
+func TestEncodeDecodeSkillEvent(t *testing.T) {
+	data, err := Encode(&knight.Envelope{Payload: &knight.Envelope_SkillEvent{
+		SkillEvent: &knight.SkillEvent{
+			CasterId:    7,
+			SkillId:     1,
+			PosX:        12.5,
+			PosY:        8.25,
+			DirAngle:    45,
+			CooldownSec: 5.0,
+		},
+	}})
+	if err != nil {
+		t.Fatalf("encode skill event: %v", err)
+	}
+	env, err := Decode(data)
+	if err != nil {
+		t.Fatalf("decode skill event: %v", err)
+	}
+	if env.MsgId != knight.MsgId_MSG_SKILL_EVENT {
+		t.Fatalf("msg_id = %v, want MSG_SKILL_EVENT", env.MsgId)
+	}
+	se := env.GetSkillEvent()
+	if se == nil || se.CasterId != 7 || se.SkillId != 1 || se.CooldownSec != 5.0 {
+		t.Fatalf("unexpected skill event: %+v", se)
+	}
+}

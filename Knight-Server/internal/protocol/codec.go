@@ -108,6 +108,8 @@ func expectedMsgID(env *knight.Envelope) (knight.MsgId, bool) {
 		return knight.MsgId_MSG_PLAYER_LEFT, true
 	case *knight.Envelope_GameResult:
 		return knight.MsgId_MSG_GAME_RESULT, true
+	case *knight.Envelope_SkillEvent:
+		return knight.MsgId_MSG_SKILL_EVENT, true
 	// 96~127 高频通道
 	case *knight.Envelope_Snapshot:
 		return knight.MsgId_MSG_SNAPSHOT, true

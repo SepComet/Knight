@@ -47,18 +47,20 @@ public sealed class BattleMapLoader
 /// <summary>
 /// 联机战斗房间场景根（挂载于 res://Scenes/Main.tscn）。
 /// 复用 Player.tscn / PlayerMotor / LocalPlayerInput / PlayerCamera / GameHudController，
-/// 消费 BattleSessionClient 的房间切换与快照事件并上报 30Hz 玩家输入，
+/// 消费 BattleSessionClient 的房间切换、快照、伤害/技能/道具/出口事件并上报 30Hz 玩家输入，
 /// 同时驱动本地玩家客户端预测校正（LocalPlayerPredictor）与远端实体快照插值（RemoteEntityInterpolator）。
 /// </summary>
 public partial class BattleWorld : Node2D
 {
     private const string PlayerPrefabPath = "res://Prefabs/Entity/Player.tscn";
     private const float NetDebugRefreshIntervalSeconds = 0.1f;
+    private const float PickupInteractRadiusTiles = 2.0f;
 
     private Node2D _wallsRoot = null!;
     private Node2D _entitiesRoot = null!;
     private PlayerCamera _camera = null!;
     private PackedScene _playerScene = null!;
+    private BattleVfxAndAudio _vfx = null!;
 
     private BattleSessionClient? _session;
     private GameHudController? _hud;
@@ -73,16 +75,19 @@ public partial class BattleWorld : Node2D
     private readonly SyncMetricsTracker _syncMetrics = new();
 
     private uint _localPlayerEntityId;
+    private uint _activeBossEntityId;
     private LocalPlayerInput? _localInput;
     private bool _interpolationEnabled = true;
     private double _syncClockSeconds;
     private float _netDebugRefreshAccumulator;
+    private float _doorPulseTime;
 
     public BattleSessionClient? ActiveSession => _session;
     public uint LocalPlayerEntityId => _localPlayerEntityId;
     public LocalPlayerInput? LocalInput => _localInput;
     public BattleMapDefinition ActiveMap => CurrentMap;
     public IReadOnlyDictionary<uint, IBattleEntityView> EntityViews => _entityViews;
+    public bool DoorOpen => _session?.DoorOpen ?? false;
 
     public bool PredictionEnabled
     {
@@ -105,6 +110,8 @@ public partial class BattleWorld : Node2D
         _entitiesRoot = GetNode<Node2D>("%EntitiesRoot");
         _camera = GetNode<PlayerCamera>("%PlayerCamera");
         _playerScene = GD.Load<PackedScene>(PlayerPrefabPath);
+        _vfx = new BattleVfxAndAudio { Name = "BattleVfxAndAudio" };
+        AddChild(_vfx);
     }
 
     private const double MaxSyncDeltaSeconds = 0.05;
@@ -116,6 +123,12 @@ public partial class BattleWorld : Node2D
             : 0.0;
         if (clampedDelta > 0.0)
             _syncClockSeconds += clampedDelta;
+
+        if (DoorOpen)
+        {
+            _doorPulseTime += (float)clampedDelta * 3.5f;
+            QueueRedraw();
+        }
 
         if (_localPlayerEntityId != 0
             && _localPredictor.HasState
@@ -129,6 +142,8 @@ public partial class BattleWorld : Node2D
                 _localPredictor.FacingDegrees,
                 _localPredictor.IsMoving,
                 _localPredictor.Alive);
+
+            UpdateLocalInteractionHint(_localPredictor.RenderPosition);
         }
 
         if (_interpolationEnabled && _remoteInterpolators.Count > 0)
@@ -176,6 +191,10 @@ public partial class BattleWorld : Node2D
         _session.EntitySpawned += OnEntitySpawned;
         _session.EntityUpdated += OnEntityUpdated;
         _session.EntityDespawned += OnEntityDespawned;
+        _session.DamageEventReceived += OnDamageEvent;
+        _session.DoorStateChanged += OnDoorStateChanged;
+        _session.ItemPickedReceived += OnItemPicked;
+        _session.SkillEventReceived += OnSkillEvent;
         _session.PlayerLeftReceived += OnPlayerLeft;
 
         if (_hud != null)
@@ -196,6 +215,10 @@ public partial class BattleWorld : Node2D
             _session.EntitySpawned -= OnEntitySpawned;
             _session.EntityUpdated -= OnEntityUpdated;
             _session.EntityDespawned -= OnEntityDespawned;
+            _session.DamageEventReceived -= OnDamageEvent;
+            _session.DoorStateChanged -= OnDoorStateChanged;
+            _session.ItemPickedReceived -= OnItemPicked;
+            _session.SkillEventReceived -= OnSkillEvent;
             _session.PlayerLeftReceived -= OnPlayerLeft;
             _session = null;
         }
@@ -211,6 +234,16 @@ public partial class BattleWorld : Node2D
         _hud = null;
         _touch = null;
         _memberNames = null;
+    }
+
+    public void SetInputEnabled(bool enabled)
+    {
+        _localInput?.SetEnabled(enabled);
+    }
+
+    public void PlayResultSfx(bool victory)
+    {
+        _vfx?.PlayResultSfx(victory);
     }
 
     public void SetPredictionEnabled(bool enabled)
@@ -349,17 +382,20 @@ public partial class BattleWorld : Node2D
         ClearEntities();
         _syncMetrics.Reset();
         LoadMap(transition.MapId);
+        QueueRedraw();
 
         // 镜头先对准本地玩家出生点，避免首帧快照到达前视野停在原点
         if (_session != null && _session.Spawns.TryGetValue(_session.LocalUid, out var localSpawn))
             _camera.GlobalPosition = CurrentMap.WorldToGodot(localSpawn.PosX, localSpawn.PosY);
 
-        UpdateHud(BattleMapCatalog.DefaultPlayerMaxHp, (int)transition.MapId);
+        UpdateHud(BattleMapCatalog.DefaultPlayerMaxHp, BattleMapCatalog.DefaultPlayerMaxHp, (int)transition.RoomIndex + 1);
+        _hud?.SetBossModel(BossHudModel.Hidden);
+        PushDungeonProgressToHud();
 
         if (_session != null)
         {
             _session.ConfirmRoomLoaded(transition.MapId);
-            GD.Print($"[BattleWorld] 房间 {transition.MapId} 加载完成，已发送 RoomLoaded");
+            GD.Print($"[BattleWorld] 房间 {transition.MapId} (idx={transition.RoomIndex}/{transition.TotalRooms}) 加载完成，已发送 RoomLoaded");
         }
     }
 
@@ -387,7 +423,20 @@ public partial class BattleWorld : Node2D
 
         _entityViews[entity.EntityId] = view;
         if (isLocal)
-            UpdateHud(entity.Hp, (int)Math.Max(1u, _session?.CurrentMapId ?? 1u));
+        {
+            var maxHp = entity.MaxHp > 0 ? entity.MaxHp : BattleMapCatalog.DefaultPlayerMaxHp;
+            UpdateHud(entity.Hp, maxHp, (int)(_session?.CurrentRoomIndex ?? 0u) + 1);
+            UpdateSkillHud(entity);
+        }
+        else if (entity.Type == EntityType.EntityBoss)
+        {
+            _activeBossEntityId = entity.EntityId;
+            UpdateBossHud(entity);
+        }
+        else if (entity.Type == EntityType.EntityProjectile && entity.ConfigId <= 4)
+        {
+            _vfx.PlayShootSfx();
+        }
     }
 
     private IBattleEntityView? CreateEntityView(EntityState entity, out bool isLocal)
@@ -396,7 +445,10 @@ public partial class BattleWorld : Node2D
         return entity.Type switch
         {
             EntityType.EntityPlayer => CreatePlayerEntityView(entity, out isLocal),
-            // M3 扩展点：EntityEnemy / EntityBoss / EntityProjectile / EntityItem 按类型分发各自视图工厂
+            EntityType.EntityEnemy => CreateEnemyEntityView(entity, isBoss: false),
+            EntityType.EntityBoss => CreateEnemyEntityView(entity, isBoss: true),
+            EntityType.EntityProjectile => CreateProjectileEntityView(entity),
+            EntityType.EntityPickup => CreatePickupEntityView(entity),
             _ => null,
         };
     }
@@ -423,7 +475,7 @@ public partial class BattleWorld : Node2D
             localInput.TouchMode = _touch != null;
             if (_touch != null)
                 localInput.BindTouch(_touch);
-            localInput.SetEnabled(true);
+            localInput.SetEnabled(alive);
             localInput.CommandSampled += OnLocalCommandSampled;
             _camera.Target = motor;
             _camera.GlobalPosition = godotPos;
@@ -441,6 +493,34 @@ public partial class BattleWorld : Node2D
 
         AttachNameTag(motor, entity.PlayerUid, isLocal);
         return motor;
+    }
+
+    private IBattleEntityView CreateEnemyEntityView(EntityState entity, bool isBoss)
+    {
+        var view = new BattleEnemyView { Name = $"{(isBoss ? "Boss" : "Enemy")}_{entity.EntityId}" };
+        view.GlobalPosition = CurrentMap.WorldToGodot(entity.PosX, entity.PosY);
+        _entitiesRoot.AddChild(view);
+        view.Configure(isBoss, entity.ConfigId, entity.Hp, entity.MaxHp);
+        view.UpdateCombatState(entity.Hp, entity.MaxHp, entity.StatusFlags);
+        return view;
+    }
+
+    private IBattleEntityView CreateProjectileEntityView(EntityState entity)
+    {
+        var view = new BattleProjectileView { Name = $"Proj_{entity.EntityId}" };
+        view.GlobalPosition = CurrentMap.WorldToGodot(entity.PosX, entity.PosY);
+        _entitiesRoot.AddChild(view);
+        view.Configure(entity.ConfigId);
+        return view;
+    }
+
+    private IBattleEntityView CreatePickupEntityView(EntityState entity)
+    {
+        var view = new BattlePickupView { Name = $"Pickup_{entity.EntityId}" };
+        view.GlobalPosition = CurrentMap.WorldToGodot(entity.PosX, entity.PosY);
+        _entitiesRoot.AddChild(view);
+        view.Configure(entity.ConfigId);
+        return view;
     }
 
     private static bool ShouldInterpolateEntity(EntityType entityType, bool isLocal)
@@ -462,6 +542,15 @@ public partial class BattleWorld : Node2D
     {
         if (!_entityViews.TryGetValue(entity.EntityId, out var view))
             return;
+
+        if (view is BattleEnemyView enemyView)
+            enemyView.UpdateCombatState(entity.Hp, entity.MaxHp, entity.StatusFlags);
+
+        if (entity.Type == EntityType.EntityBoss)
+        {
+            _activeBossEntityId = entity.EntityId;
+            UpdateBossHud(entity);
+        }
 
         if (entity.EntityId == _localPlayerEntityId)
         {
@@ -485,7 +574,16 @@ public partial class BattleWorld : Node2D
                 _localPredictor.IsMoving,
                 _localPredictor.Alive);
 
-            UpdateHud(entity.Hp, (int)Math.Max(1u, _session?.CurrentMapId ?? 1u));
+            if (view.Node is PlayerMotor localMotor)
+            {
+                localMotor.Modulate = (entity.StatusFlags & 1u) != 0
+                    ? new Color("7dd3fc")
+                    : ((entity.StatusFlags & 4u) != 0 ? new Color("fde047") : Colors.White);
+            }
+
+            var maxHp = entity.MaxHp > 0 ? entity.MaxHp : BattleMapCatalog.DefaultPlayerMaxHp;
+            UpdateHud(entity.Hp, maxHp, (int)(_session?.CurrentRoomIndex ?? 0u) + 1);
+            UpdateSkillHud(entity);
             return;
         }
 
@@ -509,6 +607,12 @@ public partial class BattleWorld : Node2D
     private void OnEntityDespawned(uint entityId, ulong playerUid)
     {
         _remoteInterpolators.Remove(entityId);
+        if (entityId == _activeBossEntityId)
+        {
+            _activeBossEntityId = 0;
+            _hud?.SetBossModel(BossHudModel.Hidden);
+        }
+
         if (!_entityViews.Remove(entityId, out var view))
             return;
 
@@ -529,6 +633,57 @@ public partial class BattleWorld : Node2D
             view.Node.QueueFree();
     }
 
+    private void OnDamageEvent(DamageEvent damage)
+    {
+        var godotPos = CurrentMap.WorldToGodot(damage.PosX, damage.PosY);
+        var isLocalTarget = damage.TargetId == _localPlayerEntityId;
+        _vfx.SpawnDamagePopup(godotPos, damage.Damage, isLocalTarget);
+
+        if (isLocalTarget && damage.NewHp <= 0)
+        {
+            var maxHp = BattleMapCatalog.DefaultPlayerMaxHp;
+            if (_session != null && _session.Entities.TryGetValue(_localPlayerEntityId, out var localEnt) && localEnt.MaxHp > 0)
+                maxHp = localEnt.MaxHp;
+            UpdateHud(0, maxHp, (int)(_session?.CurrentRoomIndex ?? 0u) + 1);
+            _localInput?.SetEnabled(false);
+        }
+
+        if (_entityViews.TryGetValue(damage.TargetId, out var targetView) && targetView is BattleEnemyView enemyView)
+            enemyView.TriggerHitFlash();
+    }
+
+    private void OnDoorStateChanged(DoorStateValue state)
+    {
+        PushDungeonProgressToHud();
+        QueueRedraw();
+        if (state == DoorStateValue.DoorOpen)
+            _vfx.PlayDoorOpenSfx();
+    }
+
+    private void OnItemPicked(ItemPicked picked)
+    {
+        Vector2 pos = _camera.GlobalPosition;
+        if (_session != null)
+        {
+            foreach (var entity in _session.Entities.Values)
+            {
+                if (entity.Type == EntityType.EntityPlayer && entity.PlayerUid == picked.Uid)
+                {
+                    pos = CurrentMap.WorldToGodot(entity.PosX, entity.PosY);
+                    break;
+                }
+            }
+        }
+        _vfx.SpawnHealOrBuffPopup(pos, picked.HealedHp, picked.ItemConfigId);
+    }
+
+    private void OnSkillEvent(SkillEvent skill)
+    {
+        var pos = CurrentMap.WorldToGodot(skill.PosX, skill.PosY);
+        var rad = BattleMapDefinition.WorldDegreesToGodotRadians(skill.DirAngle);
+        _vfx.SpawnSkillEffect(pos, rad);
+    }
+
     private void OnPlayerLeft(ulong uid, LeftReason reason)
     {
         GD.Print($"[BattleWorld] 玩家 {uid} 离开对局 ({reason})");
@@ -536,7 +691,7 @@ public partial class BattleWorld : Node2D
 
     private void OnLocalCommandSampled(PlayerCommand command)
     {
-        if (_session == null || !_session.IsRoomLoaded)
+        if (_session == null || !_session.IsRoomLoaded || _session.IsMatchFinished)
             return;
 
         var (moveX, moveY) = BattleMapDefinition.GodotMoveToWorld(command.Movement);
@@ -546,6 +701,8 @@ public partial class BattleWorld : Node2D
             buttons |= (uint)InputButtons.BtnAttack;
         if (command.InteractPressed)
             buttons |= (uint)InputButtons.BtnInteract;
+        if (command.SkillPressed)
+            buttons |= (uint)InputButtons.BtnSkill;
 
         var cmd = _session.SampleAndSendInput(moveX, moveY, aimDeg, buttons);
         if (cmd != null && _localPlayerEntityId != 0 && _localPredictor.HasState)
@@ -565,9 +722,31 @@ public partial class BattleWorld : Node2D
         }
     }
 
+    private void UpdateLocalInteractionHint(BattleVec2 localWorldPos)
+    {
+        if (_localInput == null || _session == null)
+            return;
+
+        var nearPickup = false;
+        var maxDistSq = PickupInteractRadiusTiles * PickupInteractRadiusTiles;
+        foreach (var entity in _session.Entities.Values)
+        {
+            if (entity.Type != EntityType.EntityPickup)
+                continue;
+            var dx = entity.PosX - localWorldPos.X;
+            var dy = entity.PosY - localWorldPos.Y;
+            if (dx * dx + dy * dy <= maxDistSq)
+            {
+                nearPickup = true;
+                break;
+            }
+        }
+        _localInput.InteractionAvailable = nearPickup;
+    }
+
     private void ApplyStateToView(IBattleEntityView view, EntityState entity)
     {
-        var alive = entity.State != EntityAnimState.AnimDead && entity.Hp > 0;
+        var alive = entity.State != EntityAnimState.AnimDead && (entity.Type == EntityType.EntityProjectile || entity.Type == EntityType.EntityPickup || entity.Hp > 0);
         var moving = entity.State == EntityAnimState.AnimMoving;
         ApplyWorldStateToView(view, new BattleVec2(entity.PosX, entity.PosY), entity.Facing, moving, alive);
     }
@@ -586,7 +765,7 @@ public partial class BattleWorld : Node2D
 
     private static EntitySnapshotSample ToSnapshotSample(EntityState entity, double timestampSeconds)
     {
-        var alive = entity.State != EntityAnimState.AnimDead && entity.Hp > 0;
+        var alive = entity.State != EntityAnimState.AnimDead && (entity.Type == EntityType.EntityProjectile || entity.Type == EntityType.EntityPickup || entity.Hp > 0);
         var moving = entity.State == EntityAnimState.AnimMoving;
         return new EntitySnapshotSample(
             timestampSeconds,
@@ -614,18 +793,60 @@ public partial class BattleWorld : Node2D
         motor.AddChild(label);
     }
 
-    private void UpdateHud(int hp, int mapId)
+    private void UpdateHud(int hp, int maxHp, int minorStage)
     {
         if (_hud == null)
             return;
 
-        var maxHp = BattleMapCatalog.DefaultPlayerMaxHp;
+        var safeMax = maxHp > 0 ? maxHp : BattleMapCatalog.DefaultPlayerMaxHp;
         _hud.SetModel(new GameHudModel(
-            Health: new ResourceValue(Math.Clamp(hp, 0, maxHp), maxHp),
+            Health: new ResourceValue(Math.Clamp(hp, 0, safeMax), safeMax),
             Mana: new ResourceValue(40, 40),
             Shield: new ResourceValue(0, 0),
             MajorStage: 1,
-            MinorStage: Math.Clamp(mapId, 1, 5)));
+            MinorStage: Math.Clamp(minorStage, 1, 5)));
+    }
+
+    private void UpdateSkillHud(EntityState localPlayer)
+    {
+        if (_hud == null)
+            return;
+
+        var total = localPlayer.SkillCdTotal > 0f ? localPlayer.SkillCdTotal : 5f;
+        _hud.SetSkillModel(new SkillHudModel(
+            SkillName: "冲刺斩 [Space]",
+            CooldownRemaining: localPlayer.SkillCdRemaining,
+            CooldownTotal: total,
+            StatusFlags: localPlayer.StatusFlags));
+    }
+
+    private void UpdateBossHud(EntityState boss)
+    {
+        if (_hud == null)
+            return;
+
+        var maxHp = boss.MaxHp > 0 ? boss.MaxHp : Math.Max(1, boss.Hp);
+        var isPhase2 = (boss.StatusFlags & BattleEnemyView.StatusBossPhase2) != 0;
+        _hud.SetBossModel(new BossHudModel(
+            Visible: boss.Hp > 0 && boss.State != EntityAnimState.AnimDead,
+            BossName: "地牢领主",
+            CurrentHp: boss.Hp,
+            MaxHp: maxHp,
+            IsPhase2: isPhase2));
+    }
+
+    private void PushDungeonProgressToHud()
+    {
+        if (_hud == null || _session == null)
+            return;
+
+        _hud.SetDungeonProgress(new DungeonProgressModel(
+            RoomIndex: (int)_session.CurrentRoomIndex,
+            TotalRooms: (int)_session.TotalRooms,
+            CurrentMapId: _session.CurrentMapId,
+            RoomName: CurrentMap.Name,
+            DoorOpen: _session.DoorOpen,
+            MapSequence: _session.MapSequence));
     }
 
     private void ClearEntities()
@@ -636,6 +857,7 @@ public partial class BattleWorld : Node2D
             _localInput = null;
         }
         _localPlayerEntityId = 0;
+        _activeBossEntityId = 0;
         _localPredictor.Clear();
         _remoteInterpolators.Clear();
 
@@ -654,20 +876,52 @@ public partial class BattleWorld : Node2D
     {
         var bounds = CurrentMap.RoomBoundsGodot;
         var tile = CurrentMap.TileSizePixels;
+        var palette = CurrentMap.Palette;
 
-        // 地面底色与 1-tile 网格线（与服务端世界单位 1:1 对齐）
-        DrawRect(bounds, new Color("203440"));
+        // 地面底色与 1-tile 网格线（与服务端世界单位 1:1 对齐，各房间模板有专属配色）
+        DrawRect(bounds, new Color(palette.FloorHex));
+        var gridColor = new Color(palette.GridHex);
         for (var x = 0f; x <= bounds.Size.X; x += tile)
-            DrawLine(new Vector2(x, 0), new Vector2(x, bounds.Size.Y), new Color("293f4a"));
+            DrawLine(new Vector2(x, 0), new Vector2(x, bounds.Size.Y), gridColor);
         for (var y = 0f; y <= bounds.Size.Y; y += tile)
-            DrawLine(new Vector2(0, y), new Vector2(bounds.Size.X, y), new Color("293f4a"));
+            DrawLine(new Vector2(0, y), new Vector2(bounds.Size.X, y), gridColor);
+
+        // 出口区域门可视化（右侧中央 ExitZone：锁定=暗红栅栏，开启=翠绿脉冲传送区）
+        var exitRect = CurrentMap.ExitZoneGodot;
+        if (DoorOpen)
+        {
+            var pulse = 0.25f + 0.14f * MathF.Sin(_doorPulseTime);
+            DrawRect(exitRect, new Color(0.18f, 0.85f, 0.45f, pulse));
+            DrawRect(exitRect, new Color("4ade80"), false, 2.5f);
+            // 向右引导箭头
+            var center = exitRect.GetCenter();
+            DrawLine(center + new Vector2(-14, 0), center + new Vector2(14, 0), new Color("bbf7d0"), 3f);
+            DrawLine(center + new Vector2(4, -9), center + new Vector2(14, 0), new Color("bbf7d0"), 3f);
+            DrawLine(center + new Vector2(4, 9), center + new Vector2(14, 0), new Color("bbf7d0"), 3f);
+        }
+        else
+        {
+            DrawRect(exitRect, new Color(0.75f, 0.22f, 0.22f, 0.20f));
+            DrawRect(exitRect, new Color("ef4444", 0.75f), false, 2f);
+            for (var barY = exitRect.Position.Y + 12f; barY < exitRect.End.Y; barY += 16f)
+            {
+                DrawLine(
+                    new Vector2(exitRect.Position.X + 4f, barY),
+                    new Vector2(exitRect.End.X - 4f, barY),
+                    new Color("fca5a5", 0.45f),
+                    2f);
+            }
+        }
 
         // 矩形墙体 AABB
+        var shadowColor = new Color(palette.WallShadowHex);
+        var wallColor = new Color(palette.WallHex);
+        var topColor = new Color(palette.WallTopHex);
         foreach (var wall in _mapLoader.WallRects)
         {
-            DrawRect(new Rect2(wall.Position + new Vector2(3, 5), wall.Size), new Color("142630"));
-            DrawRect(wall, new Color("526d77"));
-            DrawLine(wall.Position, new Vector2(wall.End.X, wall.Position.Y), new Color("91a8ac"), 2);
+            DrawRect(new Rect2(wall.Position + new Vector2(3, 5), wall.Size), shadowColor);
+            DrawRect(wall, wallColor);
+            DrawLine(wall.Position, new Vector2(wall.End.X, wall.Position.Y), topColor, 2);
         }
     }
 

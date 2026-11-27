@@ -215,13 +215,22 @@ public class ServerInteropTests
         a.Pushes.Clear();
         b.Pushes.Clear();
 
-        // 6. 房主开局 → 双方收 GameStart{[1,2,3]} + RoomStatePush{RUNNING}
+        // 6. 房主开局 → 双方收 M3 4 房随机序列（首房 1，末房 9，同局不重复且双端一致，Seed != 0）+ RoomStatePush{RUNNING}
         a.Client.Send(new StartGame());
         Assert.True(PumpUntil(() => a.Starts.Count > 0 && b.Starts.Count > 0,
             TimeSpan.FromSeconds(5), a.Client, b.Client),
             "未收到 GameStart");
-        Assert.Equal(new[] { 1U, 2U, 3U }, a.Starts.Dequeue().MapIds);
-        Assert.Equal(new[] { 1U, 2U, 3U }, b.Starts.Dequeue().MapIds);
+        var startA = a.Starts.Dequeue();
+        var startB = b.Starts.Dequeue();
+        Assert.NotEqual(0UL, startA.Seed);
+        Assert.Equal(startA.Seed, startB.Seed);
+        Assert.Equal(4, startA.MapIds.Count);
+        Assert.Equal(1U, startA.MapIds[0]);
+        Assert.InRange(startA.MapIds[1], 2U, 5U);
+        Assert.InRange(startA.MapIds[2], 6U, 8U);
+        Assert.Equal(9U, startA.MapIds[3]);
+        Assert.Equal(4, startA.MapIds.Distinct().Count());
+        Assert.Equal(startA.MapIds, startB.MapIds);
         Assert.True(PumpUntil(() => a.Pushes.Count > 0 && b.Pushes.Count > 0
                             && a.Pushes.Peek().State == RoomSessionState.RoomRunning,
             TimeSpan.FromSeconds(5), a.Client, b.Client),

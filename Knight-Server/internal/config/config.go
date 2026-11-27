@@ -55,7 +55,7 @@ func Defaults() Config {
 	return Config{
 		HTTPPort:         37780,
 		KCPPort:          37777,
-		ProtoVersion:     5, // 与 Knight-Proto/knight.proto 头部 PROTO_VERSION 同步
+		ProtoVersion:     6, // 与 Knight-Proto/knight.proto 头部 PROTO_VERSION 同步
 		SessionLimit:     256,
 		HeartbeatTimeout: 10 * time.Second,
 		DevTokenBypass:   false,

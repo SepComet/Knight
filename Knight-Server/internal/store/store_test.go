@@ -161,7 +161,8 @@ func testMatches(ctx context.Context, t *testing.T, st *Store) {
 	uidB, _ := newTestUser(ctx, t, st)
 
 	matchID := uint64(time.Now().UnixNano())
-	err := st.InsertMatch(ctx, matchID, 1, 180, []MatchPlayerRow{
+	const testSeed uint64 = 9876543210123
+	err := st.InsertMatchWithSeed(ctx, matchID, 1, 180, testSeed, []MatchPlayerRow{
 		{UID: uidA, CharacterID: 1, WeaponID: 7, Kills: 5, DamageDealt: 800, DamageTaken: 200, Alive: true},
 		{UID: uidB, CharacterID: 1, WeaponID: 7, Kills: 2, DamageDealt: 300, DamageTaken: 500, Alive: false},
 	})
@@ -175,7 +176,7 @@ func testMatches(ctx context.Context, t *testing.T, st *Store) {
 		t.Fatalf("list matches = %v, %v", rows, err)
 	}
 	r := rows[0]
-	if r.MatchID != matchID || r.Outcome != 1 || r.DurationSec != 180 ||
+	if r.MatchID != matchID || r.Outcome != 1 || r.DurationSec != 180 || r.Seed != testSeed ||
 		r.CharacterID != 1 || r.WeaponID != 7 ||
 		r.Kills != 5 || r.DamageDealt != 800 || r.DamageTaken != 200 || !r.Alive || r.FinishedAt.IsZero() {
 		t.Fatalf("match row = %+v", r)

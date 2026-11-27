@@ -54,6 +54,7 @@ enum MsgId {
   MSG_ITEM_PICKED = 70;      // S→C 道具拾取结果
   MSG_PLAYER_LEFT = 71;      // S→C 对局中玩家断线移除
   MSG_GAME_RESULT = 72;      // S→C 结算
+  MSG_SKILL_EVENT = 73;      // S→C 主动技能触发事件
 
   // —— 96~127 高频通道 ——
   MSG_SNAPSHOT = 96;    // S→C 单播快照
@@ -64,7 +65,7 @@ enum MsgId {
 // 1~31 连接与会话
 // ----------------------------------------------------------------------------
 
-// PROTO_VERSION = 5（任何改动 +1，见文件头规则 2）
+// PROTO_VERSION = 6（任何改动 +1，见文件头规则 2）
 message HandshakeReq {
   uint32 proto_version = 1;
   string token = 2;  // HTTP /api/v1/login 返回的会话令牌
@@ -167,7 +168,8 @@ enum RoomSessionState {
 // 开局通知：携带地牢房间序列（map_id 由客户端本地映射为内置地图资源）。
 // 随后服务端紧跟 RoomTransition(首房间)——开局加载与房间切换共用同一序列
 message GameStart {
-  repeated uint32 map_ids = 1;  // MVP 固定 [1, 2, 3]，3 = Boss 房
+  repeated uint32 map_ids = 1;  // 程序化生成的地牢房间序列（末房为 Boss 房）
+  uint64 seed = 2;              // 本局程序化地牢随机种子
 }
 
 // ----------------------------------------------------------------------------
@@ -218,6 +220,8 @@ enum DoorStateValue {
 message RoomTransition {
   uint32 map_id = 1;
   repeated SpawnAssignment spawns = 2;  // 全体在场玩家的出生点分配
+  uint32 room_index = 3;                // 当前房间在 map_ids 中的 0-based 序号
+  uint32 total_rooms = 4;               // 本局总房间数
 }
 
 message SpawnAssignment {
@@ -234,8 +238,19 @@ message RoomLoaded {
 
 message ItemPicked {
   uint32 item_entity_id = 1;
-  uint64 uid = 2;       // 拾取者
-  int32 healed_hp = 3;  // 实际恢复量（可被最大生命值截断）
+  uint64 uid = 2;             // 拾取者
+  int32 healed_hp = 3;        // 实际恢复量（可被最大生命值截断）
+  uint32 item_config_id = 4;  // 道具 config_id（1=回血药水, 2=攻击增益, 3=护盾核心）
+}
+
+// 主动技能触发事件（S→C，驱动客户端技能特效/音效与冷却同步）
+message SkillEvent {
+  uint32 caster_id = 1;    // 施法实体 ID
+  uint32 skill_id = 2;     // 技能配置 ID（1=冲刺闪避斩, 2=护盾, 3=范围爆发, 4=群体治疗）
+  float pos_x = 3;         // 施法/目标点 X
+  float pos_y = 4;         // 施法/目标点 Y
+  float dir_angle = 5;     // 施法方向（度）
+  float cooldown_sec = 6;  // 触发后的冷却时长（秒）
 }
 
 // 对局中玩家断线移除；该玩家后续规则判定视同被击败。
@@ -304,8 +319,12 @@ message EntityState {
   float facing = 5;  // 度；0°=+X(右)，90°=+Y(上)，逆时针
   EntityAnimState state = 6;
   int32 hp = 7;
-  uint64 player_uid = 8;  // ENTITY_PLAYER 时为账号 ID，其余类型为 0；用于识别本地玩家/队友
-  uint32 config_id = 9;   // 同 EntityType 内的内置配置/表现资源键（非 0），两端配置需一致
+  uint64 player_uid = 8;          // ENTITY_PLAYER 时为账号 ID，其余类型为 0；用于识别本地玩家/队友
+  uint32 config_id = 9;           // 同 EntityType 内的内置配置/表现资源键（非 0），两端配置需一致
+  int32 max_hp = 10;              // 最大生命值
+  float skill_cd_remaining = 11;  // 仅 ENTITY_PLAYER：主动技能剩余冷却（秒）
+  float skill_cd_total = 12;      // 仅 ENTITY_PLAYER：主动技能总冷却（秒）
+  uint32 status_flags = 13;       // 位掩码：1=无敌/冲刺, 2=护盾减伤, 4=攻击增益, 8=Boss二阶段
 }
 
 // 服务端 → 单个客户端的单播快照（各客户端 last_input_seq 不同）
@@ -320,6 +339,7 @@ enum InputButtons {
   BTN_NONE = 0;
   BTN_ATTACK = 1;    // bit0：按住持续（服务端按冷却自动连发）
   BTN_INTERACT = 2;  // bit1：单帧边沿（拾取请求，服务端取半径内最近合法道具）
+  BTN_SKILL = 4;     // bit2：触发主动技能（服务端按冷却校验）
 }
 
 message InputCmd {
@@ -374,6 +394,7 @@ message Envelope {
     ItemPicked item_picked = 36;
     PlayerLeft player_left = 37;
     GameResult game_result = 38;
+    SkillEvent skill_event = 39;
 
     // 96~127 高频通道
     Snapshot snapshot = 40;

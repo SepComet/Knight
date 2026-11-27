@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Godot;
 using SepCore.Battle;
+using SepCore.Definition;
 using SepCore.Gameplay.Player;
 using SepCore.Procedure;
 using SepCore.Runtime.Component;
@@ -355,6 +356,15 @@ public partial class DevAgentComponent : GlobalComponent
         if (currentScene is BattleWorld world && world.ActiveSession is { } session)
         {
             var entities = new List<BattleEntityDto>(session.Entities.Count);
+            var enemyCount = 0;
+            var bossCount = 0;
+            var pickupCount = 0;
+            var localHp = 0;
+            var localMaxHp = 0;
+            var localSkillCdRem = 0f;
+            var localSkillCdTotal = 0f;
+            uint localStatusFlags = 0;
+
             foreach (var entity in session.Entities.Values.OrderBy(e => e.EntityId))
             {
                 Vector2 godotPos;
@@ -363,17 +373,34 @@ public partial class DevAgentComponent : GlobalComponent
                 else
                     godotPos = world.ActiveMap.WorldToGodot(entity.PosX, entity.PosY);
 
+                if (entity.Type == EntityType.EntityEnemy && entity.Hp > 0) enemyCount++;
+                else if (entity.Type == EntityType.EntityBoss && entity.Hp > 0) bossCount++;
+                else if (entity.Type == EntityType.EntityPickup) pickupCount++;
+
+                if (entity.EntityId == world.LocalPlayerEntityId)
+                {
+                    localHp = entity.Hp;
+                    localMaxHp = entity.MaxHp;
+                    localSkillCdRem = entity.SkillCdRemaining;
+                    localSkillCdTotal = entity.SkillCdTotal;
+                    localStatusFlags = entity.StatusFlags;
+                }
+
                 entities.Add(new BattleEntityDto(
                     entity.EntityId,
                     entity.PlayerUid,
                     entity.Type.ToString(),
+                    entity.ConfigId,
                     entity.PosX,
                     entity.PosY,
                     godotPos.X,
                     godotPos.Y,
                     entity.Facing,
                     entity.State.ToString(),
-                    entity.Hp));
+                    entity.Hp,
+                    entity.MaxHp,
+                    entity.SkillCdRemaining,
+                    entity.StatusFlags));
             }
 
             var netSyncSnapshot = world.GetNetSyncSnapshot();
@@ -387,13 +414,56 @@ public partial class DevAgentComponent : GlobalComponent
                 netSyncSnapshot.ReconciliationsPerSecond,
                 netSyncSnapshot.AveragePositionError);
 
+            MatchResultDto? matchResultDto = null;
+            if (session.LastGameResult is { } gr)
+            {
+                var pResults = new List<MatchPlayerResultDto>(gr.Results.Count);
+                foreach (var pr in gr.Results)
+                    pResults.Add(new MatchPlayerResultDto(pr.Uid, pr.Kills, pr.DamageDealt, pr.DamageTaken, pr.Alive));
+                matchResultDto = new MatchResultDto(gr.MatchId, gr.Outcome.ToString(), gr.DurationSec, pResults);
+            }
+
+            var resultShown = UIComponent.Instance?.FindView(UIFormType.RoundSettlementForm) != null;
+
             battleState = new BattleStateDto(
                 session.CurrentMapId,
+                session.CurrentRoomIndex,
+                session.TotalRooms,
+                session.DungeonSeed,
+                session.MapSequence.ToList(),
+                session.DoorOpen,
+                enemyCount,
+                bossCount,
+                pickupCount,
+                localHp,
+                localMaxHp,
+                localSkillCdRem,
+                localSkillCdTotal,
+                localStatusFlags,
+                resultShown,
+                matchResultDto,
                 session.LastSnapshotTick,
                 session.LastAckedInputSeq,
                 world.LocalPlayerEntityId,
                 entities,
                 netSyncDto);
+        }
+
+        MatchHistoryStateDto? matchHistoryState = null;
+        if (uiApp != null)
+        {
+            var entries = new List<MatchHistoryEntryDto>(uiApp.MainMenu.MatchHistory.Count);
+            foreach (var e in uiApp.MainMenu.MatchHistory)
+            {
+                entries.Add(new MatchHistoryEntryDto(
+                    e.MatchId, e.Outcome, e.DurationSec, e.Seed,
+                    e.Kills, e.DamageDealt, e.DamageTaken, e.Alive, e.FinishedAt));
+            }
+            matchHistoryState = new MatchHistoryStateDto(
+                uiApp.MainMenu.HistoryVisible,
+                uiApp.MainMenu.HistoryLoading,
+                uiApp.MainMenu.HistoryMessage,
+                entries);
         }
 
         var uiState = CollectUiState(tree?.Root);
@@ -405,6 +475,7 @@ public partial class DevAgentComponent : GlobalComponent
             networkState,
             roomState,
             battleState,
+            matchHistoryState,
             uiState);
     }
 
@@ -420,6 +491,9 @@ public partial class DevAgentComponent : GlobalComponent
             "set_interpolation" => ExecuteSetInterpolation(req),
             "toggle_net_debug" => ExecuteToggleNetDebug(req),
             "inject_prediction_offset" => ExecuteInjectPredictionOffset(req),
+            "open_match_history" => ExecuteMatchHistoryAction(open: true, refresh: false),
+            "refresh_match_history" => ExecuteMatchHistoryAction(open: true, refresh: true),
+            "close_match_history" => ExecuteMatchHistoryAction(open: false, refresh: false),
             _ => (400, new ErrorResponse(false, $"Unsupported action type: {actionType}")),
         };
     }
@@ -533,7 +607,8 @@ public partial class DevAgentComponent : GlobalComponent
             aimRadians,
             req.Attack ?? false,
             req.Interact ?? false,
-            durationSeconds);
+            durationSeconds,
+            req.Skill ?? false);
 
         return (200, new ActionResult(true, "set_input", null, null, null, null, null));
     }
@@ -603,6 +678,26 @@ public partial class DevAgentComponent : GlobalComponent
             return (409, new ErrorResponse(false, "Cannot inject prediction offset (prediction disabled or local player unavailable)"));
 
         return (200, new ActionResult(true, "inject_prediction_offset", null, null, null, null, null));
+    }
+
+    private (int StatusCode, object Payload) ExecuteMatchHistoryAction(bool open, bool refresh)
+    {
+        var uiApp = UIComponent.Instance?.GetNodeOrNull<UiApplication>("UiApplication");
+        if (uiApp == null)
+            return (404, new ErrorResponse(false, "UiApplication not available"));
+
+        if (!open)
+        {
+            uiApp.CloseMatchHistory();
+            return (200, new ActionResult(true, "close_match_history", null, null, null, null, null));
+        }
+
+        if (refresh)
+            uiApp.RefreshMatchHistory();
+        else
+            uiApp.OpenMatchHistory();
+
+        return (200, new ActionResult(true, refresh ? "refresh_match_history" : "open_match_history", null, null, null, null, null));
     }
 
     private (int StatusCode, object Payload) CaptureScreenshotOnMainThread(string targetPath)
@@ -824,13 +919,17 @@ public partial class DevAgentComponent : GlobalComponent
         [property: JsonPropertyName("entity_id")] uint EntityId,
         [property: JsonPropertyName("player_uid")] ulong PlayerUid,
         [property: JsonPropertyName("type")] string Type,
+        [property: JsonPropertyName("config_id")] uint ConfigId,
         [property: JsonPropertyName("world_x")] float WorldX,
         [property: JsonPropertyName("world_y")] float WorldY,
         [property: JsonPropertyName("godot_x")] float GodotX,
         [property: JsonPropertyName("godot_y")] float GodotY,
         [property: JsonPropertyName("facing")] float Facing,
         [property: JsonPropertyName("state")] string State,
-        [property: JsonPropertyName("hp")] int Hp);
+        [property: JsonPropertyName("hp")] int Hp,
+        [property: JsonPropertyName("max_hp")] int MaxHp,
+        [property: JsonPropertyName("skill_cd_remaining")] float SkillCdRemaining,
+        [property: JsonPropertyName("status_flags")] uint StatusFlags);
 
     private sealed record NetSyncStateDto(
         [property: JsonPropertyName("prediction_enabled")] bool PredictionEnabled,
@@ -842,13 +941,58 @@ public partial class DevAgentComponent : GlobalComponent
         [property: JsonPropertyName("reconciliations_per_sec")] float ReconciliationsPerSec,
         [property: JsonPropertyName("avg_pos_error")] float AvgPosError);
 
+    private sealed record MatchPlayerResultDto(
+        [property: JsonPropertyName("uid")] ulong Uid,
+        [property: JsonPropertyName("kills")] uint Kills,
+        [property: JsonPropertyName("damage_dealt")] int DamageDealt,
+        [property: JsonPropertyName("damage_taken")] int DamageTaken,
+        [property: JsonPropertyName("alive")] bool Alive);
+
+    private sealed record MatchResultDto(
+        [property: JsonPropertyName("match_id")] ulong MatchId,
+        [property: JsonPropertyName("outcome")] string Outcome,
+        [property: JsonPropertyName("duration_sec")] uint DurationSec,
+        [property: JsonPropertyName("results")] List<MatchPlayerResultDto> Results);
+
     private sealed record BattleStateDto(
         [property: JsonPropertyName("map_id")] uint MapId,
+        [property: JsonPropertyName("room_index")] uint RoomIndex,
+        [property: JsonPropertyName("total_rooms")] uint TotalRooms,
+        [property: JsonPropertyName("dungeon_seed")] ulong DungeonSeed,
+        [property: JsonPropertyName("map_sequence")] List<uint> MapSequence,
+        [property: JsonPropertyName("door_open")] bool DoorOpen,
+        [property: JsonPropertyName("enemy_count")] int EnemyCount,
+        [property: JsonPropertyName("boss_count")] int BossCount,
+        [property: JsonPropertyName("pickup_count")] int PickupCount,
+        [property: JsonPropertyName("local_hp")] int LocalHp,
+        [property: JsonPropertyName("local_max_hp")] int LocalMaxHp,
+        [property: JsonPropertyName("local_skill_cd_remaining")] float LocalSkillCdRemaining,
+        [property: JsonPropertyName("local_skill_cd_total")] float LocalSkillCdTotal,
+        [property: JsonPropertyName("local_status_flags")] uint LocalStatusFlags,
+        [property: JsonPropertyName("result_shown")] bool ResultShown,
+        [property: JsonPropertyName("match_result")] MatchResultDto? MatchResult,
         [property: JsonPropertyName("last_tick")] uint LastTick,
         [property: JsonPropertyName("last_input_seq")] uint LastInputSeq,
         [property: JsonPropertyName("local_entity_id")] uint LocalEntityId,
         [property: JsonPropertyName("entities")] List<BattleEntityDto> Entities,
         [property: JsonPropertyName("net_sync")] NetSyncStateDto NetSync);
+
+    private sealed record MatchHistoryEntryDto(
+        [property: JsonPropertyName("match_id")] string MatchId,
+        [property: JsonPropertyName("outcome")] int Outcome,
+        [property: JsonPropertyName("duration_sec")] int DurationSec,
+        [property: JsonPropertyName("seed")] string Seed,
+        [property: JsonPropertyName("kills")] int Kills,
+        [property: JsonPropertyName("damage_dealt")] int DamageDealt,
+        [property: JsonPropertyName("damage_taken")] int DamageTaken,
+        [property: JsonPropertyName("alive")] bool Alive,
+        [property: JsonPropertyName("finished_at")] string FinishedAt);
+
+    private sealed record MatchHistoryStateDto(
+        [property: JsonPropertyName("open")] bool Open,
+        [property: JsonPropertyName("loading")] bool Loading,
+        [property: JsonPropertyName("message")] string Message,
+        [property: JsonPropertyName("entries")] List<MatchHistoryEntryDto> Entries);
 
     private sealed record UiButtonDto(
         [property: JsonPropertyName("name")] string Name,
@@ -879,6 +1023,7 @@ public partial class DevAgentComponent : GlobalComponent
         [property: JsonPropertyName("network")] NetworkStateDto Network,
         [property: JsonPropertyName("room")] RoomStateDto? Room,
         [property: JsonPropertyName("battle")] BattleStateDto? Battle,
+        [property: JsonPropertyName("match_history")] MatchHistoryStateDto? MatchHistory,
         [property: JsonPropertyName("ui")] UiStateDto Ui);
 
     private sealed class ActionRequest
@@ -892,6 +1037,7 @@ public partial class DevAgentComponent : GlobalComponent
         [JsonPropertyName("aim_deg")] public float? AimDeg { get; set; }
         [JsonPropertyName("attack")] public bool? Attack { get; set; }
         [JsonPropertyName("interact")] public bool? Interact { get; set; }
+        [JsonPropertyName("skill")] public bool? Skill { get; set; }
         [JsonPropertyName("duration_ms")] public int? DurationMs { get; set; }
         [JsonPropertyName("enabled")] public bool? Enabled { get; set; }
         [JsonPropertyName("expanded")] public bool? Expanded { get; set; }

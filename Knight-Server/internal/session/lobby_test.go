@@ -66,7 +66,7 @@ func newLobbyRig(t *testing.T, minPlayers int) *lobbyRig {
 
 	// 会话层先于大厅构造（大厅广播需要 mgr 作 UIDSender）；Router 走域级复合路由全栈验证
 	mgr = session.NewManager(
-		session.Config{ProtoVersion: 5, SessionLimit: 64, HeartbeatTimeout: 10 * time.Second, DisconnectDelay: 5 * time.Millisecond},
+		session.Config{ProtoVersion: 6, SessionLimit: 64, HeartbeatTimeout: 10 * time.Second, DisconnectDelay: 5 * time.Millisecond},
 		mapValidator{"tok-a": 1, "tok-b": 2, "tok-c": 3, "tok-d": 4, "tok-e": 5},
 		gate,
 		bus,
@@ -106,7 +106,7 @@ func (r *lobbyRig) dial(token string, uid uint64) int {
 	// 泵到 kcp2k 认证 → 发 HandshakeReq → 等 Ack
 	r.pumpUntil(func() bool { return cli.State() == kcp2k.PeerAuthenticated }, "kcp2k handshake")
 	data, err := protocol.Encode(&knight.Envelope{Payload: &knight.Envelope_HandshakeReq{
-		HandshakeReq: &knight.HandshakeReq{ProtoVersion: 5, Token: token},
+		HandshakeReq: &knight.HandshakeReq{ProtoVersion: 6, Token: token},
 	}})
 	if err != nil {
 		r.t.Fatal(err)
@@ -212,8 +212,8 @@ func TestLobbyCreateJoinReadyStart(t *testing.T) {
 	for _, idx := range []int{a, b} {
 		env := r.takeNext(idx)
 		gs := env.GetGameStart()
-		if gs == nil || len(gs.MapIds) != 3 || gs.MapIds[0] != 1 {
-			t.Fatalf("client %d: expected GameStart, got %T", idx, env.Payload)
+		if gs == nil || len(gs.MapIds) != 4 || gs.MapIds[0] != 1 || gs.MapIds[len(gs.MapIds)-1] != 9 || gs.Seed == 0 {
+			t.Fatalf("client %d: expected GameStart(4 maps, seed!=0), got %+v", idx, gs)
 		}
 		env = r.takeNext(idx)
 		p := env.GetRoomStatePush()

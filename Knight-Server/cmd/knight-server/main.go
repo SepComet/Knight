@@ -26,6 +26,8 @@ import (
 	"knight-server/internal/store"
 	"knight-server/internal/tick"
 	"knight-server/internal/world"
+
+	knight "knight-server/protogen"
 )
 
 func main() {
@@ -126,14 +128,16 @@ func main() {
 
 	// ---- 大厅（房间消息域 32~63）----
 	lobbyMgr := lobby.NewManager(lobby.Config{
-		MaxPlayers: cfg.MaxPlayers,
-		MinPlayers: cfg.MinPlayers,
-		MaxRooms:   cfg.MaxRooms,
+		MaxPlayers:       cfg.MaxPlayers,
+		MinPlayers:       cfg.MinPlayers,
+		MaxRooms:         cfg.MaxRooms,
+		DungeonGenerator: world.GenerateDungeon,
 	}, gate, mgr, bus)
 
 	// ---- 战斗世界（游戏域 64~127）----
 	worldMgr := world.NewManager(world.Config{
 		TickRate: cfg.TickRate,
+		Recorder: &mysqlMatchRecorder{store: st, ids: ids},
 	}, runner, mgr, mgr, bus)
 
 	// ---- 域级 Router（域段见 knight.proto MsgId 分配表）----
@@ -184,8 +188,11 @@ func main() {
 		if err := httpSrv.Shutdown(shutdownCtx); err != nil {
 			slog.Error("graceful shutdown failed", "err", err)
 		}
-		// 先停模拟循环再关传输：对局可能还在经 gate 发包，传输层最后关
+		// 先停模拟循环，等待在途对局结算落库与 GameResult 下发完成，再关会话与传输层（MySQL defer 最后关闭）
 		runner.Stop()
+		if err := worldMgr.WaitPersist(shutdownCtx); err != nil {
+			slog.Warn("wait match persist timeout during shutdown", "err", err)
+		}
 		mgr.Close()
 		gate.Stop()
 	}
@@ -200,4 +207,33 @@ func tokenValidator(cfg config.Config, tokens *auth.TokenStore) session.TokenVal
 		return session.DevBypassValidator{}
 	}
 	return tokens
+}
+
+// mysqlMatchRecorder 将对局结算写入 MySQL matches / match_players 表。
+type mysqlMatchRecorder struct {
+	store *store.Store
+	ids   *snowflake.Node
+}
+
+func (r *mysqlMatchRecorder) RecordMatch(ctx context.Context, outcome knight.GameOutcome, durationSec uint32, seed uint64, players []world.MatchPlayerStat) (uint64, error) {
+	matchID, err := r.ids.Next()
+	if err != nil {
+		return 0, err
+	}
+	rows := make([]store.MatchPlayerRow, 0, len(players))
+	for _, p := range players {
+		rows = append(rows, store.MatchPlayerRow{
+			UID:         p.UID,
+			CharacterID: p.CharacterID,
+			WeaponID:    p.WeaponID,
+			Kills:       p.Kills,
+			DamageDealt: p.DamageDealt,
+			DamageTaken: p.DamageTaken,
+			Alive:       p.Alive,
+		})
+	}
+	if err := r.store.InsertMatchWithSeed(ctx, matchID, uint32(outcome), durationSec, seed, rows); err != nil {
+		return 0, err
+	}
+	return matchID, nil
 }

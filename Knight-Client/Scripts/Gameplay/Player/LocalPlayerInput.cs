@@ -31,8 +31,9 @@ public partial class LocalPlayerInput : Node
         float? aimRadians = null,
         bool attackHeld = false,
         bool interact = false,
-        double? durationSeconds = null)
-        => _synthetic.Set(movement, aimRadians, attackHeld, interact, durationSeconds);
+        double? durationSeconds = null,
+        bool skill = false)
+        => _synthetic.Set(movement, aimRadians, attackHeld, interact, durationSeconds, skill);
 
     public void ClearSyntheticInput() => _synthetic.Clear();
 
@@ -44,6 +45,7 @@ public partial class LocalPlayerInput : Node
         view.AttackChanged += OnAttack;
         view.SwitchWeaponRequested += OnSwitchWeapon;
         view.SkillRequested += OnSkill;
+        view.InteractRequested += OnInteract;
     }
 
     public void SetEnabled(bool enabled)
@@ -60,6 +62,7 @@ public partial class LocalPlayerInput : Node
         if (!_enabled || !_focused || !Motor.Alive || TouchMode || input.IsEcho()) return;
         if (input.IsActionPressed("player_attack")) _primary.SetHeld(true, InteractionAvailable);
         if (input.IsActionReleased("player_attack")) _primary.SetHeld(false, InteractionAvailable);
+        if (input.IsActionPressed("player_interact")) OnInteract();
         if (input.IsActionPressed("player_switch_weapon")) OnSwitchWeapon();
         if (input.IsActionPressed("player_skill")) OnSkill();
     }
@@ -84,14 +87,14 @@ public partial class LocalPlayerInput : Node
         {
             _input.Reset();
             _synthetic.Clear();
-            return new(Vector2.Zero, Motor.FacingRadians, false, false);
+            return new(Vector2.Zero, Motor.FacingRadians, false, false, false);
         }
         if (_synthetic.TrySample(Motor.FacingRadians, out var syntheticCommand))
         {
             CommandSampled?.Invoke(syntheticCommand);
             return syntheticCommand;
         }
-        if (!_focused) { _input.Reset(); return new(Vector2.Zero, Motor.FacingRadians, false, false); }
+        if (!_focused) { _input.Reset(); return new(Vector2.Zero, Motor.FacingRadians, false, false, false); }
         var aim = Motor.FacingRadians;
         var canAttack = true;
         if (TouchMode)
@@ -126,8 +129,17 @@ public partial class LocalPlayerInput : Node
     {
         if (_enabled && _focused && Motor.Alive) _primary.SetHeld(held, InteractionAvailable);
     }
+    private void OnInteract()
+    {
+        if (_enabled && _focused && Motor.Alive) _input.RequestInteraction();
+    }
     private void OnSwitchWeapon() { if (_enabled && _focused && Motor.Alive) SwitchWeaponRequested?.Invoke(); }
-    private void OnSkill() { if (_enabled && _focused && Motor.Alive) SkillRequested?.Invoke(); }
+    private void OnSkill()
+    {
+        if (!_enabled || !_focused || !Motor.Alive) return;
+        _input.RequestSkill();
+        SkillRequested?.Invoke();
+    }
     private void UnbindTouch()
     {
         if (_touch == null) return;
@@ -135,6 +147,7 @@ public partial class LocalPlayerInput : Node
         _touch.AttackChanged -= OnAttack;
         _touch.SwitchWeaponRequested -= OnSwitchWeapon;
         _touch.SkillRequested -= OnSkill;
+        _touch.InteractRequested -= OnInteract;
         _touch = null;
         _input.Reset();
         _primary.Reset();

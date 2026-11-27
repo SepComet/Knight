@@ -11,9 +11,13 @@
 package lobby
 
 import (
+	"crypto/rand"
+	"encoding/binary"
 	"log"
+	mathrand "math/rand/v2"
 	"sort"
 	"sync"
+	"time"
 
 	"knight-server/internal/event"
 	"knight-server/internal/kcp2k"
@@ -27,6 +31,11 @@ type Config struct {
 	MaxPlayers int // 单房人数上限（协议 4）
 	MinPlayers int // 开局最少人数（协议默认 2，开发期可配 1）
 	MaxRooms   int // 同时存在房间数上限
+	// SeedGenerator 可选随机种子生成器（测试可注入固定种子）；为空时使用加密随机数。
+	SeedGenerator func() uint64
+	// DungeonGenerator 可选程序化地牢生成器（由上层注入 world.GenerateDungeon，避免 lobby 耦合 world）；
+	// 为空时回落为默认 4 房随机序列 [1, 2..5, 6..8, 9]。
+	DungeonGenerator func(seed uint64) []uint32
 }
 
 // maxRoomPasswordLen 房间密码长度上限（knight.proto CreateRoomReq 注释）。
@@ -358,17 +367,23 @@ func (m *Manager) handleStart(uid uint64, connID string) []func() {
 
 	room.State = knight.RoomSessionState_ROOM_RUNNING
 
-	// 开局通知：MVP 固定地图序列 [1, 2, 3]（knight.proto GameStart 注释）
-	mapIDs := []uint32{1, 2, 3}
+	// 基于随机种子从预制房间模板池生成程序化地牢序列（同局不重复、必达 Boss 房）
+	seed := m.nextSeed()
+	var mapIDs []uint32
+	if m.cfg.DungeonGenerator != nil {
+		mapIDs = m.cfg.DungeonGenerator(seed)
+	} else {
+		mapIDs = defaultGenerateDungeon(seed)
+	}
 	if data, err := protocol.Encode(&knight.Envelope{Payload: &knight.Envelope_GameStart{
-		GameStart: &knight.GameStart{MapIds: mapIDs},
+		GameStart: &knight.GameStart{MapIds: mapIDs, Seed: seed},
 	}}); err == nil {
 		for _, mem := range room.members {
 			m.uidSender.SendToUID(mem.UID, data, kcp2k.ChannelReliable)
 		}
 	}
 
-	log.Printf("[lobby] room %d game started (%d players)", room.ID, len(room.members))
+	log.Printf("[lobby] room %d game started (%d players, seed=%d, maps=%v)", room.ID, len(room.members), seed, mapIDs)
 	m.broadcast(room) // RoomStatePush{RUNNING}
 
 	playerUIDs := make([]uint64, 0, len(room.members))
@@ -380,9 +395,34 @@ func (m *Manager) handleStart(uid uint64, connID string) []func() {
 		event.Publish(m.bus, event.GameStarted, event.GameStartedArgs{
 			RoomID:     startRoomID,
 			MapIDs:     mapIDs,
+			Seed:       seed,
 			PlayerUIDs: playerUIDs,
 		})
 	}}
+}
+
+func (m *Manager) nextSeed() uint64 {
+	if m.cfg.SeedGenerator != nil {
+		if s := m.cfg.SeedGenerator(); s != 0 {
+			return s
+		}
+	}
+	var b [8]byte
+	if _, err := rand.Read(b[:]); err == nil {
+		if s := binary.LittleEndian.Uint64(b[:]); s != 0 {
+			return s
+		}
+	}
+	return uint64(time.Now().UnixNano())
+}
+
+// defaultGenerateDungeon 在未注入 DungeonGenerator 时提供兜底 4 房序列生成，
+// 保持与 world.GenerateDungeon 一致的规则（[1, 2..5, 6..8, 9]），解耦 lobby 与 world。
+func defaultGenerateDungeon(seed uint64) []uint32 {
+	rng := mathrand.New(mathrand.NewPCG(seed, seed^0x9e3779b97f4a7c15))
+	normalPool := []uint32{2, 3, 4, 5}
+	specialPool := []uint32{6, 7, 8}
+	return []uint32{1, normalPool[rng.IntN(len(normalPool))], specialPool[rng.IntN(len(specialPool))], 9}
 }
 
 // ---------------------------------------------------------------- 广播/应答
